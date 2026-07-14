@@ -1,0 +1,8 @@
+{
+  "name": "maestro-vcs",
+  "version": "5.3.0",
+  "description": "Delivery: conventional commits with secret detection and quality gates, pull requests, releases. Layered on the official commit-commands plugin.",
+  "author": {
+    "name": "ARABII"
+  }
+}

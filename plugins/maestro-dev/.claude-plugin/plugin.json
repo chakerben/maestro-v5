@@ -1,0 +1,8 @@
+{
+  "name": "maestro-dev",
+  "version": "5.3.0",
+  "description": "Maestro development pipeline: sdlc, plan, implement (phased, resumable), review, TDD, debug, brainstorm. Hosts executor/checker/architect/devil-advocate agents.",
+  "author": {
+    "name": "ARABII"
+  }
+}

@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    name: Validate marketplace
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Validate structure, manifests, and Philosophy compliance
+        run: node scripts/validate.js
+      - name: Test bash-guard hook (34-case suite)
+        run: bash scripts/tests/bash-guard.test.sh
+      - name: Test memory-sync hook
+        run: |
+          mkdir -p /tmp/proj/maestro_docs/memory
+          echo "# Brief" > /tmp/proj/maestro_docs/memory/project-brief.md
+          echo "# P" > /tmp/proj/CLAUDE.md
+          CLAUDE_PROJECT_DIR=/tmp/proj node plugins/maestro-core/hooks/memory-sync.js
+          grep -q "maestro_memory" /tmp/proj/CLAUDE.md
+          echo "memory-sync OK"
+
+  commitlint:
+    name: Conventional commits
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: wagoid/commitlint-github-action@v6
