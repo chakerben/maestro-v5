@@ -291,6 +291,8 @@ exit(0 if any(k in deps for k in ('next','nuxt','react-dom','vue')) else 1)" 2>/
       PLUGINS="$PLUGINS maestro-web"
     fi
   fi
+  # Flutter
+  [ -f "$P/pubspec.yaml" ] && PLUGINS="$PLUGINS maestro-mobile"
   act "plugins : $PLUGINS"
   if [ "$DRY_RUN" = "0" ]; then
     if [ "$HAS_CLAUDE" = "1" ]; then
