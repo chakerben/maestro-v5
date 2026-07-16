@@ -1,6 +1,6 @@
 {
   "name": "maestro-web",
-  "version": "5.3.0",
+  "version": "5.3.1",
   "description": "Web standards: Next.js + Prisma + Clerk + PostgreSQL + Zod stack enforcement, UX standards, RTL-aware design review layered on the official frontend-design plugin.",
   "author": {
     "name": "ARABII"

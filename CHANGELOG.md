@@ -1,5 +1,17 @@
 # Changelog
 
+## 5.3.1 — Field feedback from the 32-project rollout (2026-07-14)
+
+- scripts/verify-migration.sh: batch doctor — runs the contraband/structure
+  checks across every project at once (used to validate the full migration:
+  32 green, 0 contraband)
+- scripts/install-shortcuts.sh: 20 short personal commands (/sdlc, /check,
+  /garden, /ship, /rtl...) installed in ~/.claude/commands — no plugin
+  namespace, avoids Claude Code built-in collisions (/doctor, /memory, /review)
+- migrate-v4-to-v5.sh: Flutter detection via pubspec.yaml (maestro-mobile
+  now auto-enabled on Flutter projects)
+
+
 ## 5.3.0 — Official-guidelines conformity (2026-07-14)
 
 Audit against current Claude Code official skill/agent/hook guidance.
