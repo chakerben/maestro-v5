@@ -4,11 +4,13 @@ Candidate improvements, prioritized. Nothing here blocks the pilot rollout.
 
 ## v5.3 candidates (after pilot feedback)
 
-- **maestro-dev:03-debug** — systematic root-cause debugging skill
+- **maestro-dev:04-debug** — systematic root-cause debugging skill
   (reproduce → smallest failing case → cause → fix → regression test).
   Today the executor + expert postures cover it implicitly.
-- **maestro-dev:04-brainstorm** — Socratic one-question-at-a-time ideation
-  (pattern absorbed from Superpowers; formalize as a skill if pilots miss it).
+- ~~maestro-dev:brainstorm~~ — **shipped as `maestro-dev:03-brainstorm`.**
+  One question at a time, journal with a falsifiable stop condition, devil-advocate
+  pass, routed handoff. See docs/BRAINSTORM-SUPERPOWERS.md for what was absorbed
+  from Superpowers and what was deliberately refused.
 - **maestro-vcs worktree support** — parallel feature work via git worktrees
   (v4 had worktree-parallel; reintroduce only if a real need appears).
 - **skill-eval harness** — automated test cases validating that skill

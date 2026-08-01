@@ -12,6 +12,7 @@ Present it grouped by INTENT (what the user wants to do), not by plugin:
 - Check install health / after migration → `maestro-core:04-doctor`
 
 **Building**
+- Idea still open, several approaches → `maestro-dev:03-brainstorm`
 - Take a feature from idea to shipped → `maestro-dev:00-sdlc` (say `auto` for unattended)
 - Plan before building → `maestro-dev:01-plan`
 - Implement an existing plan → `maestro-dev:02-implement`

@@ -1,5 +1,46 @@
 # Changelog
 
+## 5.5.0 — brainstorm (2026-08-01)
+
+- **`maestro-dev:03-brainstorm`** — from an open idea to a recorded decision.
+  Four actions, each with a `## Test` (rule #4, which 15 of the 23 existing
+  skills still do not honour). State lands in
+  `maestro_docs/tasks/<date>_<slug>/design.md` with `status:` frontmatter, so a
+  brainstorm interrupted at question four resumes at question five.
+
+  Absorbed from Superpowers' `brainstorming`, and deliberately diverging from it
+  on five points:
+  - **Description = triggering conditions only.** Superpowers' own
+    `writing-skills` establishes that a description summarising the workflow
+    creates a shortcut agents take instead of reading the body — and its
+    `brainstorming` description does exactly that ("You MUST use this before any
+    creative work…"), which also makes it hijack every request.
+  - **Recipes instead of prohibitions.** Their measured A/B: the prohibition arm
+    produced *more* of the unwanted content than the no-guidance control. So the
+    one-question rule is written as a recipe — ask, wait, journal, choose the
+    next from what changed — not as "never ask two questions".
+  - **An explicit off-ramp.** Superpowers routes every change through a design,
+    "a todo list, a single-function utility, a config change — all of them". A
+    skill with no exit is a skill people learn to route around. Three stated
+    conditions send the request straight to `01-plan`.
+  - **The discipline leaves evidence.** Each journal entry carries a `Change :`
+    line, and the stop condition is falsifiable — stop when no remaining unknown
+    changes the shape, and name the ones left open. The `## Test` sections check
+    the artifact rather than trusting the process.
+  - **Routed handoff, four destinations.** Superpowers has exactly one terminal
+    state (`writing-plans`) and no path for "we shouldn't build this". Here the
+    exit follows what the journal surfaced: `maestro-pm:00-prd`,
+    `maestro-pm:02-specs` / `m-architect`, `maestro-dev:01-plan`, or `dropped`.
+
+  Also, unlike Superpowers, the adversarial pass is a real model-pinned agent
+  (`m-devil-advocate`, no Edit/Write) rather than the same context arguing with
+  itself — with their anti-pre-judging rule applied to the prompt that summons it.
+
+- **Honest plugin descriptions.** `maestro-dev` advertised `TDD, debug,
+  brainstorm` in both its manifest and the marketplace entry; only three skills
+  existed. Descriptions drive routing, so promising absent capabilities sends
+  the model looking for skills that are nowhere. They now list what ships.
+
 ## 5.4.0 — Audit fixes + owner move (2026-08-01)
 
 ### Breaking: the repository and the npm package moved owner
