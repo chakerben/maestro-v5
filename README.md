@@ -9,7 +9,7 @@
 ## Install
 
 ```text
-/plugin marketplace add arabiipte/maestro-v5
+/plugin marketplace add chakerben/maestro-v5
 /plugin install maestro-core@maestro
 ```
 

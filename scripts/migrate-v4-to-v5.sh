@@ -34,7 +34,7 @@ set -u
 # ── Config ──────────────────────────────────────────────────
 PROJECTS_ROOT="${PROJECTS_ROOT:-$HOME/Documents/Projects}"
 MARKETPLACE_NAME="maestro"
-MARKETPLACE_REPO="${MARKETPLACE_REPO:-arabiipte/maestro-v5}"
+MARKETPLACE_REPO="${MARKETPLACE_REPO:-chakerben/maestro-v5}"
 DRY_RUN=0
 FORCE_DIRTY=0
 LIST_ONLY=0
@@ -55,6 +55,7 @@ for arg in "$@"; do
     --force-dirty) FORCE_DIRTY=1 ;;
     --list) LIST_ONLY=1 ;;
     --all) ALL=1 ;;
+    -*) err "option inconnue : $arg (--dry-run, --force-dirty, --list, --all)"; exit 2 ;;
     *) PROJECTS+=("$arg") ;;
   esac
 done
@@ -141,9 +142,13 @@ migrate_project() {
   # ── 1. Backup ──
   say "  ${BLUE}1/8 Backup${NC}"
   if [ "$DRY_RUN" = "0" ]; then mkdir -p "$BK"; fi
+  # Tout ce que la migration réécrit OU supprime doit figurer ici. Les trois
+  # dernières entrées ont été ajoutées en 5.3.2 : sans elles, settings.json,
+  # CLAUDE.md et maestro_docs/memory-bank étaient modifiés sans copie possible.
   for item in scripts/hooks .claude/agents .claude/commands .claude/skills \
               .claude/version.txt .claude/quality-gates.json .claude/session-log.md \
-              .claude/maestro.config.json docs/memory-bank; do
+              .claude/maestro.config.json docs/memory-bank \
+              .claude/settings.json CLAUDE.md maestro_docs/memory-bank; do
     if [ -e "$P/$item" ]; then
       act "backup $item"
       if [ "$DRY_RUN" = "0" ]; then

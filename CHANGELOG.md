@@ -1,5 +1,60 @@
 # Changelog
 
+## 5.4.0 — Audit fixes + owner move (2026-08-01)
+
+### Breaking: the repository and the npm package moved owner
+
+- Repo: `arabiipte/maestro-v5` → **`chakerben/maestro-v5`**. GitHub redirects the
+  old URL, so an existing clone and `claude plugin marketplace update maestro`
+  keep working — but re-point them, redirects are a courtesy, not a contract:
+  `git remote set-url origin https://github.com/chakerben/maestro-v5.git`
+  and re-add the marketplace from the new path.
+- npm: `@arabiipte/maestro` → **`@chakerben/maestro`** on GitHub Packages. A
+  package scope does NOT follow a repo transfer — this is a new package, starting
+  at 5.4.0. The old scope keeps the 5.3.x releases and the archived v4.
+- `~/.npmrc` needs the new scope line:
+  `@chakerben:registry=https://npm.pkg.github.com`
+- The marketplace NAME is unchanged (`maestro`), so `enabledPlugins` entries in
+  the 32 migrated projects (`maestro-core@maestro`…) are untouched.
+
+### Fixed — from the 5.3.1 adversarial audit
+
+Every item below was a reproduced corruption, not a hypothetical; each now has a
+regression test.
+
+- **memory-sync: stop destroying CLAUDE.md.** The block was located by two
+  unpaired `indexOf` calls, so a mention of `<maestro_memory>` in prose deleted
+  everything up to the real closing tag, and a closing tag appearing first made
+  the hook append a new block every session, forever. The block is now matched
+  as a pair, anchored on its own line; 0 or >1 matches, or any stray tag, means
+  the hook bails without writing. A stale block costs a sync — a wrong edit
+  costs the user's file.
+- **memory-sync: atomic, serialised write.** Read-modify-write with no lock
+  corrupted CLAUDE.md in 4 of 200 concurrent-session trials (once 45 KB → 89
+  bytes), and readers could observe a 0-byte file. Now tmp + rename under a
+  lockfile with a stale timeout; 40 concurrent pairs, zero corruption.
+- **memory-sync: filename injection, symlinks, unbounded lists.** Entry names
+  are validated before interpolation (a filename containing a newline could
+  inject instructions into CLAUDE.md); a symlinked CLAUDE.md is left alone; the
+  on-demand list is capped at 200 entries.
+- **migrate-v4-to-v5: back up what is actually touched.** `.claude/settings.json`,
+  `CLAUDE.md` and `maestro_docs/memory-bank` were rewritten or deleted without a
+  copy. All three are now in the backup list — the four worst migration failures
+  become recoverable.
+- **migrate-v4-to-v5: reject unknown options.** `--dryrun`, `-n`, `--dry` were
+  silently taken as project names with `DRY_RUN=0` — a typo'd dry run deleted
+  files for real. Unknown `-*` now exits 2.
+- **PHILOSOPHY rule #5 says what is true.** Reviewer agents carry no Edit/Write,
+  which the platform enforces — but `checker` also carries `Bash`, which can
+  write. The gap is now named in the rule and in `checker.md`, instead of being
+  described as physically prevented.
+- **CI: 10-case memory-sync regression suite** replaces the previous
+  `grep -q maestro_memory` smoke test, which passed under every bug above.
+  Wired into `npm test`.
+- **`scripts/check-versions.js`**: the version lives in 9 files by hand (5.2.1
+  already shipped one alignment incident). `npm test` now fails on drift, and on
+  a tag build it also fails if `v<tag>` and `package.json` disagree.
+
 ## 5.3.1 — Field feedback from the 32-project rollout (2026-07-14)
 
 - scripts/verify-migration.sh: batch doctor — runs the contraband/structure

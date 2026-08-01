@@ -4,8 +4,8 @@
 #
 # Fait tout, dans l'ordre, avec confirmation à chaque phase :
 #
-#   PHASE 1  Publier le repo sur GitHub (arabiipte/maestro-v5)
-#   PHASE 2  Publier le package npm @arabiipte/maestro@5.x (GitHub Packages)
+#   PHASE 1  Publier le repo sur GitHub (chakerben/maestro-v5)
+#   PHASE 2  Publier le package npm @chakerben/maestro@5.x (GitHub Packages)
 #   PHASE 3  Déprécier la v4 sur npm (optionnel)
 #   PHASE 4  Setup global : marketplace + plugins officiels (scope user)
 #            + désinstallation du npm v4 global
@@ -24,9 +24,11 @@
 
 set -u
 
-ORG="arabiipte"
+ORG="chakerben"
 REPO="maestro-v5"
-PKG="@arabiipte/maestro"
+PKG="@chakerben/maestro"
+# Le package v4 reste sous l'ancien owner : il ne se transfère pas avec le repo.
+PKG_V4="@arabiipte/maestro"
 VERSION=$(node -p "require('./package.json').version" 2>/dev/null || echo "5.3.0")
 PROJECTS_ROOT="${PROJECTS_ROOT:-$HOME/Documents/Projects}"
 
@@ -119,7 +121,7 @@ fi
 step "PHASE 3 — Déprécier la v4 sur npm (optionnel)"
 # ══════════════════════════════════════════════════════════
 if ask "Déprécier $PKG@4.x ?"; then
-  npm deprecate --registry=https://npm.pkg.github.com "$PKG@<5.0.0" \
+  npm deprecate --registry=https://npm.pkg.github.com "$PKG_V4@<5.0.0" \
     "Maestro v4 is replaced by the v5 plugin marketplace: claude plugin marketplace add $ORG/$REPO" \
     && ok "v4 dépréciée" || warn "dépréciation échouée (droits/registry ?) — pas bloquant"
 else

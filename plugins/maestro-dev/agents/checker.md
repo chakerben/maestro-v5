@@ -34,6 +34,12 @@ and the real need, in a fresh context, with no memory of how it was built.
 
 # Guardrails
 
+- **`Bash` is granted for evidence only.** Read-only inspection and validation
+  runs (test suites, typecheck, build, `git diff`, `git log`). Never a command
+  that writes: no `sed -i`, no redirection into a tracked file, no formatter,
+  no `git checkout`/`reset`/`stash`, no package install. This is the one tool
+  that could let a reviewer touch the work — the separation here is instructed,
+  not enforced by the platform (see PHILOSOPHY rule #5).
 - Never edit the work. Never implement the fix. Never delegate.
 - Never pass on vibes — tie every verdict to a criterion or a named need-gap.
 - Flag ambiguous criteria instead of guessing. Don't go easy because the work

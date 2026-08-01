@@ -40,10 +40,16 @@ each with a `## Test` section) + optional `assets/` and `references/`.
 - `executor` (sonnet): builds, never judges its own work.
 - `checker` (opus): judges with evidence, never edits the work.
 No agent both writes and approves the same change.
-**Enforced, not just instructed**: reviewer agents carry a `tools:` allowlist
-without Edit/Write — the platform physically prevents them from modifying code.
-Same principle everywhere: side-effect skills use `disable-model-invocation`,
-knowledge skills use `user-invocable: false`, hooks carry a platform `timeout`.
+**Enforced where the platform allows it**: reviewer agents carry a `tools:`
+allowlist without Edit/Write, so the platform prevents them from editing files.
+`m-devil-advocate` and `m-i18n-checker` (Read/Grep/Glob only) are fully
+enforced. `checker` additionally carries `Bash`, because a verdict without a
+validation run is a vibe — and `Bash` can write. That residual gap is
+**instructed, not enforced**, and named as such in `checker.md`. Side-effect
+skills use `disable-model-invocation`; hooks carry a platform `timeout`.
+
+Say what is enforced and what is instructed. A rule described as guaranteed
+when it is only requested is worse than no rule: it stops you checking.
 
 ### 6. Persistent state, resumable sessions
 Every feature lives in `maestro_docs/tasks/<yyyy_mm_dd>_<slug>/` with

@@ -1,7 +1,7 @@
 {
-  "name": "@arabiipte/maestro",
-  "version": "5.3.1",
-  "description": "Maestro 5 — Claude Code plugin marketplace. Business-layer framework for web & mobile development (RTL/Arabic-native). Install via: claude plugin marketplace add arabiipte/maestro-v5",
+  "name": "@chakerben/maestro",
+  "version": "5.4.0",
+  "description": "Maestro 5 — Claude Code plugin marketplace. Business-layer framework for web & mobile development (RTL/Arabic-native). Install via: claude plugin marketplace add chakerben/maestro-v5",
   "keywords": [
     "claude-code",
     "plugins",
@@ -14,7 +14,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/arabiipte/maestro-v5.git"
+    "url": "git+https://github.com/chakerben/maestro-v5.git"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
@@ -30,6 +30,6 @@
   ],
   "scripts": {
     "validate": "node scripts/validate.js",
-    "test": "node scripts/validate.js && bash scripts/tests/bash-guard.test.sh"
+    "test": "node scripts/check-versions.js && node scripts/validate.js && bash scripts/tests/bash-guard.test.sh && bash scripts/tests/memory-sync.test.sh"
   }
 }
