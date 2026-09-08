@@ -49,6 +49,17 @@ references/expert-postures.md) and keep task state in
 maestro_docs/tasks/<date>_<slug>/ so any session can resume.
 </maestro_routing>
 ```
+3c. Pre-fill `patterns.md` with the concurrency convention — a repository is
+   routinely open in several sessions at once, and the rule has to be readable
+   before the first commit, not after the first collision:
+
+```
+## Sessions concurrentes — un worktree par branche
+Le répertoire principal reste sur la branche par défaut ; toute branche vit
+dans son propre worktree (`gwt new <branche>`, skill maestro-vcs:03-worktree).
+Jamais de `git switch` ni de `git commit -a` dans un répertoire partagé —
+commiter par chemins. <port de dev à décaler / services partagés du projet>
+```
 4. Run the memory-sync logic once so the `<maestro_memory>` block appears
    immediately (the hook will maintain it from now on).
 5. Report created vs skipped files.

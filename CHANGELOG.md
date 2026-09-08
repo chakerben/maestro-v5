@@ -1,5 +1,40 @@
 # Changelog
 
+## 5.6.0 — one worktree per branch (2026-09-09)
+
+- **`maestro-vcs:03-worktree`** — a repository is routinely open in several
+  sessions at once (Claude, editor, terminal). In that directory `git switch`
+  moves the branch for everybody and `git commit -a` sweeps up the neighbour's
+  staged work — both hit us for real while shipping a landing-page PR next to a
+  session mid-rename on the admin pages. The skill states the rule (the main
+  checkout stays on the default branch, every branch gets its own worktree) and
+  drives it through three actions, each with its `## Test`.
+
+- **`scripts/gwt`** — the tool the skill calls, installed to `~/.local/bin/gwt`
+  by `install-shortcuts.sh` (symlink, so a marketplace update updates the tool),
+  plus the `/wt` shortcut and the `git wt` alias. It carries what makes a
+  worktree usable — worktree placed outside the repo, `node_modules` symlinked,
+  and the files git does NOT carry copied (`.env*`, `CLAUDE.md`, `AGENTS.md`,
+  `.mcp.json`, `.claude/*.local.json`; all ignored, so a worktree was born
+  without project instructions or granted permissions) — and three traps found
+  by using it:
+  - the branch is created `--no-track`, otherwise it follows `origin/<default>`
+    and a bare `git push` aims at the default branch;
+  - the base is the LOCAL default branch when it is ahead of origin (this repo
+    had four unpushed commits — branching from `origin/main` silently amputated
+    them);
+  - the clean-worktree check ignores what `gwt` itself provisioned, since in a
+    repo where `node_modules` is not ignored the symlink alone blocked removal.
+
+- **`maestro-vcs:00-commit`** — the gate opens with an ownership check: foreign
+  changes in the tree mean commit by explicit paths (`git commit -F msg -- paths`,
+  options before `--`), never `-a`, never a `git switch` to make a precondition
+  pass. `01-pull-request` says the same for the default-branch refusal.
+
+- **`maestro-core:00-onboard`** — new projects are scaffolded with the
+  convention already written in `patterns.md`, so it is readable before the
+  first commit rather than after the first collision.
+
 ## 5.5.0 — brainstorm (2026-08-01)
 
 - **`maestro-dev:03-brainstorm`** — from an open idea to a recorded decision.

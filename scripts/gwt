@@ -1,0 +1,195 @@
+#!/usr/bin/env bash
+# gwt — git worktrees, sans cérémonie.
+#
+# Pourquoi : plusieurs sessions (Claude, éditeur, terminal) qui partagent UN seul
+# répertoire de travail se marchent dessus — un `git switch` d'un côté déplace la
+# branche de tout le monde, et un `git commit -a` embarque le travail du voisin.
+# Un worktree = une branche = un répertoire, sur le MÊME dépôt (un seul .git,
+# aucune resynchronisation à faire).
+#
+#   gwt new <branche> [--from <base>]   crée le worktree et s'y prépare
+#   gwt path <branche>                  imprime le chemin (cd "$(gwt path x)")
+#   gwt ls                              liste les worktrees du dépôt
+#   gwt rm <branche> [--force]          retire le worktree (refuse si sale)
+#   gwt clean                           élague les worktrees fantômes
+#
+# Emplacement : <parent-du-dépôt>/.worktrees/<dépôt>/<branche>, donc HORS du
+# dépôt — rien à ajouter au .gitignore. Surchargeable avec GWT_ROOT.
+
+set -euo pipefail
+
+die() { printf '\033[31m✗\033[0m %s\n' "$*" >&2; exit 1; }
+info() { printf '\033[36m›\033[0m %s\n' "$*"; }
+ok() { printf '\033[32m✓\033[0m %s\n' "$*"; }
+
+git rev-parse --git-dir >/dev/null 2>&1 || die "pas un dépôt git : $PWD"
+
+# Racine du dépôt PRINCIPAL, même si on est déjà dans un worktree lié.
+common_dir=$(cd "$(git rev-parse --git-common-dir)" && pwd)
+main_repo=$(dirname "$common_dir")
+repo_name=$(basename "$main_repo")
+root="${GWT_ROOT:-$(dirname "$main_repo")/.worktrees}/$repo_name"
+
+slug() { printf '%s' "${1//\//-}"; }
+
+# Chemins déposés par gwt lui-même — jamais comptés comme du travail en cours.
+PROVISIONED_EXCLUDES=(
+  ':(exclude)node_modules' ':(exclude).venv' ':(exclude)venv' ':(exclude)vendor'
+  ':(exclude).env' ':(exclude).env.*' ':(exclude)CLAUDE.md' ':(exclude)AGENTS.md'
+  ':(exclude).mcp.json' ':(exclude).claude'
+)
+
+default_branch() {
+  git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||' \
+    || { git show-ref --verify --quiet refs/heads/main && echo main; } \
+    || echo master
+}
+
+cmd_new() {
+  local branch="${1:-}" base=""
+  [ -n "$branch" ] || die "usage : gwt new <branche> [--from <base>]"
+  shift
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --from) base="${2:-}"; shift 2 ;;
+      *) die "option inconnue : $1" ;;
+    esac
+  done
+
+  local dir="$root/$(slug "$branch")"
+  [ -e "$dir" ] && die "existe déjà : $dir"
+
+  info "fetch origin…"
+  git fetch --quiet origin || info "fetch impossible (hors ligne ?) — on continue sur le local"
+
+  if [ -z "$base" ]; then
+    local db; db=$(default_branch)
+    if git show-ref --verify --quiet "refs/remotes/origin/$db"; then
+      base="origin/$db"
+      # …sauf si le local est EN AVANCE sur le remote (commits pas encore
+      # poussés) : partir de origin donnerait une branche silencieusement
+      # amputée de ce travail. Vu pour de vrai sur le dépôt maestro, dont deux
+      # commits de release n'avaient jamais été poussés.
+      local ahead; ahead=$(git rev-list --count "origin/$db..$db" 2>/dev/null || echo 0)
+      if [ "${ahead:-0}" -gt 0 ]; then
+        base="$db"
+        info "$db local a $ahead commit(s) non poussé(s) → base = $db (local), pas origin/$db"
+      fi
+    else
+      base="$db"
+    fi
+  fi
+
+  mkdir -p "$root"
+  if git show-ref --verify --quiet "refs/heads/$branch"; then
+    info "la branche $branch existe → worktree sur cette branche"
+    git worktree add "$dir" "$branch"
+  else
+    info "nouvelle branche $branch depuis $base"
+    # --no-track : sinon la branche suit origin/main, et un `git push` nu
+    # viserait main. L'amont se pose au premier `git push -u origin <branche>`.
+    git branch --no-track "$branch" "$base"
+    git worktree add "$dir" "$branch"
+  fi
+
+  link_heavy_dirs "$dir"
+  copy_local_files "$dir"
+
+  ok "worktree prêt : $dir"
+  printf '\n  cd %q\n\n' "$dir"
+  printf '  Rappel : un serveur de dev tourne peut-être déjà dans %s\n' "$repo_name"
+  printf '  → lancer sur un autre port (ex. npm run dev -- --port 5174).\n'
+}
+
+# node_modules & co : symlink vers le dépôt principal (même machine, même arch)
+# plutôt qu'un `npm install` de plusieurs minutes par worktree.
+link_heavy_dirs() {
+  local dir="$1" d
+  for d in node_modules .venv venv vendor; do
+    if [ -d "$main_repo/$d" ] && [ ! -e "$dir/$d" ]; then
+      ln -s "$main_repo/$d" "$dir/$d"
+      info "lien : $d → dépôt principal"
+    fi
+  done
+}
+
+# Fichiers NON VERSIONNÉS dont dépend le travail : COPIÉS (pas liés) pour qu'une
+# modif dans le worktree ne reparte pas dans le dépôt principal.
+#
+# CLAUDE.md / AGENTS.md / .claude/ sont ignorés par le .gitignore_global : sans
+# cette copie, un worktree naît SANS les instructions projet ni les permissions
+# déjà accordées — la session repartirait de zéro.
+#
+# Racine du dépôt uniquement (+ .claude/) : une copie de sauvegarde enfouie
+# (.maestro-doctor-backup-*/CLAUDE.md) n'a rien à faire dans un worktree neuf.
+copy_local_files() {
+  local dir="$1" f rel
+  while IFS= read -r f; do
+    rel="${f#"$main_repo"/}"
+    [ -e "$dir/$rel" ] && continue   # déjà fourni par git : ne pas écraser
+    mkdir -p "$dir/$(dirname "$rel")"
+    cp "$f" "$dir/$rel"
+    info "copié : $rel"
+  done < <(
+    find "$main_repo" -maxdepth 1 -type f \
+      \( -name '.env' -o -name '.env.*' -o -name 'CLAUDE.md' -o -name 'AGENTS.md' \
+         -o -name '.mcp.json' \) 2>/dev/null
+    [ -d "$main_repo/.claude" ] && \
+      find "$main_repo/.claude" -maxdepth 1 -type f -name '*.local.json' 2>/dev/null
+  )
+}
+
+cmd_path() {
+  local branch="${1:-}"
+  [ -n "$branch" ] || die "usage : gwt path <branche>"
+  local dir="$root/$(slug "$branch")"
+  [ -d "$dir" ] || die "aucun worktree pour $branch (gwt new $branch)"
+  printf '%s\n' "$dir"
+}
+
+cmd_ls() {
+  git worktree list
+}
+
+cmd_rm() {
+  local branch="${1:-}" force=0
+  [ -n "$branch" ] || die "usage : gwt rm <branche> [--force]"
+  [ "${2:-}" = "--force" ] && force=1
+  local dir="$root/$(slug "$branch")"
+  [ -d "$dir" ] || die "aucun worktree pour $branch"
+
+  # Ce que gwt a lui-même déposé (lien node_modules, .env copiés…) n'est PAS du
+  # travail : dans un dépôt où node_modules n'est pas ignoré, le lien suffisait
+  # à faire passer le worktree pour sale et bloquait sa suppression.
+  local dirty
+  dirty=$(git -C "$dir" status --porcelain -- . "${PROVISIONED_EXCLUDES[@]}")
+  if [ -n "$dirty" ] && [ "$force" -eq 0 ]; then
+    printf '%s\n' "$dirty"
+    die "worktree non propre — commit, ou relance avec --force"
+  fi
+
+  # --force côté git : le garde-fou, c'est le contrôle ci-dessus. Sans lui, git
+  # refuserait à cause du lien node_modules déposé par gwt.
+  git worktree remove --force "$dir"
+  git worktree prune
+  ok "worktree retiré : $dir (la branche $branch, elle, existe toujours)"
+}
+
+cmd_clean() {
+  git worktree prune -v
+  ok "worktrees fantômes élagués"
+}
+
+case "${1:-}" in
+  new)   shift; cmd_new "$@" ;;
+  path)  shift; cmd_path "$@" ;;
+  ls|list) shift; cmd_ls "$@" ;;
+  rm|remove) shift; cmd_rm "$@" ;;
+  clean|prune) shift; cmd_clean "$@" ;;
+  ''|-h|--help)
+    # L'en-tête du fichier EST la doc : on l'imprime jusqu'à la première ligne
+    # non commentée, donc elle ne peut pas se désynchroniser du script.
+    awk 'NR>1 { if ($0 !~ /^#/) exit; sub(/^# ?/, ""); print }' "$0"
+    ;;
+  *) die "commande inconnue : $1 (gwt --help)" ;;
+esac

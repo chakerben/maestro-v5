@@ -45,3 +45,5 @@ Read `maestro_docs/gates.json` (fallback: level `standard`):
 - The secrets scan uses `assets/secret-patterns.md` and can never be skipped.
 - Delegate the raw git mechanics to the official commit-commands plugin when
   installed; this skill owns the gate and the message.
+- The working directory may be shared with another session. Commit by paths,
+  never `-a`, and put branch work in a worktree — `maestro-vcs:03-worktree`.

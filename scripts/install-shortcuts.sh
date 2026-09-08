@@ -15,6 +15,10 @@
 #   /perf     → audit performance          /design   → design review
 #   /rtl      → audit RTL/arabe            /prd      → PRD
 #   /stories  → user stories               /specs    → spec technique
+#   /wt       → worktree (une branche = un répertoire)
+#
+# Installe aussi la commande `gwt` dans ~/.local/bin (lien vers scripts/gwt) :
+# c'est l'outil du skill maestro-vcs:03-worktree.
 #
 # NB: /doctor /memory /review sont des built-ins Claude Code
 #     → d'où /check /mem /design ici.
@@ -52,6 +56,7 @@ mk mem     "maestro-core:01-memory"    "Generate/review project memory from the 
 mk gates   "maestro-quality:00-quality-gate" "Quality gate level (off/standard/high/paranoid)" "status | set <level> | run"
 mk ship    "maestro-vcs:00-commit"     "Commit through the quality gate + secret scan" "[scope hint]"
 mk pr      "maestro-vcs:01-pull-request" "Open a structured PR from the task folder" "[draft]"
+mk wt      "maestro-vcs:03-worktree"   "Isolate a branch in its own git worktree (sessions concurrentes)" "new <branche> | list | remove <branche>"
 mk release "maestro-vcs:02-release"    "Cut a release: semver bump + changelog + tag" "major | minor | patch"
 mk sec     "maestro-quality:01-security-audit" "Deep OWASP-aligned security audit" "[scope path]"
 mk perf    "maestro-quality:02-perf-audit"     "Measure-first performance audit" "[scope path]"
@@ -79,3 +84,17 @@ echo ""
 echo "✅ $(ls "$DIR" | wc -l | tr -d ' ') commandes installées."
 echo "▶ Relance ta session Claude Code, puis tape / pour voir la liste."
 echo "▶ Désinstallation d'un raccourci : rm ~/.claude/commands/<nom>.md"
+
+# ── gwt : l'outil du skill maestro-vcs:03-worktree ─────────────────────────
+# Un lien, pas une copie : une mise à jour du marketplace met l'outil à jour.
+BIN_SRC="$(cd "$(dirname "$0")" && pwd)/gwt"
+BIN_DIR="$HOME/.local/bin"
+mkdir -p "$BIN_DIR"
+chmod +x "$BIN_SRC"
+ln -sfn "$BIN_SRC" "$BIN_DIR/gwt"
+echo "  ✅ gwt   →  $BIN_SRC"
+case ":$PATH:" in
+  *":$BIN_DIR:"*) ;;
+  *) echo "  ⚠️  $BIN_DIR absent du PATH — ajoute : export PATH=\"$BIN_DIR:\$PATH\"" ;;
+esac
+git config --global alias.wt '!gwt' 2>/dev/null && echo "  ✅ alias git wt  →  gwt"

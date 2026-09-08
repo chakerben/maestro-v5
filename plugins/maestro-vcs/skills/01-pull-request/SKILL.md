@@ -10,6 +10,9 @@ argument-hint: "[draft]"
 
 1. Preconditions: non-default branch, clean tree, branch pushed
    (push it after confirming). Refuse on the default branch.
+   On the default branch, do NOT switch the current directory to make the
+   precondition pass — another session may be reading it. Move the work to a
+   worktree instead (`maestro-vcs:03-worktree`) and open the PR from there.
 2. Build the body from the task folder when one exists:
    - **Objective** (from spec.md, one sentence)
    - **What changed** (phase table with statuses)

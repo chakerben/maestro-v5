@@ -1,6 +1,6 @@
 {
   "name": "maestro-dev",
-  "version": "5.5.0",
+  "version": "5.6.0",
   "description": "Maestro development pipeline: brainstorm (open questions -> recorded decision), sdlc orchestration, plan, implement (phased, resumable). Hosts the executor, checker, m-architect, m-devil-advocate and m-i18n-checker agents.",
   "author": {
     "name": "ARABII"
