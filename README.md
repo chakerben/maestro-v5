@@ -45,6 +45,7 @@ runtime**, and **never rebuild what Anthropic maintains**.
 ## Docs
 
 - [Architecture](docs/ARCHITECTURE.md)
+- [Audit 5.9.1](docs/AUDIT-5.9.1.md) — independent adversarial pass on the day's six releases; 17 findings, all closed in 5.9.2
 - [Performance & token audit 5.9.0](docs/PERF-AUDIT-5.9.0.md) — what a session and a dispatch cost, and the budget guard
 - [Tooling audit 2026-09](docs/TOOLING-AUDIT-2026-09.md) — 25 TikTok-famous tools, what was absorbed, what was rejected and why
 - [Audit 5.5.0](docs/AUDIT-5.5.0.md) — what was found, what was fixed in 5.6.0

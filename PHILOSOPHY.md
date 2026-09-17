@@ -72,7 +72,7 @@ validation run is a vibe — and `Bash` can write. That residual gap is
 **instructed, not enforced**, and named as such in `checker.md`. Same for
 `m-architect`: it carries `Write` to record decisions, and `Write` has no
 path restriction — "never production code" is instructed there too.
-Reviewer agents declare `role: reviewer` in their frontmatter; that key, not
+Every agent declares `role: reviewer | builder | advisor`; that key, not
 the file name, is what the validator keys on. They carry both a `tools:`
 allowlist and a `disallowedTools:` denylist (belt and braces — the denylist
 survives the platform adding new tools), and a `maxTurns` so a verdict that

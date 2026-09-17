@@ -2,7 +2,7 @@
 name: 00-commit
 description: Commit staged or specified changes through the Maestro quality gate — secret detection, configurable checks, conventional message. Use to commit work, especially before a PR. This is WHERE quality checks run in Maestro (never in hooks). Not for pushing force or rewriting history.
 argument-hint: "[scope hint or files]"
-allowed-tools: Bash(git diff *), Bash(git status *), Bash(git log *), Bash(bash *), Bash(cat *)
+allowed-tools: Bash   # turn-scoped: the !`…` injections above use shell builtins, pipes and $(…) that pattern grants do not cover
 ---
 
 # Skill: commit

@@ -37,12 +37,12 @@ const RULES = [
     // (-r -f), or long (--recursive --force). Deliberately does NOT block
     // subpaths (rm -rf ~/x/node_modules is legit). A trailing "# comment"
     // is tolerated.
-    re: /\brm(?=[^\n]*\s(?:-[a-zA-Z]*[rR][a-zA-Z]*|--recursive)\b)(?=[^\n]*\s(?:-[a-zA-Z]*f[a-zA-Z]*|--force)\b)\s+[^\n]*\s(\/\*?|~\/?|\$HOME\/?|"\$HOME"\/?|\$\{HOME\}\/?|"\$\{HOME\}"\/?)\s*(;|&&|\|\||#|$)/,
+    re: /\brm(?=[^\n]*\s(?:-[a-zA-Z]*[rR][a-zA-Z]*|--recursive)\b)(?=[^\n]*\s(?:-[a-zA-Z]*f[a-zA-Z]*|--force)\b)\s+[^\n]*\s(?:"(?:\/|~|\$HOME|\$\{HOME\})\/?(?:\*|\.\.?)?"|'(?:\/|~)\/?(?:\*|\.\.?)?'|(?:\/|~|\$HOME|\$\{HOME\}|"\$HOME"|"\$\{HOME\}")\/?(?:\*|\.\.?)?)(\s|;|&&|\|\||\||#|[0-9]?>|$)/,
     msg: 'BLOCKED: recursive force-delete targeting / or home itself',
   },
   {
     // piped remote execution — also via sudo, and process substitution
-    re: /\b(curl|wget)\b[^|;&]*\|\s*(sudo\s+)?(ba|z|da)?sh\b|\b(ba|z|da)?sh\s+<\(\s*(curl|wget)\b/i,
+    re: /\b(curl|wget)\b[^|;&]*\|\s*(sudo(\s+-\S+)*\s+)?(ba|z|da)?sh\b|\b(ba|z|da)?sh\s+<\(\s*(curl|wget)\b/i,
     msg: 'BLOCKED: piping remote content into a shell',
   },
   {
@@ -56,16 +56,16 @@ const RULES = [
   {
     // reading secret env files (any path prefix), EXCEPT template files
     // (.env.example/.env.sample/.env.template contain no secrets)
-    re: /\b(cat|head|tail|less|more|bat|strings)\s+\S*\.env(\.(?!example\b|sample\b|template\b)\w+)?(\s|;|\||$)/,
+    re: /\b(cat|head|tail|less|more|bat|strings)(\s+-\S+)*\s+(--\s+)?(\S*\/)?\.env(?!\.(example|sample|template|md|txt|d)\b)(\.[\w.-]+)*(\s|;|\||$)/,
     msg: 'BLOCKED: reading a secrets file (.env)',
   },
   {
     // echoing secret-looking env vars
-    re: /\becho\s+[^\n]*\$\{?[A-Z_]*(SECRET|PASSWORD|TOKEN|API_KEY)/,
+    re: /\b(echo|printf)\s+[^\n]*\$\{?[A-Z_]*(SECRET|PASSWORD|TOKEN|API_KEY|PRIVATE_KEY|SECRET_KEY|ACCESS_KEY)\}?\b(?!_)/,
     msg: 'BLOCKED: printing secrets from the environment',
   },
   {
-    re: /\bgit\s+push(?=[^\n]*(\s--force(?!-with-lease)\b|\s-f\b|\s\+\w))/,
+    re: /\bgit(\s+-[cC]\s*\S+)*\s+push(?=[^\n]*(\s--force(?!-with-lease)\b|\s-[a-zA-Z]*f[a-zA-Z]*\b|\s\+\w))/,
     msg: 'BLOCKED: git push --force / -f / +ref (use --force-with-lease)',
   },
 ];
@@ -91,8 +91,12 @@ function main() {
   }
   if (!cmd) return 0;
 
+  // A trailing shell comment is not part of the command: drop it before
+  // matching (only when the # is preceded by whitespace and not inside quotes
+  // — good enough for an accident guard).
+  const stripped = cmd.replace(/\s+#(?=(?:[^"']*["'][^"']*["'])*[^"']*$)[^\n]*/g, '');
   for (const rule of RULES) {
-    if (rule.re.test(cmd)) {
+    if (rule.re.test(stripped)) {
       process.stderr.write(rule.msg + '\n');
       return 2;
     }

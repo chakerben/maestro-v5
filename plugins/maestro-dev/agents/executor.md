@@ -2,6 +2,7 @@
 name: executor
 description: Turns a dispatched task into working, validated code that fits the project. Use when an approved scope must become code. Never plans, never judges its own work.
 model: sonnet
+role: builder
 effort: medium
 maxTurns: 40
 skills:

@@ -62,15 +62,15 @@ text
 @b
 </maestro_memory>
 EOF
-BEFORE=$(md5sum < "$T/p/CLAUDE.md"); run
-chk "two blocks: file untouched" "$(md5sum < "$T/p/CLAUDE.md")" "$BEFORE"
+BEFORE=$(shasum -a 1 < "$T/p/CLAUDE.md"); run
+chk "two blocks: file untouched" "$(shasum -a 1 < "$T/p/CLAUDE.md")" "$BEFORE"
 
 # 5. No block: append once, then idempotent.
 fixture <<'EOF'
 # P
 EOF
-run; A=$(md5sum < "$T/p/CLAUDE.md"); run
-chk "append then idempotent" "$(md5sum < "$T/p/CLAUDE.md")" "$A"
+run; A=$(shasum -a 1 < "$T/p/CLAUDE.md"); run
+chk "append then idempotent" "$(shasum -a 1 < "$T/p/CLAUDE.md")" "$A"
 
 # 6. A filename containing a newline must not inject content into CLAUDE.md.
 fixture <<'EOF'
@@ -117,8 +117,8 @@ chk "routing: old content gone" "$(grep -c 'Feature end-to-end -> skill' "$T/p/C
 chk "routing: exactly one block" "$(grep -c '^<maestro_routing>' "$T/p/CLAUDE.md")" "1"
 
 # 10. An up-to-date routing block leaves the file byte-identical (and the mtime alone).
-A=$(md5sum < "$T/p/CLAUDE.md"); run
-chk "routing: up to date → untouched" "$(md5sum < "$T/p/CLAUDE.md")" "$A"
+A=$(shasum -a 1 < "$T/p/CLAUDE.md"); run
+chk "routing: up to date → untouched" "$(shasum -a 1 < "$T/p/CLAUDE.md")" "$A"
 
 # 11. A project WITHOUT memory bank but WITH a routing block still gets refreshed.
 rm -rf "$T/p"; mkdir -p "$T/p"; printf '# P\n<maestro_routing>\nold\n</maestro_routing>\n' > "$T/p/CLAUDE.md"
@@ -151,6 +151,33 @@ old
 EOF
 run
 chk "both blocks present after run" "$(grep -c '^<maestro_memory>\|^<maestro_routing>' "$T/p/CLAUDE.md")" "2"
+
+# 15. A block inside a fenced code block is documentation: left alone, real block appended after.
+fixture <<'EOF'
+# P
+Example:
+```
+<maestro_routing>
+example content
+</maestro_routing>
+```
+EOF
+run
+chk "fence: example untouched" "$(grep -c '^example content' "$T/p/CLAUDE.md")" "1"
+chk "fence: real router appended outside" "$(grep -c "maestro-routing $HASH" "$T/p/CLAUDE.md")" "1"
+chk "fence: memory block appended too" "$(grep -c '^<maestro_memory>' "$T/p/CLAUDE.md")" "1"
+
+# 16. CRLF file stays CRLF (no mixed endings).
+rm -rf "$T/p"; mkdir -p "$T/p/maestro_docs/memory"; echo "# m" > "$T/p/maestro_docs/memory/a.md"
+printf '# P\r\n<maestro_routing>\r\nold\r\n</maestro_routing>\r\n' > "$T/p/CLAUDE.md"
+run
+chk "crlf: no bare LF introduced" "$(node -e 'const s=require("fs").readFileSync(process.argv[1],"utf8");console.log((s.match(/[^\r]\n/g)||[]).length)' "$T/p/CLAUDE.md")" "0"
+chk "crlf: router present" "$(grep -c "maestro-routing $HASH" "$T/p/CLAUDE.md")" "1"
+
+# 17. maestro_docs/memory as a FILE is not a memory bank: foreign repo untouched.
+rm -rf "$T/p"; mkdir -p "$T/p/maestro_docs"; echo x > "$T/p/maestro_docs/memory"; printf '# foreign\n' > "$T/p/CLAUDE.md"
+run
+chk "memory is a file: untouched" "$(cat "$T/p/CLAUDE.md")" "# foreign"
 
 echo "memory-sync: $PASS passed, $FAIL failed"
 [ "$FAIL" = "0" ] || exit 1

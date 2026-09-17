@@ -2,6 +2,7 @@
 name: m-architect
 description: Designs system architecture, data models, and technical approach before implementation. Use for architecture decisions, DB schema design, API design, or when a feature needs structural thinking. Never writes production code.
 model: opus
+role: advisor
 effort: high
 tools: Read, Grep, Glob, Write
 maxTurns: 30

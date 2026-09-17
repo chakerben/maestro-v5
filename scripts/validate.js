@@ -84,7 +84,7 @@ for (const entry of marketplace.plugins) {
     if (!name || !/^description:\s*\S+/m.test(fm)) { fail(`${tag}: SKILL.md frontmatter missing name/description`); continue; }
     // A skill that injects live context (!`cmd`) must pre-approve Bash, or a
     // permission prompt aborts the invocation.
-    if (/^!`/m.test(txt) && !/^allowed-tools:\s*\S/m.test(fm))
+    if (/(^|\s)!`/m.test(txt) && !/^allowed-tools:\s*\S/m.test(fm))
       fail(`${tag}: uses !\`cmd\` injection but declares no allowed-tools`);
     if (name !== s.name) fail(`${tag}: frontmatter name "${name}" ≠ directory name`);
     // Rule #4: router (every action has ## Test) or contract (SKILL.md has ## Test)
@@ -101,6 +101,23 @@ for (const entry of marketplace.plugins) {
       fail(`${tag}: no actions/ and no "## Test" in SKILL.md (Philosophy rule #4)`);
     }
   }
+}
+
+// dependency cycles
+{
+  const deps = {};
+  for (const { name, dir } of pluginDirs) {
+    try { deps[name] = (JSON.parse(read(path.join(dir, '.claude-plugin', 'plugin.json'))).dependencies || []).map((d) => (typeof d === 'string' ? d : d.name)); }
+    catch { deps[name] = []; }
+  }
+  const seen = new Set();
+  const visit = (n, stack) => {
+    if (stack.includes(n)) { fail(`dependency cycle: ${[...stack, n].join(' → ')}`); return; }
+    if (seen.has(n)) return;
+    for (const d of deps[n] || []) visit(d, [...stack, n]);
+    seen.add(n);
+  };
+  for (const n of Object.keys(deps)) visit(n, []);
 }
 
 // ── Rule #1: hooks, wherever they could be declared ────────
@@ -126,9 +143,22 @@ for (const src of hookSources) {
   try { cfg = JSON.parse(read(src.file)); }
   catch (e) { fail(`${rel(src.file)}: invalid JSON — ${e.message}`); continue; }
   let hooks = src.key ? cfg[src.key] : cfg.hooks;
-  if (src.key === 'hooks' && typeof hooks === 'string') {
-    // plugin.json may point to a hooks file: count what it points to
-    fail(`${rel(src.file)}: "hooks" points to "${hooks}" — declare hooks in hooks/hooks.json only, so rule #1 stays checkable`);
+  if (src.key === 'hooks' && (typeof hooks === 'string' || Array.isArray(hooks))) {
+    // plugin.json may point at one or several hook files (documented forms).
+    // Refuse the indirection AND count what it points to, so a smuggled file
+    // still trips rule #1 even if someone deletes the first check.
+    const targets = Array.isArray(hooks) ? hooks : [hooks];
+    fail(`${rel(src.file)}: "hooks" points to ${JSON.stringify(targets)} — declare hooks in hooks/hooks.json only, so rule #1 stays checkable`);
+    for (const t of targets) {
+      if (typeof t !== 'string') continue;
+      const tp = path.resolve(path.dirname(src.file), '..', t.replace(/^\$\{CLAUDE_PLUGIN_ROOT\}\/?/, ''));
+      try {
+        const sub = JSON.parse(read(tp));
+        for (const event of Object.keys(sub.hooks || {}))
+          for (const group of sub.hooks[event] || [])
+            for (const h of group.hooks || []) { hookCount++; hookCommands.push({ file: tp, event, h }); }
+      } catch { fail(`${rel(src.file)}: hooks target "${t}" unreadable`); }
+    }
     continue;
   }
   if (!hooks) continue;
@@ -205,8 +235,12 @@ for (const { name, dir } of pluginDirs) {
       const role = (fm.match(/^role:\s*(\S+)/m) || [])[1];
       const toolsLine = (fm.match(/^tools:\s*(.+)$/m) || [])[1] || '';
       const tools = toolsLine.split(/[,\s]+/).filter(Boolean);
-      if (isAgent && /checker|advocate|reviewer|auditor|critic/i.test(f) && role !== 'reviewer')
-        problems.push('looks like a reviewer but has no "role: reviewer"');
+      if (isAgent && !['reviewer', 'builder', 'advisor'].includes(role))
+        problems.push('every agent declares role: reviewer | builder | advisor (rule #5 keys on it, not on the file name)');
+      const descLine = (fm.match(/^description:\s*(.+)$/m) || [])[1] || '';
+      const descNoNeg = descLine.replace(/\b(never|not|no)\s+\w+/gi, ''); // "never judges its own work" is not a reviewer
+      if (isAgent && role !== 'reviewer' && /\b(review|judge|audit|verif|critique|challenge)/i.test(f + ' ' + descNoNeg))
+        problems.push('description says it reviews/judges but role is not reviewer');
       const disallowedLine = (fm.match(/^disallowedTools:\s*(.+)$/m) || [])[1] || '';
       const disallowed = disallowedLine.split(/[,\s]+/).filter(Boolean);
       if (isAgent) {

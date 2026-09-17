@@ -3,7 +3,7 @@ name: 03-ticket
 description: Use when a defect, gap, or improvement has been FOUND and must be handed to the team instead of fixed on the spot — a bug seen during QA or an audit, a checker finding, a "seen on the way" note from 04-debug, "crée un ticket", "mets ça sur Trello". Turns each finding into one Trello card in the project's backlog list, following the Maestro card convention. Not for fixing the bug (maestro-dev:04-debug), not for product framing (00-prd), not for user stories of a new feature (01-user-stories).
 argument-hint: "<finding, or 'from <report path>'>"
 arguments: [source]
-allowed-tools: Bash(cat *), Bash(ls *), Bash(git *)
+allowed-tools: Bash   # turn-scoped: the !`…` injections above use shell builtins, pipes and $(…) that pattern grants do not cover
 ---
 
 # Skill: ticket

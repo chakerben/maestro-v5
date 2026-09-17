@@ -4,7 +4,7 @@ description: Use when a mobile build is about to be submitted to the App Store o
 argument-hint: "[ios | android | both] [rejection text]"
 arguments: [platform]
 disable-model-invocation: true
-allowed-tools: Bash(cat *), Bash(ls *), Bash(grep *), Bash(git *), Bash(node *)
+allowed-tools: Bash   # turn-scoped: the !`…` injections above use shell builtins, pipes and $(…) that pattern grants do not cover
 ---
 
 # Skill: store-release

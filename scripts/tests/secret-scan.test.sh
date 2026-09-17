@@ -22,5 +22,17 @@ echo "x" > c.txt && git add c.txt
 chk "clean" "$(bash "$S" cached | head -1 | cut -d' ' -f1-3)" "SECRET SCAN: clean"
 chk "always exit 0" "$(bash "$S" cached >/dev/null; echo $?)" "0"
 chk "unknown mode: skipped, exit 0" "$(bash "$S" bogus | cut -d' ' -f1-3; )" "SECRET SCAN: skipped"
+# 5.9.2 regressions (independent audit of 5.9.1)
+git config diff.noprefix true
+printf '++i;\n+++ b/fake\nAKIAABCDEFGHIJKLMNOP\nx="sk_live_abcdefghijklmnopqrstuvwxyz"; y="AKIAABCDEFGHIJKLMNOP" // gate:allow both\r\n' > d.txt
+git add d.txt
+OUT=$(bash "$S" cached)
+chk "noprefix: file name kept" "$(echo "$OUT" | grep -c 'd.txt:3  AWS')" "1"
+chk "++ content line: line numbers right (hit at 3)" "$(echo "$OUT" | grep -c 'd.txt:3')" "1"
+chk "+++ inside content: FILE not rewritten" "$(echo "$OUT" | grep -c 'fake')" "0"
+chk "allowed line lists every secret" "$(echo "$OUT" | grep -c 'd.txt:4')" "2"
+chk "CRLF: reason has no CR" "$(echo "$OUT" | grep -c $'both\r')" "0"
+git config --unset diff.noprefix
+chk "git failure → skipped, not clean" "$(bash "$S" branch nonexistent | cut -d' ' -f1-3)" "SECRET SCAN: skipped"
 echo "secret-scan: $PASS passed, $FAIL failed"
 [ "$FAIL" = "0" ] || exit 1

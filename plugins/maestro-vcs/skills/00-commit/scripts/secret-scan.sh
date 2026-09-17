@@ -27,9 +27,12 @@ PATTERNS_MD="$HERE/../assets/secret-patterns.md"
 MODE="${1:-cached}"
 BASE="${2:-}"
 
+# Fixed prefixes: users with diff.noprefix / diff.mnemonicPrefix would otherwise
+# lose every file name. Parsing relies on "+++ b/<path>".
+DIFF_OPTS=(-U0 --no-color --src-prefix=a/ --dst-prefix=b/ --no-ext-diff)
 diff_input() {
   case "$MODE" in
-    cached) git diff --cached -U0 --no-color ;;
+    cached) git diff --cached "${DIFF_OPTS[@]}" ;;
     branch)
       if [ -z "$BASE" ]; then
         for b in origin/main main origin/master master; do
@@ -37,13 +40,14 @@ diff_input() {
         done
       fi
       [ -n "$BASE" ] || { echo "__NOBASE__"; return; }
-      git diff -U0 --no-color "$BASE...HEAD" ;;
+      git diff "${DIFF_OPTS[@]}" "$BASE...HEAD" ;;
     stdin) cat ;;
     *) echo "__BADMODE__" ;;
   esac
 }
 
-DIFF="$(diff_input 2>/dev/null)"
+DIFF="$(diff_input 2>/tmp/secret-scan.err.$$)" || { echo "SECRET SCAN: skipped — git diff failed ($(head -c 200 /tmp/secret-scan.err.$$ | tr -d '\n'))"; rm -f /tmp/secret-scan.err.$$; exit 0; }
+rm -f /tmp/secret-scan.err.$$
 case "$DIFF" in
   __NOBASE__) echo "SECRET SCAN: skipped — no base branch found (pass one: secret-scan.sh branch <base>)"; exit 0 ;;
   __BADMODE__) echo "SECRET SCAN: skipped — unknown mode '$MODE'"; exit 0 ;;
@@ -61,12 +65,18 @@ done < "$PATTERNS_MD"
 [ "${#PATS[@]}" -gt 0 ] || { echo "SECRET SCAN: skipped — no patterns parsed"; exit 0; }
 
 # Walk the diff: track file + new-line numbers, test each added line.
-HITS=0; ALLOWED=0; CHECKED=0; FILE=""; LN=0; OUT=""; ALLOW_OUT=""
+HITS=0; ALLOWED=0; CHECKED=0; FILE=""; LN=0; OUT=""; ALLOW_OUT=""; PREV=""
 while IFS= read -r l; do
+  l="${l%$'\r'}"   # CRLF content: keep line numbers and reasons clean
   case "$l" in
-    +++\ b/*) FILE="${l#+++ b/}"; continue ;;
-    +++*|---*) continue ;;
-    @@*) h="${l#*+}"; h="${h%% *}"; h="${h%%,*}"; LN="${h:-0}"; continue ;;
+    diff\ --git\ *) FILE="${l##* b/}"; PREV="$l"; continue ;;
+    +++\ b/*) if [ "${PREV#--- }" != "$PREV" ] || [ "${PREV#diff --git}" != "$PREV" ]; then PREV="$l"; continue; fi ;;
+    ---\ *) if [ "${PREV#diff --git}" != "$PREV" ] || [ "${PREV#index }" != "$PREV" ] || [ "${PREV#new file}" != "$PREV" ] || [ "${PREV#deleted file}" != "$PREV" ] || [ "${PREV#similarity}" != "$PREV" ] || [ "${PREV#rename}" != "$PREV" ]; then PREV="$l"; continue; fi ;;
+    @@*) h="${l#*+}"; h="${h%% *}"; h="${h%%,*}"; LN="${h:-0}"; PREV="$l"; continue ;;
+    index\ *|new\ file\ mode*|deleted\ file\ mode*|similarity\ *|rename\ *|Binary\ files*|old\ mode*|new\ mode*) PREV="$l"; continue ;;
+  esac
+  PREV="$l"
+  case "$l" in
     +*)
       added="${l#+}"; CHECKED=$((CHECKED+1))
       for i in "${!PATS[@]}"; do
@@ -75,6 +85,7 @@ while IFS= read -r l; do
           masked="${m:0:8}…"
           if printf '%s' "$added" | grep -Eq '//[[:space:]]*gate:allow[[:space:]]+[^[:space:]]'; then
             ALLOWED=$((ALLOWED+1)); ALLOW_OUT+="  $FILE:$LN  ${NAMES[$i]}  $masked  ($(printf '%s' "$added" | sed -E 's/.*gate:allow[[:space:]]+//'))"$'\n'
+            continue   # an allowed line lists EVERY secret it carries
           else
             HITS=$((HITS+1)); OUT+="  $FILE:$LN  ${NAMES[$i]}  $masked"$'\n'
           fi

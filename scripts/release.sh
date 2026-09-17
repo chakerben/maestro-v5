@@ -64,6 +64,9 @@ echo "  Dry-run    : $DRY_RUN"
 step "0/5 Préflight"
 [ -f "$ROOT/.claude-plugin/marketplace.json" ] || { err "pas le dépôt maestro"; exit 1; }
 ok "dépôt reconnu"
+BR=$(git branch --show-current)
+[ "$BR" = "main" ] || { err "sur la branche '$BR' — une release part de main uniquement"; exit 1; }
+ok "branche main"
 
 if [ -f "$ROOT/.git/index.lock" ]; then
   if pgrep -x git >/dev/null 2>&1; then err "un process git tourne — ferme-le"; exit 1; fi

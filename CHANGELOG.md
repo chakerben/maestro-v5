@@ -1,5 +1,43 @@
 # Changelog
 
+## 5.9.2 — independent audit fixes (2026-09-17)
+
+From `docs/AUDIT-5.9.1.md`: an auditor with the code and no access to the
+author's conclusions attacked the day's six releases. 17 findings, all closed;
+test cases 98 → 134.
+
+### Fixed
+
+- **validate.js (P1)**: the array form of `plugin.json` `hooks` was not
+  counted — three smuggled PreToolUse hooks passed green. Both string and
+  array forms are refused AND their targets counted. Also: `role:` is now
+  mandatory on every agent (`reviewer | builder | advisor`), a description that
+  says review/judge without `role: reviewer` fails, inline `!`cmd`` without
+  `allowed-tools` fails, `dependencies` cycles fail.
+- **memory-sync.js**: a block inside a fenced code block is documentation, not
+  the block (fences masked before matching); CRLF files stay CRLF; a
+  `maestro_docs/memory` *file* is not a memory bank (no router appended to a
+  foreign repo). 6 new regression cases.
+- **memory-sync.test.sh** used `md5sum`, absent on macOS — three cases passed
+  vacuously on the release machine. `shasum -a 1`.
+- **secret-scan.sh**: `diff.noprefix` no longer loses file names (prefixes
+  forced); a git failure reports `skipped`, never `clean`; `++…` and `+++ …`
+  added lines are content, not headers (line numbers right); an allowed line
+  lists every secret it carries; CR stripped. 6 new cases.
+- **bash-guard.js**: 15 bypasses closed (quoted targets, `$HOME/*`, `~/.`,
+  `$HOME/..`, redirect/pipe terminators, tabs, `-fu`, `git -c … push`,
+  `sudo -E`, options before `.env`, multi-suffix `.env`, `printf`) and 4 false
+  positives removed (`#` comment stripped, `.env` path-anchored with doc
+  suffixes excluded, secret word must end the variable name). 95 cases.
+- **release.sh** refuses to run off `main`.
+- **maestro-dev** now depends on **maestro-mobile** (m-i18n-checker preloads
+  rtl-i18n; the preload was dangling on web-only installs).
+- Injection skills declare `allowed-tools: Bash` (turn-scoped) — pattern
+  grants did not cover the builtins/pipes/`$(…)` the injections use.
+- **install-shortcuts.sh**: `git wt` alias is opt-in (`--git-alias`), `/menu`
+  points at `/maestro`, the final count is honest.
+- ARCHITECTURE.md anatomy lists `scripts/`, plugin `references/`, `commands/`.
+
 ## 5.9.1 — context budget (2026-09-17)
 
 From `docs/PERF-AUDIT-5.9.0.md`. No rule removed; every number now has a ceiling.

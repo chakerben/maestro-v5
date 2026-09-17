@@ -3,7 +3,7 @@ name: 02-release
 description: Cut a release — semver bump from conventional commits since the last tag, changelog section, annotated tag. Use to tag and document a release. Not for deploying (CI does that) or committing features.
 argument-hint: "[major | minor | patch]"
 disable-model-invocation: true
-allowed-tools: Bash(git *)
+allowed-tools: Bash   # turn-scoped: the !`…` injections above use shell builtins, pipes and $(…) that pattern grants do not cover
 ---
 
 # Skill: release

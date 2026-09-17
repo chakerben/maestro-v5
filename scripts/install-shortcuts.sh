@@ -44,7 +44,7 @@ echo "  ✅ /$1  →  $2"
 }
 
 echo "📦 Installation des raccourcis Maestro dans $DIR"
-mk menu    "maestro-core menu command (commands/maestro.md)" "Show the Maestro capability map grouped by intent" ""
+mk menu    "maestro-core command /maestro (run it: /maestro $ARGUMENTS)" "Show the Maestro capability map grouped by intent" ""
 mk onboard "maestro-core:00-onboard"   "Onboard this project into Maestro 5 (stack detection, plugins, memory)" ""
 mk sdlc    "maestro-dev:00-sdlc"       "Full pipeline: spec → plan → implement → review → ship" "<feature>"
 mk auto    "maestro-dev:00-sdlc"       "Full pipeline UNATTENDED (auto mode, hard stops only)" "<feature>"
@@ -81,7 +81,7 @@ open the PR but NEVER merge. Read the skill's SKILL.md first.
 EOF
 
 echo ""
-echo "✅ $(ls "$DIR" | wc -l | tr -d ' ') commandes installées."
+echo "✅ raccourcis Maestro écrits dans $DIR ($(ls "$DIR" | wc -l | tr -d ' ') commandes au total, Maestro et autres)."
 echo "▶ Relance ta session Claude Code, puis tape / pour voir la liste."
 echo "▶ Désinstallation d'un raccourci : rm ~/.claude/commands/<nom>.md"
 
@@ -97,4 +97,8 @@ case ":$PATH:" in
   *":$BIN_DIR:"*) ;;
   *) echo "  ⚠️  $BIN_DIR absent du PATH — ajoute : export PATH=\"$BIN_DIR:\$PATH\"" ;;
 esac
-git config --global alias.wt '!gwt' 2>/dev/null && echo "  ✅ alias git wt  →  gwt"
+if [ "${1:-}" = "--git-alias" ]; then
+  git config --global alias.wt '!gwt' && echo "  ✅ alias git wt  →  gwt (écrit dans ~/.gitconfig)"
+else
+  echo "  ℹ️  alias 'git wt' non installé (touche ~/.gitconfig) — relance avec --git-alias pour l'ajouter"
+fi

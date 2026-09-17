@@ -42,10 +42,10 @@ const BLOCK_CLOSE = '</maestro_memory>';
 // Anchored on its own line, exactly as buildBlock() emits it. Anchoring is
 // what makes a prose mention ("le bloc <maestro_memory> est géré...") harmless:
 // it is not a line of its own, so it can never become the start of the match.
-const BLOCK_RE = /^<maestro_memory>[ \t]*\r?$[\s\S]*?^<\/maestro_memory>[ \t]*\r?$/gm;
+const BLOCK_RE = /^<maestro_memory>[ \t]*\r?$[\s\S]*?^<\/maestro_memory>[ \t]*(?=\r?$)/gm;
 const ROUTING_OPEN = '<maestro_routing>';
 const ROUTING_CLOSE = '</maestro_routing>';
-const ROUTING_RE = /^<maestro_routing>[ \t]*\r?$[\s\S]*?^<\/maestro_routing>[ \t]*\r?$/gm;
+const ROUTING_RE = /^<maestro_routing>[ \t]*\r?$[\s\S]*?^<\/maestro_routing>[ \t]*(?=\r?$)/gm;
 const ROUTING_SRC = path.join(__dirname, '..', 'references', 'routing.md');
 const MAX_ROUTING_BYTES = 8192;
 const MEMORY_DIR = path.join('maestro_docs', 'memory');
@@ -108,23 +108,48 @@ function buildBlock(memoryPath) {
  * Replace the block, or append it. Returns the new content, or null when the
  * file is in a shape we refuse to touch.
  */
+/**
+ * A block that sits inside a fenced code block (``` or ~~~) is documentation,
+ * not the block. Mask fenced regions with same-length filler so offsets are
+ * preserved, match on the mask, then apply to the real content.
+ */
+function maskFences(content) {
+  const lines = content.split('\n');
+  let inFence = false;
+  return lines
+    .map((l) => {
+      if (/^\s*(```|~~~)/.test(l)) { inFence = !inFence; return '#'.repeat(l.length); }
+      return inFence ? '#'.repeat(l.length) : l;
+    })
+    .join('\n');
+}
+
 function applyBlock(content, newBlock, re = BLOCK_RE, open = BLOCK_OPEN, close = BLOCK_CLOSE) {
-  const matches = content.match(re) || [];
+  const masked = maskFences(content);
+  const eol = content.includes('\r\n') ? '\r\n' : '\n';
+  if (eol !== '\n') newBlock = newBlock.replace(/\r?\n/g, eol);
+  const matches = [];
+  re.lastIndex = 0;
+  let m;
+  while ((m = re.exec(masked)) !== null) matches.push({ index: m.index, length: m[0].length });
+  re.lastIndex = 0;
 
   if (matches.length === 1) {
-    return content.replace(re, () => newBlock);
+    const { index, length } = matches[0];
+    return content.slice(0, index) + newBlock + content.slice(index + length);
   }
   if (matches.length > 1) {
     // Several well-formed blocks: ambiguous, a human must resolve it.
     return null;
   }
-  // No well-formed block. If a tag appears anyway (prose mention, code fence,
-  // unclosed block, close-before-open), appending would compound the mess and
-  // replacing would eat user content. Bail — a stale block costs a sync, a
-  // wrong edit costs the user's file.
-  if (content.includes(open) || content.includes(close)) return null;
+  // No well-formed block OUTSIDE fences. If a tag appears anyway outside a
+  // fence (prose mention, unclosed block, close-before-open), appending would
+  // compound the mess and replacing would eat user content. Bail — a stale
+  // block costs a sync, a wrong edit costs the user's file. Tags that live
+  // only inside fences are documentation: append normally.
+  if (masked.includes(open) || masked.includes(close)) return null;
 
-  return content.trimEnd() + '\n\n' + newBlock + '\n';
+  return content.replace(/\s+$/, '') + eol + eol + newBlock + eol;
 }
 
 /**
@@ -147,9 +172,9 @@ function buildRoutingBlock() {
 
 /** Only the routing block: replace if present and stale, append if absent. */
 function applyRouting(content, newBlock) {
-  const matches = content.match(ROUTING_RE) || [];
+  const matches = maskFences(content).match(ROUTING_RE) || [];
   const hashLine = newBlock.split('\n')[1];
-  if (matches.length === 1 && matches[0].includes(hashLine)) return content; // up to date
+  if (matches.length === 1 && content.includes(hashLine)) return content; // up to date
   return applyBlock(content, newBlock, ROUTING_RE, ROUTING_OPEN, ROUTING_CLOSE);
 }
 
@@ -203,7 +228,8 @@ function main() {
 
   // A Maestro project has a memory bank (memory block) and/or a routing block
   // already in its CLAUDE.md. Anything else is not ours: silently exit.
-  const hasMemory = fs.existsSync(memoryPath);
+  let hasMemory = false;
+  try { hasMemory = fs.statSync(memoryPath).isDirectory(); } catch { /* absent */ }
 
   // Never follow a symlink out of the project.
   let st;
@@ -231,7 +257,7 @@ function main() {
 
     // Routing: only for projects that are already Maestro's (a routing block
     // present, or a memory bank). Never append a router to a foreign repo.
-    const isMaestroProject = hasMemory || ROUTING_RE.test(content);
+    const isMaestroProject = hasMemory || ROUTING_RE.test(maskFences(content));
     ROUTING_RE.lastIndex = 0;
     if (!isMaestroProject) return;
 

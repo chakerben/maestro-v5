@@ -2,7 +2,7 @@
 name: 04-doctor
 description: Verify the health of a Maestro install in the current project — plugins enabled, hooks compliant, memory bank coherent, and NO leftovers from Maestro v4 or third-party orchestrators (claude-flow, ruv-swarm). Use after a migration, when something feels broken, or as a periodic checkup. Not for first-time setup (00-onboard).
 argument-hint: check | fix
-allowed-tools: Bash(claude plugin *), Bash(cat *), Bash(ls *), Bash(grep *)
+allowed-tools: Bash   # turn-scoped: the !`…` injections above use shell builtins, pipes and $(…) that pattern grants do not cover
 ---
 
 # Skill: doctor

@@ -63,10 +63,13 @@ plugins/<name>/
 ├── .claude-plugin/plugin.json   # manifest (required)
 ├── README.md
 ├── skills/<NN>-<name>/
-│   ├── SKILL.md                 # contract: frontmatter + actions table + rules
-│   ├── actions/<NN>-<name>.md   # atomic, each with a ## Test section
+│   ├── SKILL.md                 # contract: frontmatter + actions table + rules (+ !`live state`)
+│   ├── actions/<NN>-<name>.md   # atomic, each with a ## Test section (router skills)
 │   ├── assets/                  # templates (optional)
-│   └── references/              # extended docs (optional)
-├── agents/<name>.md             # model-pinned agents (optional)
+│   ├── references/              # extended docs (optional)
+│   └── scripts/                 # executables a skill injects, e.g. 00-commit/scripts/secret-scan.sh
+├── references/                  # plugin-level; maestro-core/references/routing.md is READ BY THE HOOK
+├── commands/<name>.md           # slash commands (maestro-core: /maestro)
+├── agents/<name>.md             # model-pinned agents, role: reviewer|builder|advisor
 └── hooks/hooks.json             # only core & quality have one
 ```

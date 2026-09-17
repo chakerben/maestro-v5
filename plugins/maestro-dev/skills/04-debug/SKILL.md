@@ -3,7 +3,7 @@ name: 04-debug
 description: Use when behaviour that already exists is wrong — a bug report, a crash, a stack trace, "ça marche pas", "it worked yesterday", a failing test nobody understands, wrong output for a known input. Drives reproduce → isolate → cause → fix + regression test, with resumable state. Not for building something new (00-sdlc / 01-plan), not for an open design question (03-brainstorm), not for a performance complaint without a defect (maestro-quality:02-perf-audit).
 argument-hint: "<what is wrong, or a stack trace / failing test path>"
 effort: high
-allowed-tools: Bash(git *), Bash(cat *), Bash(ls *)
+allowed-tools: Bash   # turn-scoped: the !`…` injections above use shell builtins, pipes and $(…) that pattern grants do not cover
 ---
 
 # Skill: debug

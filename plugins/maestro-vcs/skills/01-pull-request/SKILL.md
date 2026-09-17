@@ -2,7 +2,7 @@
 name: 01-pull-request
 description: Open a structured pull request from the current feature branch — body built from the task folder (objective, phases, review verdict), reviewers hinted by touched areas. Use to open or update a PR. Not for merging (humans merge) or committing (00-commit).
 argument-hint: "[draft]"
-allowed-tools: Bash(git *), Bash(bash *), Bash(gh pr *)
+allowed-tools: Bash   # turn-scoped: the !`…` injections above use shell builtins, pipes and $(…) that pattern grants do not cover
 ---
 
 # Skill: pull-request
