@@ -19,7 +19,7 @@ the table below is markdown escaping for `|` — use a plain `|` in the command.
 | `xox[bpars]-[A-Za-z0-9-]{10,}` | Slack token |
 | `AKIA[0-9A-Z]{16}` | AWS access key |
 | `-----BEGIN (RSA\|EC\|OPENSSH\|DSA\|PGP) PRIVATE KEY` | Private key |
-| `AIza[0-9A-Za-z\-_]{35}` | Google API key |
+| `AIza[0-9A-Za-z_-]{35}` | Google API key |
 | `eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{10,}` | JWT |
 | `sk-[A-Za-z0-9]{20,}T3BlbkFJ[A-Za-z0-9]{20,}` | OpenAI key |
 | `sk-ant-[A-Za-z0-9-]{20,}` | Anthropic key |

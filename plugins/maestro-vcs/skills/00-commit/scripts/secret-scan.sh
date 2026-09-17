@@ -16,6 +16,9 @@
 # Lines ending in `// gate:allow <reason>` are listed under ALLOWED and do not
 # count as hits; the gate must copy them into the commit body as Gate-Allow:.
 set -uo pipefail
+# BSD grep (macOS) applies locale collation to bracket ranges; force C so a
+# range like `[A-Za-z0-9_-]` means bytes, not collation order.
+export LC_ALL=C
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PATTERNS_MD="$HERE/../assets/secret-patterns.md"
@@ -70,7 +73,7 @@ while IFS= read -r l; do
         m="$(printf '%s\n' "$added" | grep -Eio -e "${PATS[$i]}" | head -1)" || true
         if [ -n "$m" ]; then
           masked="${m:0:8}…"
-          if printf '%s' "$added" | grep -Eq '//[[:space:]]*gate:allow[[:space:]]+\S'; then
+          if printf '%s' "$added" | grep -Eq '//[[:space:]]*gate:allow[[:space:]]+[^[:space:]]'; then
             ALLOWED=$((ALLOWED+1)); ALLOW_OUT+="  $FILE:$LN  ${NAMES[$i]}  $masked  ($(printf '%s' "$added" | sed -E 's/.*gate:allow[[:space:]]+//'))"$'\n'
           else
             HITS=$((HITS+1)); OUT+="  $FILE:$LN  ${NAMES[$i]}  $masked"$'\n'

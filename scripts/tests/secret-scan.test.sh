@@ -5,6 +5,7 @@ PASS=0; FAIL=0
 chk() { if [ "$2" = "$3" ]; then PASS=$((PASS+1)); else FAIL=$((FAIL+1)); echo "  ❌ [$1] got='$2' want='$3'"; fi; }
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
 cd "$T" && git init -q && git -c user.name=t -c user.email=t@t commit -q --allow-empty -m init
+BASE=$(git rev-parse --abbrev-ref HEAD)   # main or master, per the machine's init.defaultBranch
 git checkout -q -b feat
 printf 'const a = 1;\nconst k = "sk_live_abcdefghijklmnopqrstuvwxyz";\nconst ok = "sk_live_abcdefghijklmnopqrstuvwxyz"; // gate:allow fixture\n' > a.js
 git add a.js
@@ -15,7 +16,7 @@ chk "cached: allow listed, not a hit" "$(echo "$OUT" | grep -c 'a.js:3.*fixture'
 chk "cached: masked" "$(echo "$OUT" | grep -c 'sk_live_abcdefghij')" "0"
 git -c user.name=t -c user.email=t@t commit -qm x
 printf 'AKIAABCDEFGHIJKLMNOP\n' > b.txt && git add b.txt && git -c user.name=t -c user.email=t@t commit -qm y
-OUT=$(bash "$S" branch master)
+OUT=$(bash "$S" branch "$BASE")
 chk "branch: 2 hits across commits" "$(echo "$OUT" | head -1 | grep -o '[0-9]* hit' )" "2 hit"
 echo "x" > c.txt && git add c.txt
 chk "clean" "$(bash "$S" cached | head -1 | cut -d' ' -f1-3)" "SECRET SCAN: clean"
