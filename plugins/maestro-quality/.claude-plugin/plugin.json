@@ -3,6 +3,6 @@
   "version": "5.6.0",
   "description": "Workflow-time quality gates (off/standard/high/paranoid) invoked at commit and review. Ships the PreToolUse bash-guard security hook.",
   "author": {
-    "name": "ARABII"
+    "name": "Ben Moussa Chaker"
   }
 }

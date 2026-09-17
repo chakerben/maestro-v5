@@ -63,7 +63,7 @@ Everything below comes from `docs/AUDIT-5.5.0.md`; the letters are its item ids.
 
 ### Not changed (decisions left to the owner)
 
-- `owner.name` / `author.name` stay `ARABII` (C-6).
+- `owner.name` / `author.name`: `ARABII` → `Ben Moussa Chaker` (C-6, decided 2026-09-17).
 - `m-architect` keeps `Write` (needed for tech-decisions.md); PHILOSOPHY #5
   now names it as instructed, not enforced.
 - `role: reviewer` is a Maestro-side frontmatter key; the platform ignores

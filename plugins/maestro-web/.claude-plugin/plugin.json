@@ -3,6 +3,6 @@
   "version": "5.6.0",
   "description": "Web standards: Next.js + Prisma + Clerk + PostgreSQL + Zod stack enforcement, UX standards, RTL-aware design review layered on the official frontend-design plugin.",
   "author": {
-    "name": "ARABII"
+    "name": "Ben Moussa Chaker"
   }
 }
