@@ -10,6 +10,10 @@ The development pipeline.
 - `01-plan` — gather → explore → phased plan with resumable frontmatter state
 - `02-implement` — phase loop: fresh executor context per phase, assertion
   gates, one commit per phase, resume support
+- `03-brainstorm` — one question at a time, journal, devil-advocate pass,
+  routed handoff (see docs/BRAINSTORM-SUPERPOWERS.md)
+- `04-debug` — reproduce → isolate → cause → fix + regression test; no edit
+  before a repro; resumable `debug.md`; side-findings go to `03-ticket`
 
 ## Agents
 

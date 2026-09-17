@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "maestro",
-  "version": "5.7.0",
+  "version": "5.8.0",
   "description": "Maestro 5 — Business-layer framework for web & mobile development on top of official Claude Code plugins. RTL/Arabic-native, opinionated stack (Next.js, Prisma, Clerk, Expo), workflow-enforced quality.",
   "owner": {
     "name": "Ben Moussa Chaker"
@@ -15,7 +15,7 @@
     {
       "name": "maestro-dev",
       "source": "./plugins/maestro-dev",
-      "description": "Development pipeline: brainstorm (open questions to a recorded decision), sdlc orchestration, plan, implement (phased, resumable). Hosts the executor, checker, m-architect, m-devil-advocate and m-i18n-checker agents."
+      "description": "Development pipeline: brainstorm (open questions to a recorded decision), sdlc orchestration, plan, implement (phased, resumable), debug (reproduce → cause → regression test). Hosts the executor, checker, m-architect, m-devil-advocate and m-i18n-checker agents."
     },
     {
       "name": "maestro-quality",
@@ -35,7 +35,7 @@
     {
       "name": "maestro-pm",
       "source": "./plugins/maestro-pm",
-      "description": "Product management: PRD, user stories, and technical specs — FR/EN/AR templates."
+      "description": "Product management: PRD, user stories, technical specs — FR/EN/AR templates — and tickets (a finding becomes a Trello card, never a silent fix)."
     },
     {
       "name": "maestro-vcs",

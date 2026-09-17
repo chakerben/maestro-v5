@@ -11,9 +11,7 @@ journal included, and file what broke as the next release's changelog.
 
 ## v5.3 candidates (after pilot feedback)
 
-- **maestro-dev:04-debug** — systematic root-cause debugging skill
-  (reproduce → smallest failing case → cause → fix → regression test).
-  Today the executor + expert postures cover it implicitly.
+- ~~maestro-dev:04-debug~~ — **shipped in 5.8.0.**
 - ~~maestro-dev:brainstorm~~ — **shipped as `maestro-dev:03-brainstorm`.**
   One question at a time, journal with a falsifiable stop condition, devil-advocate
   pass, routed handoff. See docs/BRAINSTORM-SUPERPOWERS.md for what was absorbed
@@ -27,8 +25,7 @@ journal included, and file what broke as the next release's changelog.
 
 - **i18n of the framework itself** — AR/FR translations of user-facing skill
   outputs (SKILL.md stay English for model performance).
-- **maestro-mobile:03-store-release** — App Store / Play Store submission
-  checklist skill (KSA specifics: age ratings, data disclosure).
+- ~~maestro-mobile:03-store-release~~ — **shipped in 5.8.0.**
 - **maestro-web:03-seo-standards** — metadata, OG, sitemap, hreflang for
   multilingual sites (ar/fr/en alternates).
 

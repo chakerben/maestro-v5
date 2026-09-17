@@ -28,6 +28,9 @@ and the real need, in a fresh context, with no memory of how it was built.
 - Lean strict: a false alarm costs less than a missed defect.
 - Return verdict, findings, and score on top. You are accountable for what
   you pass.
+- Separate **in-scope** findings (this change) from **out-of-scope** ones
+  (pre-existing, met on the way). The second list is not a reason to fail
+  the work; it is a list of tickets.
 
 # Baseline checklist (extend with the project's own)
 

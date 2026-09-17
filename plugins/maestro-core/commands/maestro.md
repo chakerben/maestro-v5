@@ -16,6 +16,7 @@ Present it grouped by INTENT (what the user wants to do), not by plugin:
 - Take a feature from idea to shipped → `maestro-dev:00-sdlc` (say `auto` for unattended)
 - Plan before building → `maestro-dev:01-plan`
 - Implement an existing plan → `maestro-dev:02-implement`
+- Something that exists is broken → `maestro-dev:04-debug`
 - Independent review before ship → agent `checker`
 - Challenge a decision → agent `m-devil-advocate`
 - Design architecture / DB schema → agent `m-architect`
@@ -37,6 +38,8 @@ Present it grouped by INTENT (what the user wants to do), not by plugin:
 - Arabic PDF generation → `maestro-mobile:02-pdf-rtl`
 - Stack enforcement → `maestro-web:00-web-standards` · UX → `01-ux-standards` · Review a screen → `02-design-review`
 - PRD → `maestro-pm:00-prd` · Stories → `01-user-stories` · Specs → `02-specs`
+- A finding must go to the team, not be fixed now → `maestro-pm:03-ticket`
+- Submit a mobile build to the stores → `maestro-mobile:03-store-release`
 
 **Delivery**
 - Open a PR → `maestro-vcs:01-pull-request` · Cut a release → `maestro-vcs:02-release`

@@ -1,6 +1,6 @@
 {
   "name": "maestro-vcs",
-  "version": "5.7.0",
+  "version": "5.8.0",
   "description": "Delivery: conventional commits with secret detection and quality gates, pull requests, releases. Layered on the official commit-commands plugin.",
   "author": {
     "name": "Ben Moussa Chaker"

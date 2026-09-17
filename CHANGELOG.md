@@ -1,5 +1,40 @@
 # Changelog
 
+## 5.8.0 — three skills for the daily loop (2026-09-17)
+
+27 skills. Still 2 hooks, 5 agents.
+
+### Added
+
+- **`maestro-dev:04-debug`** (router, 4 actions) — reproduce → isolate →
+  cause → fix. Binding: nothing in the source is edited before a repro exists
+  that fails on demand; the cause and the symptom are named separately with
+  file:line; the regression test is written red before the fix; defects met
+  on the way go to `03-ticket`, never fixed in passing. State in
+  `maestro_docs/tasks/<folder>/debug.md` (`reproducing | isolating |
+  cause-found | fixed | not-reproducible`). Was on the roadmap since 5.3.
+- **`maestro-pm:03-ticket`** (contract) — a finding becomes one Trello card:
+  🔴🟠🟡⚪ priority as first character, four sections (Repro · Attendu ·
+  Critères · Pistes), labels `quality`/`fast` (+`rtl`), `Trouvé : repo@sha`
+  trailer, never an AI attribution. All cards are drafted, shown as a batch,
+  approved once, then created through the connected Trello tool; with no
+  Trello tool they land in `maestro_docs/tickets/` and the skill says so.
+  Board and list are plugin `userConfig` (`TRELLO_BOARD`, `TRELLO_LIST`,
+  default `À faire V1`). The skill never fixes the code — that is the point.
+- **`maestro-mobile:03-store-release`** (contract, `disable-model-invocation`)
+  — go/no-go submission checklist in `maestro_docs/releases/`: Build and
+  Compliance are blocking, KSA section (Hijri, SAR, numerals, +966 OTP,
+  regulatory notices, charity licence for donation apps), Arabic screenshots
+  taken in RTL with real content, a rejection text mapped back to the item it
+  violates. `GO` only with zero ❌. Was on the roadmap since 5.4.
+
+### Changed
+
+- `checker` separates in-scope from out-of-scope findings; `00-sdlc/04-review`
+  routes the second list to `03-ticket` instead of folding it into the
+  iteration loop.
+- `/maestro` menu, READMEs and plugin descriptions list the three skills.
+
 ## 5.7.0 — the platform does the enforcing (2026-09-17)
 
 Every item uses a documented Claude Code plugin/skill/agent feature that

@@ -4,7 +4,7 @@
 > official Claude Code plugin ecosystem. RTL/Arabic-native. Workflow-enforced
 > quality. Zero runtime bloat.
 
-**7 plugins · 24 skills · 5 agents · 2 hooks total · FR/EN/AR**
+**7 plugins · 27 skills · 5 agents · 2 hooks total · FR/EN/AR**
 
 ## Install
 
@@ -29,11 +29,11 @@ project memory bank.
 | Plugin | Purpose | Hooks |
 |---|---|---|
 | `maestro-core` | Onboarding, memory bank, CLAUDE.md gardener, condense, doctor | 1 (SessionStart memory-sync) |
-| `maestro-dev` | brainstorm, sdlc, plan, implement + executor/checker/m-architect/m-devil-advocate/m-i18n-checker agents | 0 |
+| `maestro-dev` | brainstorm, sdlc, plan, implement, debug + executor/checker/m-architect/m-devil-advocate/m-i18n-checker agents | 0 |
 | `maestro-quality` | Quality gates at commit/review time | 1 (PreToolUse bash-guard) |
-| `maestro-mobile` | RN/Expo/Flutter, RTL Arabic, RTL PDF | 0 |
+| `maestro-mobile` | RN/Expo/Flutter, RTL Arabic, RTL PDF, store release checklist | 0 |
 | `maestro-web` | Next.js/Prisma/Clerk stack, UX, design review | 0 |
-| `maestro-pm` | PRD, user stories, specs (FR/EN/AR) | 0 |
+| `maestro-pm` | PRD, user stories, specs (FR/EN/AR), tickets → Trello | 0 |
 | `maestro-vcs` | Commits with gates (executable secrets scan), PRs, releases | 0 |
 
 ## Philosophy

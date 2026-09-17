@@ -1,11 +1,26 @@
 {
   "name": "maestro-pm",
-  "version": "5.7.0",
-  "description": "Product management: PRD, user stories, technical specs with FR/EN/AR templates.",
+  "version": "5.8.0",
+  "description": "Product management: PRD, user stories, technical specs with FR/EN/AR templates, and tickets (findings → Trello cards, never fixes).",
   "author": {
     "name": "Ben Moussa Chaker"
   },
   "dependencies": [
     "maestro-core"
-  ]
+  ],
+  "userConfig": {
+    "TRELLO_BOARD": {
+      "type": "string",
+      "title": "Trello board",
+      "description": "Name of the Trello board that receives tickets (e.g. umaplace-dev)",
+      "required": false
+    },
+    "TRELLO_LIST": {
+      "type": "string",
+      "title": "Backlog list",
+      "description": "List that receives new cards",
+      "default": "À faire V1",
+      "required": false
+    }
+  }
 }

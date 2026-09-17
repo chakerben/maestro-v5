@@ -10,5 +10,9 @@ Mobile + Arabic — the Maestro differentiator.
   6 Arabic plural categories, Hijri dates, arab/latn numerals, SarIcon,
   Arabic typography (line-height, letter-spacing:0). Ships
   `references/rtl-checklist.md`.
+- `03-store-release` — go/no-go submission checklist with evidence: build,
+  compliance (permissions, account deletion, IAP vs PSP), listing, KSA
+  specifics (Hijri, SAR, +966 OTP, regulatory notices); works a rejection
+  text back to the item it violates
 - `02-pdf-rtl` — the reliable Arabic PDF route (browser print engine),
   embedded fonts, bidi-safe invoice templates, shaping smoke tests
