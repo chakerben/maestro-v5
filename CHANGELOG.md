@@ -1,5 +1,21 @@
 # Changelog
 
+## 5.9.5 — the last stragglers (2026-09-17)
+
+After 5.9.4 the fleet reported 5.9.4 everywhere except a handful of copies
+frozen at 5.6.0, with `prune-installed.sh` finding **0 dead entries** — so
+those paths exist and were simply never visited.
+
+Cause: `--all` kept only the directories that *declare* a plugin in
+`.claude/settings.json` / `settings.local.json`. A `gwt` worktree (and
+`uma-place`) has an installed copy recorded in `installed_plugins.json` but no
+such declaration, so it was filtered out of the list before the update loop —
+and stayed at its install-time version forever.
+
+- `plugins_of` now unions three sources: `settings.json`,
+  `settings.local.json`, and the plugins recorded for that exact path in
+  `installed_plugins.json` (real-path compared, deduped).
+
 ## 5.9.4 — fleet hygiene (2026-09-17)
 
 `claude plugin list` after 5.9.3: 59 enabled copies still at 5.5.0/5.6.0 while

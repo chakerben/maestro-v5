@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "maestro",
-  "version": "5.9.4",
+  "version": "5.9.5",
   "description": "Maestro 5 — Business-layer framework for web & mobile development on top of official Claude Code plugins. RTL/Arabic-native, opinionated stack (Next.js, Prisma, Clerk, Expo), workflow-enforced quality.",
   "owner": {
     "name": "Ben Moussa Chaker"

@@ -48,7 +48,7 @@ command -v python3 >/dev/null || { err "python3 requis"; exit 1; }
 # Quels plugins maestro ce projet déclare-t-il ? (settings.json ET settings.local.json —
 # 5.9.4 : uma-place ne déclarait les siens que dans le .local et était invisible)
 plugins_of() {
-  python3 - "$1" <<'PY' 2>/dev/null
+  { python3 - "$1" <<'PY' 2>/dev/null
 import json, sys, os
 seen = set()
 for f in ("settings.json", "settings.local.json"):
@@ -62,6 +62,43 @@ for f in ("settings.json", "settings.local.json"):
         if mk == "maestro" and name not in seen:
             seen.add(name); print(name)
 PY
+    installed_plugins_of "$1"
+  } | awk 'NF && !seen[$0]++'
+}
+
+# Les plugins @maestro INSTALLÉS pour ce chemin, d'après installed_plugins.json.
+# 5.9.5 : un worktree gwt ou un projet dont le .claude/settings.json ne déclare rien
+# a quand même une copie installée — sans ça elle reste à sa version d'origine à vie.
+installed_plugins_of() {
+  python3 - "$1" <<'PYP' 2>/dev/null
+import json, os, re, sys
+target = os.path.realpath(sys.argv[1])
+f = os.path.expanduser("~/.claude/plugins/installed_plugins.json")
+try:
+    d = json.load(open(f))
+except Exception:
+    raise SystemExit(0)
+out = []
+def name_from(chain):
+    for k in reversed(chain):
+        m = re.match(r"^(maestro-[a-z]+)(@maestro)?$", str(k))
+        if m:
+            return m.group(1)
+    return None
+def walk(o, chain):
+    if isinstance(o, dict):
+        if o.get("scope") == "project":
+            p = o.get("projectPath") or o.get("project")
+            if isinstance(p, str) and os.path.realpath(p) == target:
+                n = o.get("name") or o.get("plugin") or name_from(chain)
+                if n and str(n).startswith("maestro-") and n not in out:
+                    out.append(str(n).split("@")[0])
+        for k, v in o.items(): walk(v, chain + [k])
+    elif isinstance(o, list):
+        for v in o: walk(v, chain)
+walk(d, [])
+for n in out: print(n)
+PYP
 }
 
 # La source de vérité de `claude plugin list` : installed_plugins.json. Chaque copie
