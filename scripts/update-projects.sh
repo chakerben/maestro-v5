@@ -107,11 +107,20 @@ PYK
 
 # Découverte = installed_plugins.json (vérité) + scan de PROJECTS_ROOT (profondeur 3,
 # pour .worktrees/<repo>/<branche>) + projets connus de ~/.claude.json, dédoublonnés.
+# Un dossier de sauvegarde (.maestro-v4-backup-*, .maestro-doctor-backup-*) contient
+# un .claude/ copié : ce n'est pas un projet. Idem node_modules.
+is_project() {
+  case "$1" in
+    */.maestro-*backup*|*/node_modules/*|*/.git/*) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
 discover() {
   { installed_projects
     [ -d "$PROJECTS_ROOT" ] && find "$PROJECTS_ROOT" -maxdepth 3 -mindepth 1 -type d -name '.claude' -exec dirname {} \; 2>/dev/null
     known_projects
-  } | sort -u
+  } | sort -u | while IFS= read -r d; do is_project "$d" && echo "$d"; done
 }
 
 if [ "$ALL" = "1" ] || [ "$LIST_ONLY" = "1" ]; then
@@ -224,8 +233,20 @@ else
   echo -e "${B}Terminé : $DONE ok, $FAILED en échec${N}"
 fi
 echo ""
+SERVED=$(python3 - <<'PYS' 2>/dev/null || echo "?"
+import json, os, glob
+for p in glob.glob(os.path.expanduser("~/.claude/plugins/marketplaces/*/.claude-plugin/marketplace.json")):
+    d = json.load(open(p))
+    if d.get("name") == "maestro":
+        print(d.get("version", "?")); break
+PYS
+)
 echo "  Vérifier :  claude plugin list | grep -A1 '@$MARKETPLACE' | grep Version | sort -u"
-echo "  Attendu  :  Version: $EXPECTED  (et plus aucune version antérieure)"
+echo "  Attendu  :  Version: ${SERVED:-$EXPECTED}  — c'est ce que le marketplace SERT aujourd'hui"
+if [ -n "$SERVED" ] && [ "$SERVED" != "?" ] && [ "$SERVED" != "$EXPECTED" ]; then
+  warn "ton clone est en $EXPECTED mais le marketplace sert $SERVED — pousse et tague ($ ./scripts/release.sh $EXPECTED) pour que les projets puissent l'avoir"
+fi
+echo "  Restes anciens ? ce sont des entrées mortes :  ./scripts/prune-installed.sh"
 echo ""
 echo "  Pour que les prochaines versions se propagent seules :"
 echo "     /plugin  → onglet Marketplaces → $MARKETPLACE → Enable auto-update"
