@@ -43,6 +43,7 @@ Present it grouped by INTENT (what the user wants to do), not by plugin:
 
 **Delivery**
 - Open a PR → `maestro-vcs:01-pull-request` · Cut a release → `maestro-vcs:02-release`
+- Repo shared with another session → `maestro-vcs:03-worktree` (one branch, one worktree)
 
 End with: "Describe what you want in plain words — the right skill triggers
 automatically from its description. This menu is just the map."

@@ -2,7 +2,7 @@
 
 ## 5.8.0 — three skills for the daily loop (2026-09-17)
 
-27 skills. Still 2 hooks, 5 agents.
+28 skills (with `03-worktree`, merged from origin — see below). Still 2 hooks, 5 agents.
 
 ### Added
 
@@ -38,6 +38,41 @@
   routes the second list to `03-ticket` instead of folding it into the
   iteration loop.
 - `/maestro` menu, READMEs and plugin descriptions list the three skills.
+
+### Merged from origin/main — 2026-09-09, "one worktree per branch" (pushed as an unreleased "5.6.0" from another machine; the tag v5.6.0 is the audit release below, this work ships in 5.8.0)
+
+- **`maestro-vcs:03-worktree`** — a repository is routinely open in several
+  sessions at once (Claude, editor, terminal). In that directory `git switch`
+  moves the branch for everybody and `git commit -a` sweeps up the neighbour's
+  staged work — both hit us for real while shipping a landing-page PR next to a
+  session mid-rename on the admin pages. The skill states the rule (the main
+  checkout stays on the default branch, every branch gets its own worktree) and
+  drives it through three actions, each with its `## Test`.
+
+- **`scripts/gwt`** — the tool the skill calls, installed to `~/.local/bin/gwt`
+  by `install-shortcuts.sh` (symlink, so a marketplace update updates the tool),
+  plus the `/wt` shortcut and the `git wt` alias. It carries what makes a
+  worktree usable — worktree placed outside the repo, `node_modules` symlinked,
+  and the files git does NOT carry copied (`.env*`, `CLAUDE.md`, `AGENTS.md`,
+  `.mcp.json`, `.claude/*.local.json`; all ignored, so a worktree was born
+  without project instructions or granted permissions) — and three traps found
+  by using it:
+  - the branch is created `--no-track`, otherwise it follows `origin/<default>`
+    and a bare `git push` aims at the default branch;
+  - the base is the LOCAL default branch when it is ahead of origin (this repo
+    had four unpushed commits — branching from `origin/main` silently amputated
+    them);
+  - the clean-worktree check ignores what `gwt` itself provisioned, since in a
+    repo where `node_modules` is not ignored the symlink alone blocked removal.
+
+- **`maestro-vcs:00-commit`** — the gate opens with an ownership check: foreign
+  changes in the tree mean commit by explicit paths (`git commit -F msg -- paths`,
+  options before `--`), never `-a`, never a `git switch` to make a precondition
+  pass. `01-pull-request` says the same for the default-branch refusal.
+
+- **`maestro-core:00-onboard`** — new projects are scaffolded with the
+  convention already written in `patterns.md`, so it is readable before the
+  first commit rather than after the first collision.
 
 ## 5.7.0 — the platform does the enforcing (2026-09-17)
 
@@ -146,8 +181,9 @@ Everything below comes from `docs/AUDIT-5.5.0.md`; the letters are its item ids.
 
 - `scripts/release-5.4.0.sh`, `scripts/update-projects-5.4.0.sh` — one-shot,
   release done (C-9).
-- `migrate-v4-to-v5.sh`, `verify-migration.sh`, `setup-all.sh`,
-  `install-shortcuts.sh` → `scripts/archive/v4-migration/` with a README
+- `migrate-v4-to-v5.sh`, `verify-migration.sh`, `setup-all.sh`
+  → `scripts/archive/v4-migration/` (`install-shortcuts.sh` stays live: it
+  installs `gwt`) with a README
   listing their known defects; `RUNBOOK-v5.4.0.md`, `MIGRATION-FROM-V4.md`
   → `docs/archive/` (D, C-12). The 32 projects were migrated in July; the
   only live sentence of the runbook moved to the top of `ROADMAP.md`.

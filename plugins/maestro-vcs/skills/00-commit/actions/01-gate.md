@@ -4,8 +4,18 @@ Run the quality gate on the diff.
 
 ## Process
 
+0. **Ownership check, before anything else.** `git branch --show-current` and
+   `git status --short`. Changes you did not make in this session = another
+   session shares this directory. Then, without exception:
+   - never `git add -A` / `git commit -a` — commit the paths you touched:
+     `git commit -F <message-file> -- <paths>` (options BEFORE `--`, or the
+     pathspec swallows them);
+   - never `git switch` here; branch work belongs in a worktree
+     (`maestro-vcs:03-worktree`);
+   - name the foreign paths in the report.
 1. Collect the diff: staged changes (`git diff --cached`); if nothing staged,
-   ask whether to stage all tracked modifications.
+   ask whether to stage all tracked modifications — in a shared directory,
+   list what you would stage and stage only your own paths.
 2. **Secrets scan (always, never skippable).** The result is already in the
    skill's "Live state" (it ran `scripts/secret-scan.sh cached` at
    invocation). If anything was staged since, re-run it. `RED` → the output
@@ -24,5 +34,7 @@ Run the quality gate on the diff.
 ## Test
 
 - A diff containing `sk_live_xxxxxxxxxxxxxxxxxxxxxxxx` is blocked even at level `off`.
+- With another session's staged rename in the tree, the commit carries only the
+  paths this session touched.
 - No check ran with `--silent`.
 - A red gate produced no commit.

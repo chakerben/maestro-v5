@@ -4,7 +4,7 @@
 > official Claude Code plugin ecosystem. RTL/Arabic-native. Workflow-enforced
 > quality. Zero runtime bloat.
 
-**7 plugins · 27 skills · 5 agents · 2 hooks total · FR/EN/AR**
+**7 plugins · 28 skills · 5 agents · 2 hooks total · FR/EN/AR**
 
 ## Install
 
@@ -34,7 +34,7 @@ project memory bank.
 | `maestro-mobile` | RN/Expo/Flutter, RTL Arabic, RTL PDF, store release checklist | 0 |
 | `maestro-web` | Next.js/Prisma/Clerk stack, UX, design review | 0 |
 | `maestro-pm` | PRD, user stories, specs (FR/EN/AR), tickets → Trello | 0 |
-| `maestro-vcs` | Commits with gates (executable secrets scan), PRs, releases | 0 |
+| `maestro-vcs` | Commits with gates (executable secrets scan), PRs, releases, one-worktree-per-branch | 0 |
 
 ## Philosophy
 

@@ -9,4 +9,5 @@ P1-8, P1-9, P1-10, P1-12 → P1-16 (re-confirmed in `docs/AUDIT-5.5.0.md` §D).
 If a v4 project ever resurfaces, fix those first — or migrate it by hand, it
 is a one-hour job for one project.
 
-`update-projects.sh` and `release.sh` (in `scripts/`) are the live tools.
+`update-projects.sh`, `release.sh` and `install-shortcuts.sh` (which now also
+installs `gwt` for `maestro-vcs:03-worktree`) are the live tools in `scripts/`.
