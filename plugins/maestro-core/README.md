@@ -2,6 +2,12 @@
 
 The Maestro 5 foundation. Install this first.
 
+## Router
+
+`references/routing.md` is the plain-prompt map. The SessionStart hook keeps a
+`<maestro_routing>` copy current in every project's CLAUDE.md, so nobody types
+a skill name.
+
 ## Skills
 
 - `00-onboard` — full project setup: stack detection, official plugin

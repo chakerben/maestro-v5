@@ -26,3 +26,10 @@ Before running an action, read its file in `actions/`.
 - Never delete — archive. Archives live in `maestro_docs/memory/internal/archive/`.
 - Every edit shows a diff preview and requires explicit approval.
 - Target budget: tier-1 (always-loaded) memory ≤ 200 lines total.
+- **Skill-gap log** (absorbed from task-observer, no always-on skill): every
+  full garden run ends by listing corrections the user made more than once
+  in recent sessions (same instruction repeated, same mistake fixed twice)
+  into `maestro_docs/memory/internal/skill-gaps.md` — one line each,
+  "<what was corrected> → candidate: <existing skill to amend | new skill>".
+  Three entries on the same line = a change to the Maestro marketplace, not
+  to this project.

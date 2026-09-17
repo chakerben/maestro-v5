@@ -29,6 +29,15 @@ journal included, and file what broke as the next release's changelog.
 - **maestro-web:03-seo-standards** — metadata, OG, sitemap, hreflang for
   multilingual sites (ar/fr/en alternates).
 
+## Later — tested on one project before becoming framework
+
+- **Strix** (open-source dynamic pentest agent, Docker + own LLM key): a
+  `maestro-quality:03-pentest` skill that runs it as a CLI against a staging
+  URL with a test Clerk session, pre-launch only. Not a hook, not an MCP.
+- **Motion AI Kit** only if a project standardises on Motion over GSAP.
+- **Firecrawl** official plugin the first time a real multi-page crawl is needed.
+- `context: fork` on the audit skills; `isolation: worktree` on the executor.
+
 ## Watching the official ecosystem (rule #8)
 
 Re-check `claude-plugins-official` at each release: if Anthropic ships an

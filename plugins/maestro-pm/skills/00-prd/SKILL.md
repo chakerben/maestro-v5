@@ -6,6 +6,8 @@ argument-hint: "<product/feature idea>"
 
 # Skill: prd
 
+Prose follows `04-writing` (voice, tells, Arabic register).
+
 A PRD answers WHY and FOR WHOM before anyone discusses HOW.
 
 ## Process

@@ -13,3 +13,5 @@ Product management, FR/EN/AR.
 - `03-ticket` — a finding becomes one Trello card (🔴🟠🟡⚪ priority, repro /
   attendu / critères / pistes, labels quality|fast), batch-approved, never a
   fix. Board and list come from the plugin's user config.
+- `04-writing` — prose rules for anything a human reads: direct, committed,
+  no AI tells; Arabic register and punctuation; `rewrite` mode

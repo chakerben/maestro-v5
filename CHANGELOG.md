@@ -1,5 +1,51 @@
 # Changelog
 
+## 5.9.0 — plain prompts route themselves (2026-09-17)
+
+31 skills. Still 2 hooks, 5 agents. Everything here follows
+`docs/TOOLING-AUDIT-2026-09.md` — 25 tools from the feeds, judged with the
+five-question grid in `maestro-core/references/third-party-vetting.md`.
+
+### Added
+
+- **The router is pushed, not typed.** `maestro-core/references/routing.md`
+  is the map "plain words → skill/agent" (FR/AR/EN triggers). The existing
+  SessionStart hook (`memory-sync.js`) now also maintains a
+  `<maestro_routing>` block in every Maestro project's CLAUDE.md from that
+  file — paired-match safety, content hash so an unchanged router costs
+  nothing, never appended to a foreign repo, ambiguity → no write. 9 new
+  regression cases (19 total). Still one hook.
+- **`maestro-dev:05-lean-code`** — Ponytail's ladder (skip → reuse → stdlib →
+  platform → installed dep → one-liner → build) fused with Karpathy's four
+  principles; `debt:` markers; `audit <path>` mode. Preloaded into executor,
+  checker and m-architect; the checker cites the rung per finding and lists
+  new `debt:` markers.
+- **`maestro-pm:04-writing`** — stop-slop's tells and self-score, the
+  "/ghost" and "L99" folklore reduced to what they actually mean (natural
+  voice; commit to a recommendation), plus an Arabic section (formulaic
+  openers, MSA vs WhatsApp register, digits, «،» «؟», Latin tokens in RTL
+  text) and a French one. `rewrite` mode preserves every number and name.
+- **`maestro-web:03-motion`** — GSAP (free since Webflow) + Lenis on marketing
+  surfaces only; reduced-motion variant first; transforms/opacity only;
+  SplitText by words never chars on Arabic; direction-aware offsets.
+- `00-onboard`: context7 is now mandatory before library-specific code
+  (executor rule too); `firecrawl` (official) on demand; a **vetted
+  third-party** table — Impeccable skill-only with its hook refused,
+  skills.sh for discovery — and the instruction not to re-suggest anything
+  the audit rejected.
+- `02-gardener`: skill-gap log (task-observer's idea, no always-on skill).
+- `docs/TOOLING-AUDIT-2026-09.md` — the record: 10 absorbed, 4 recommended,
+  9 rejected with mechanism-level reasons (claude-mem 6 hooks + daemon + LLM
+  in Stop; ECC 21 hooks with Prettier/tsc in PostToolUse; Omniroute model
+  switching; Composio overlap + repricing; Meetily has no MCP…), 2 later
+  (Strix pentest, Motion AI Kit).
+
+### Changed
+
+- `04-scaffold` writes the routing block from `references/routing.md`
+  instead of an inline copy.
+- `/maestro` menu says it out loud: you never need the menu.
+
 ## 5.8.0 — three skills for the daily loop (2026-09-17)
 
 28 skills (with `03-worktree`, merged from origin — see below). Still 2 hooks, 5 agents.

@@ -9,6 +9,7 @@ disallowedTools: Write, Edit, MultiEdit, NotebookEdit
 maxTurns: 30
 skills:
   - maestro-mobile:01-rtl-i18n
+  - maestro-dev:05-lean-code
 ---
 
 # Role
@@ -36,7 +37,8 @@ and the real need, in a fresh context, with no memory of how it was built.
 
 - [ ] No duplication — DRY across code and docs.
 - [ ] No incoherence — naming, behavior, docs-vs-code consistent.
-- [ ] No over-engineering — simplest solution that meets the need.
+- [ ] No over-engineering — cite the lean-code rung for every finding; list
+      every new `debt:` marker in the report.
 - [ ] No dead code, debug leftovers, or silent TODOs.
 - [ ] i18n: no hardcoded user-facing strings; RTL-safe if `ar` locale exists.
 - [ ] No secrets, keys, or credentials in the diff.

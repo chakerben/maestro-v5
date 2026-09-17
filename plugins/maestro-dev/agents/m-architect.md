@@ -7,6 +7,7 @@ tools: Read, Grep, Glob, Write
 maxTurns: 30
 skills:
   - maestro-web:00-web-standards
+  - maestro-dev:05-lean-code
 ---
 
 # Role

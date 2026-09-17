@@ -3,8 +3,14 @@
  * Maestro 5 — memory-sync.js
  * Hook: SessionStart (the ONLY hook in maestro-core — Philosophy rule #1)
  *
- * Syncs the <maestro_memory> block in the project's CLAUDE.md with references
- * to the memory bank files under maestro_docs/memory/.
+ * Syncs two blocks in the project's CLAUDE.md:
+ *   <maestro_memory>  — references to the memory bank files under
+ *                        maestro_docs/memory/ (two tiers, see below)
+ *   <maestro_routing> — the plain-prompt router, copied from this plugin's
+ *                        references/routing.md so every project gets the
+ *                        current map at session start without anyone typing
+ *                        anything. Refreshed only when its content hash
+ *                        changes (5.9.0). Same paired-match safety as memory.
  *
  * Two tiers:
  *   - Root files in maestro_docs/memory/  -> always loaded (@-references)
@@ -37,6 +43,11 @@ const BLOCK_CLOSE = '</maestro_memory>';
 // what makes a prose mention ("le bloc <maestro_memory> est géré...") harmless:
 // it is not a line of its own, so it can never become the start of the match.
 const BLOCK_RE = /^<maestro_memory>[ \t]*\r?$[\s\S]*?^<\/maestro_memory>[ \t]*\r?$/gm;
+const ROUTING_OPEN = '<maestro_routing>';
+const ROUTING_CLOSE = '</maestro_routing>';
+const ROUTING_RE = /^<maestro_routing>[ \t]*\r?$[\s\S]*?^<\/maestro_routing>[ \t]*\r?$/gm;
+const ROUTING_SRC = path.join(__dirname, '..', 'references', 'routing.md');
+const MAX_ROUTING_BYTES = 8192;
 const MEMORY_DIR = path.join('maestro_docs', 'memory');
 const ON_DEMAND_DIRS = ['internal', 'external'];
 const EXCLUDED = new Set(['.gitkeep', 'README.md']);
@@ -97,11 +108,11 @@ function buildBlock(memoryPath) {
  * Replace the block, or append it. Returns the new content, or null when the
  * file is in a shape we refuse to touch.
  */
-function applyBlock(content, newBlock) {
-  const matches = content.match(BLOCK_RE) || [];
+function applyBlock(content, newBlock, re = BLOCK_RE, open = BLOCK_OPEN, close = BLOCK_CLOSE) {
+  const matches = content.match(re) || [];
 
   if (matches.length === 1) {
-    return content.replace(BLOCK_RE, () => newBlock);
+    return content.replace(re, () => newBlock);
   }
   if (matches.length > 1) {
     // Several well-formed blocks: ambiguous, a human must resolve it.
@@ -111,9 +122,35 @@ function applyBlock(content, newBlock) {
   // unclosed block, close-before-open), appending would compound the mess and
   // replacing would eat user content. Bail — a stale block costs a sync, a
   // wrong edit costs the user's file.
-  if (content.includes(BLOCK_OPEN) || content.includes(BLOCK_CLOSE)) return null;
+  if (content.includes(open) || content.includes(close)) return null;
 
   return content.trimEnd() + '\n\n' + newBlock + '\n';
+}
+
+/**
+ * The routing block: references/routing.md wrapped in tags, with a hash line
+ * so an unchanged router costs nothing. Returns null when the source is
+ * missing, oversized, or contains a tag of its own (never nest).
+ */
+function buildRoutingBlock() {
+  let src;
+  try {
+    src = fs.readFileSync(ROUTING_SRC, 'utf8');
+  } catch {
+    return null;
+  }
+  if (src.length > MAX_ROUTING_BYTES) return null;
+  if (src.includes(ROUTING_OPEN) || src.includes(ROUTING_CLOSE)) return null;
+  const hash = require('crypto').createHash('sha1').update(src).digest('hex').slice(0, 12);
+  return [ROUTING_OPEN, `<!-- maestro-routing ${hash} — managed by maestro-core, edit references/routing.md instead -->`, src.trimEnd(), ROUTING_CLOSE].join('\n');
+}
+
+/** Only the routing block: replace if present and stale, append if absent. */
+function applyRouting(content, newBlock) {
+  const matches = content.match(ROUTING_RE) || [];
+  const hashLine = newBlock.split('\n')[1];
+  if (matches.length === 1 && matches[0].includes(hashLine)) return content; // up to date
+  return applyBlock(content, newBlock, ROUTING_RE, ROUTING_OPEN, ROUTING_CLOSE);
 }
 
 /** Serialise concurrent sessions; returns a release fn, or null if locked. */
@@ -164,8 +201,9 @@ function main() {
   const memoryPath = path.join(projectDir, MEMORY_DIR);
   const claudeMd = path.join(projectDir, 'CLAUDE.md');
 
-  // Not a Maestro project or no memory bank yet -> silently exit
-  if (!fs.existsSync(memoryPath)) return;
+  // A Maestro project has a memory bank (memory block) and/or a routing block
+  // already in its CLAUDE.md. Anything else is not ours: silently exit.
+  const hasMemory = fs.existsSync(memoryPath);
 
   // Never follow a symlink out of the project.
   let st;
@@ -176,8 +214,9 @@ function main() {
   }
   if (!st.isFile()) return;
 
-  const newBlock = buildBlock(memoryPath);
-  if (newBlock === null) return;
+  const newBlock = hasMemory ? buildBlock(memoryPath) : null;
+  const routingBlock = buildRoutingBlock();
+  if (newBlock === null && routingBlock === null) return;
 
   const release = acquireLock(path.join(projectDir, '.claude-md.maestro.lock'));
   if (!release) return; // another session is syncing: fail open
@@ -190,8 +229,24 @@ function main() {
       return;
     }
 
-    const updated = applyBlock(content, newBlock);
-    if (updated === null || updated === content) return;
+    // Routing: only for projects that are already Maestro's (a routing block
+    // present, or a memory bank). Never append a router to a foreign repo.
+    const isMaestroProject = hasMemory || ROUTING_RE.test(content);
+    ROUTING_RE.lastIndex = 0;
+    if (!isMaestroProject) return;
+
+    // Any ambiguity in either block (0 well-formed + stray tag, or >1) means
+    // a human must look: the file is left exactly as it is.
+    let updated = content;
+    if (newBlock !== null) {
+      updated = applyBlock(updated, newBlock);
+      if (updated === null) return;
+    }
+    if (routingBlock !== null) {
+      updated = applyRouting(updated, routingBlock);
+      if (updated === null) return;
+    }
+    if (updated === content) return;
 
     try {
       writeAtomic(claudeMd, updated);

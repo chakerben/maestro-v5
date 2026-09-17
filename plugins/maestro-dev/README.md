@@ -14,6 +14,9 @@ The development pipeline.
   routed handoff (see docs/BRAINSTORM-SUPERPOWERS.md)
 - `04-debug` — reproduce → isolate → cause → fix + regression test; no edit
   before a repro; resumable `debug.md`; side-findings go to `03-ticket`
+- `05-lean-code` — the ladder (skip → reuse → stdlib → platform → installed dep
+  → one-liner → build), surgical changes, `debt:` markers; preloaded in the
+  executor, checker and architect
 
 ## Agents
 

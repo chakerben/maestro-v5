@@ -29,6 +29,17 @@ status report (installed / already present / skipped).
 | Always (recommended) | `pr-review-toolkit` | user | Specialized PR review passes |
 | Developing Maestro itself (ask) | `skill-creator` | user | Scaffold and evaluate new skills |
 | PDF generation or E2E testing (ask) | `playwright` | project | Browser automation — required route for Arabic RTL PDFs (maestro-mobile:02-pdf-rtl) and E2E |
+| Multi-page crawl / doc extraction needed (ask) | `firecrawl` | user | Official plugin; keyless tier covers scrape/search. One page → WebFetch, no plugin |
+
+## Vetted third-party (not official — install only skill-level, never their hooks)
+
+| Signal | Tool | How | Why it passed vetting |
+|---|---|---|---|
+| Frontend with visual ambition (ask) | Impeccable (`npx impeccable install`) | skill + commands only; **decline its PostToolUse design hook** | Best generic design-taste skill; no RTL knowledge — `maestro-mobile:01-rtl-i18n` and `maestro-web:02-design-review` layer Arabic on top |
+| Looking for a niche skill | skills.sh CLI (`npx skills find <kw>`) | discovery only | Run `references/third-party-vetting.md` on anything before `add` |
+
+Everything else from the 2026-09 tooling audit (`docs/TOOLING-AUDIT-2026-09.md`)
+is either absorbed into Maestro skills or rejected — do not re-suggest it.
 
 ## Process
 
@@ -49,3 +60,4 @@ status report (installed / already present / skipped).
 - No plugin was installed without explicit approval in this session.
 - Every installed plugin appears in `claude plugin list`.
 - LSP binaries were verified or the user was clearly told what to install.
+- No third-party hook was installed (`claude plugin list` + `.claude/settings.json` show ≤ 2 Maestro hooks and nothing else).

@@ -42,6 +42,11 @@ Secrets scan of the WHOLE branch diff (every commit, whatever created it):
 6. Open via the official github plugin / `gh pr create`. Report the URL.
 7. NEVER merge. Merging is a human act.
 
+## Writing
+
+The PR body follows `maestro-pm:04-writing` when maestro-pm is installed:
+first line carries the point, no filler, no praise of the change.
+
 ## Test
 
 - The PR body contains objective + test instructions.

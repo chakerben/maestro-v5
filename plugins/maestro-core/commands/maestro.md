@@ -20,11 +20,13 @@ Present it grouped by INTENT (what the user wants to do), not by plugin:
 - Independent review before ship → agent `checker`
 - Challenge a decision → agent `m-devil-advocate`
 - Design architecture / DB schema → agent `m-architect`
+- "Simplifie" / too complex / debt audit → `maestro-dev:05-lean-code` (always on while building)
 
 **Context & memory**
 - Refresh project memory from the codebase → `maestro-core:01-memory`
 - Context feels bloated / rules conflict → `maestro-core:02-gardener`
 - Terse output mode → `maestro-core:03-condense`
+- Any prose a human reads (README, PR, client message, AR/FR/EN) → `maestro-pm:04-writing`
 
 **Quality & delivery**
 - Commit with gates + secret detection → `maestro-vcs:00-commit`
@@ -36,7 +38,7 @@ Present it grouped by INTENT (what the user wants to do), not by plugin:
 - RN/Expo standards → `maestro-mobile:00-mobile-standards`
 - Arabic RTL i18n (or `audit`) → `maestro-mobile:01-rtl-i18n`
 - Arabic PDF generation → `maestro-mobile:02-pdf-rtl`
-- Stack enforcement → `maestro-web:00-web-standards` · UX → `01-ux-standards` · Review a screen → `02-design-review`
+- Stack enforcement → `maestro-web:00-web-standards` · UX → `01-ux-standards` · Review a screen → `02-design-review` · Landing motion → `03-motion`
 - PRD → `maestro-pm:00-prd` · Stories → `01-user-stories` · Specs → `02-specs`
 - A finding must go to the team, not be fixed now → `maestro-pm:03-ticket`
 - Submit a mobile build to the stores → `maestro-mobile:03-store-release`
@@ -45,5 +47,6 @@ Present it grouped by INTENT (what the user wants to do), not by plugin:
 - Open a PR → `maestro-vcs:01-pull-request` · Cut a release → `maestro-vcs:02-release`
 - Repo shared with another session → `maestro-vcs:03-worktree` (one branch, one worktree)
 
-End with: "Describe what you want in plain words — the right skill triggers
+End with: "You never need this menu: the `<maestro_routing>` block in CLAUDE.md
+routes plain words to the right skill. Describe what you want in plain words — the right skill triggers
 automatically from its description. This menu is just the map."

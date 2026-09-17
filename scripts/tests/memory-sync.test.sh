@@ -99,5 +99,58 @@ done
 chk "40 concurrent pairs: no truncation" "$BAD" "0"
 chk "no leftover tmp/lock files" "$(ls "$T/p" | grep -cE '\.tmp$|\.lock$')" "0"
 
+# ── Routing block (5.9.0) ──────────────────────────────────
+ROUTING_SRC="plugins/maestro-core/references/routing.md"
+HASH=$(node -e 'console.log(require("crypto").createHash("sha1").update(require("fs").readFileSync(process.argv[1],"utf8")).digest("hex").slice(0,12))' "$ROUTING_SRC")
+
+# 9. A stale routing block (the one migrate-v4-to-v5 wrote) is replaced by the current router.
+fixture <<'EOF'
+# P
+<maestro_routing>
+Maestro 5 is installed. Route by intent:
+- Feature end-to-end -> skill maestro-dev:00-sdlc
+</maestro_routing>
+EOF
+run
+chk "routing: stale block replaced" "$(grep -c "maestro-routing $HASH" "$T/p/CLAUDE.md")" "1"
+chk "routing: old content gone" "$(grep -c 'Feature end-to-end -> skill' "$T/p/CLAUDE.md")" "0"
+chk "routing: exactly one block" "$(grep -c '^<maestro_routing>' "$T/p/CLAUDE.md")" "1"
+
+# 10. An up-to-date routing block leaves the file byte-identical (and the mtime alone).
+A=$(md5sum < "$T/p/CLAUDE.md"); run
+chk "routing: up to date → untouched" "$(md5sum < "$T/p/CLAUDE.md")" "$A"
+
+# 11. A project WITHOUT memory bank but WITH a routing block still gets refreshed.
+rm -rf "$T/p"; mkdir -p "$T/p"; printf '# P\n<maestro_routing>\nold\n</maestro_routing>\n' > "$T/p/CLAUDE.md"
+run
+chk "routing: no memory bank, block still refreshed" "$(grep -c "maestro-routing $HASH" "$T/p/CLAUDE.md")" "1"
+
+# 12. A foreign repo (no memory bank, no routing block) is never touched.
+rm -rf "$T/p"; mkdir -p "$T/p"; printf '# Someone else\n' > "$T/p/CLAUDE.md"
+run
+chk "routing: foreign repo untouched" "$(cat "$T/p/CLAUDE.md")" "# Someone else"
+
+# 13. A prose mention of the routing tag must not cost the text after it.
+fixture <<'EOF'
+# P
+The <maestro_routing> block is managed automatically.
+
+## RULES
+- keep
+EOF
+run
+chk "routing: prose mention → rules preserved" "$(grep -c '^- keep' "$T/p/CLAUDE.md")" "1"
+chk "routing: prose mention → no block appended (ambiguous)" "$(grep -c '^<maestro_routing>' "$T/p/CLAUDE.md")" "0"
+
+# 14. Memory block appended on a project that has only a routing block + memory dir.
+fixture <<'EOF'
+# P
+<maestro_routing>
+old
+</maestro_routing>
+EOF
+run
+chk "both blocks present after run" "$(grep -c '^<maestro_memory>\|^<maestro_routing>' "$T/p/CLAUDE.md")" "2"
+
 echo "memory-sync: $PASS passed, $FAIL failed"
 [ "$FAIL" = "0" ] || exit 1

@@ -31,24 +31,13 @@ maestro_docs/
    the one-paragraph product description if it cannot be inferred.
 3. If `CLAUDE.md` does not exist, create a minimal one (project name, stack
    one-liner). Never overwrite an existing CLAUDE.md.
-3b. Upsert a `<maestro_routing>` block in CLAUDE.md (idempotent — replace if
-   present):
+3b. Write the `<maestro_routing>` block in CLAUDE.md: the tags around the
+   verbatim content of `${CLAUDE_PLUGIN_ROOT}/references/routing.md` (never a
+   hand-typed copy — that file is the single source). From the next session
+   start, the memory-sync hook keeps this block current on every release, so
+   plain prompts always route to the current skill set without anyone typing a
+   skill name.
 
-```
-<maestro_routing>
-Maestro is installed. Route by intent:
-- Feature end-to-end -> skill maestro-dev:00-sdlc (say "auto" for unattended)
-- Plan only -> maestro-dev:01-plan · Build a plan -> maestro-dev:02-implement
-- Independent review -> agent checker · Challenge a plan -> agent m-devil-advocate
-- Architecture/DB design -> agent m-architect
-- Memory stale -> maestro-core:01-memory · Context bloated -> maestro-core:02-gardener
-- Install broken / after migration -> maestro-core:04-doctor
-- Menu: /maestro
-Always adopt the expert posture of the task domain (see maestro-dev
-references/expert-postures.md) and keep task state in
-maestro_docs/tasks/<date>_<slug>/ so any session can resume.
-</maestro_routing>
-```
 3c. Pre-fill `patterns.md` with the concurrency convention — a repository is
    routinely open in several sessions at once, and the rule has to be readable
    before the first commit, not after the first collision:
