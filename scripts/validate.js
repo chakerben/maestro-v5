@@ -137,6 +137,13 @@ for (const { file, event, h } of hookCommands) {
   if (typeof h.timeout !== 'number')
     fail(`${rel(file)} [${event}]: hook has no "timeout" (rule #5: hooks carry a platform timeout)`);
 }
+// Skills and agents can register hooks through their own frontmatter
+// (`hooks:` key) — those run for the rest of the session. Rule #1 covers them.
+walk(path.join(ROOT, 'plugins'), (p, name) => {
+  if (!name.endsWith('.md')) return;
+  const fm = frontmatter(read(p));
+  if (/^hooks:/m.test(fm)) fail(`${rel(p)}: frontmatter declares hooks — rule #1 allows hooks in hooks/hooks.json only`);
+});
 if (hookCount > 2) fail(`${hookCount} hooks found — Philosophy rule #1 allows 2`);
 else ok(`${hookCount} hook(s) total across ${hookSources.length} candidate file(s) — compliant`);
 
