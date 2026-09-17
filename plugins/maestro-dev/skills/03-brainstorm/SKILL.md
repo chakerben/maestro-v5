@@ -2,6 +2,7 @@
 name: 03-brainstorm
 description: Use when the request names a problem but not a solution, when two or more approaches are plausible and the trade-off has not been made, when the ask contains "je pense à", "comment on ferait", "quelle est la meilleure façon", "est-ce qu'on devrait", or when a plan would be guesswork because the shape of the thing is still open. Not for a request that already states its objective and acceptance criteria, not for product framing with users and metrics, not for diagnosing behaviour that already exists.
 argument-hint: "<l'idée, en une phrase>"
+effort: high
 ---
 
 # Skill: brainstorm

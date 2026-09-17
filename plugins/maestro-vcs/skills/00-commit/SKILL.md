@@ -2,9 +2,27 @@
 name: 00-commit
 description: Commit staged or specified changes through the Maestro quality gate — secret detection, configurable checks, conventional message. Use to commit work, especially before a PR. This is WHERE quality checks run in Maestro (never in hooks). Not for pushing force or rewriting history.
 argument-hint: "[scope hint or files]"
+allowed-tools: Bash(git diff *), Bash(git status *), Bash(git log *), Bash(bash *), Bash(cat *)
 ---
 
 # Skill: commit
+
+## Live state (computed at invocation — not a claim, a measurement)
+
+Staged diff:
+!`git diff --cached --stat --no-color | tail -20; [ -n "$(git diff --cached --name-only)" ] || echo "(nothing staged)"`
+
+Secrets scan of the staged diff (`scripts/secret-scan.sh`, patterns from `assets/secret-patterns.md`):
+!`bash "${CLAUDE_SKILL_DIR}/scripts/secret-scan.sh" cached`
+
+Gate level:
+!`cat maestro_docs/gates.json 2>/dev/null || echo '{ "level": "standard" }  (default — no maestro_docs/gates.json)'`
+
+Runner (from the lockfile):
+!`if [ -f bun.lockb ] || [ -f bun.lock ]; then echo bun; elif [ -f pnpm-lock.yaml ]; then echo pnpm; elif [ -f yarn.lock ]; then echo yarn; elif [ -f package-lock.json ]; then echo npm; else echo "none detected"; fi`
+
+A `SECRET SCAN: RED` above ends action 01 immediately. If the state above says
+"(nothing staged)", action 01 starts by asking what to stage.
 
 The quality checkpoint of the whole framework. Everything v4 tried to enforce
 at runtime runs HERE, once, at the moment it matters.
@@ -42,6 +60,9 @@ Read `maestro_docs/gates.json` (fallback: level `standard`):
 - Detect the project's package runner from the LOCKFILE (bun.lockb → bun,
   pnpm-lock.yaml → pnpm, yarn.lock → yarn, package-lock.json → npm). Never
   pass `--silent` to runners (it leaks into tsc and breaks it — v4 bug).
-- The secrets scan uses `assets/secret-patterns.md` and can never be skipped.
+- The secrets scan is `scripts/secret-scan.sh` (its patterns live in
+  `assets/secret-patterns.md`); it ran above before you read this line, and it
+  can never be skipped. If it was staged after invocation, re-run it: 
+  `bash ${CLAUDE_SKILL_DIR}/scripts/secret-scan.sh cached`.
 - Delegate the raw git mechanics to the official commit-commands plugin when
   installed; this skill owns the gate and the message.

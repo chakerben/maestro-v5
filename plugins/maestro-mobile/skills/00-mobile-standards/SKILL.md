@@ -2,6 +2,16 @@
 name: 00-mobile-standards
 description: React Native / Expo standards for any mobile work — project structure, navigation, state, performance, and platform conventions. Auto-applies whenever building or reviewing RN/Expo code. Not for web (maestro-web) or pure RTL questions (01-rtl-i18n).
 user-invocable: false
+paths:
+  - "app.json"
+  - "app.config.*"
+  - "eas.json"
+  - "metro.config.*"
+  - "android/**"
+  - "ios/**"
+  - "**/*.native.*"
+  - "pubspec.yaml"
+  - "lib/**/*.dart"
 ---
 
 # Skill: mobile-standards

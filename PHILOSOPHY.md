@@ -30,6 +30,14 @@ No other hook, ever. Not for quality. Not for convenience. Not "just this once".
 - Typecheck → real-time via official LSP plugins; final gate at commit.
 - Tests → gates of `maestro-vcs:00-commit` (every commit, phase commits included) and the `checker` agent at `maestro-dev:00-sdlc` step 04.
 
+### 2b. What a skill must know, it computes
+A skill that depends on the repository's state (what is staged, the gate
+level, the last tag, the plugins installed) gets that state through `!`
+injection at invocation — measured before the model reads the skill, never
+recalled or "checked" in prose. The secrets scan is the canonical case:
+`scripts/secret-scan.sh` runs before `00-commit` is read, and its verdict is
+in the context, not in a promise.
+
 ### 3. Every hook must prove itself
 - < 100 ms wall time.
 - `exit 0` on any internal error (fail open, never block on our own bugs).
@@ -57,7 +65,12 @@ validation run is a vibe — and `Bash` can write. That residual gap is
 `m-architect`: it carries `Write` to record decisions, and `Write` has no
 path restriction — "never production code" is instructed there too.
 Reviewer agents declare `role: reviewer` in their frontmatter; that key, not
-the file name, is what the validator keys on. Side-effect
+the file name, is what the validator keys on. They carry both a `tools:`
+allowlist and a `disallowedTools:` denylist (belt and braces — the denylist
+survives the platform adding new tools), and a `maxTurns` so a verdict that
+does not converge stops instead of circling. Agents preload the standards
+they are asked to apply through `skills:` — "apply 01-rtl-i18n" is a wish
+unless the skill is in the agent's context. Side-effect
 skills use `disable-model-invocation`; hooks carry a platform `timeout`.
 
 Say what is enforced and what is instructed. A rule described as guaranteed

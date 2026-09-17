@@ -2,6 +2,14 @@
 name: 00-web-standards
 description: The Maestro web stack conventions — Next.js App Router, Prisma/PostgreSQL, Clerk, Zod, Tailwind. Auto-applies when building or reviewing web code. Deviations require a recorded decision. Not for mobile (maestro-mobile) or generic UI polish (official frontend-design plugin).
 user-invocable: false
+paths:
+  - "app/**"
+  - "src/app/**"
+  - "pages/**"
+  - "prisma/**"
+  - "middleware.ts"
+  - "src/middleware.ts"
+  - "next.config.*"
 ---
 
 # Skill: web-standards

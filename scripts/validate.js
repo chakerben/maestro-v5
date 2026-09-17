@@ -50,6 +50,8 @@ for (const entry of marketplace.plugins) {
 // ── Plugins, skills (rule #4) ──────────────────────────────
 console.log('▶ Plugins & skills');
 const pluginDirs = [];
+const knownPlugins = new Set(marketplace.plugins.map((e) => e.name));
+const knownSkills = new Set(); // "plugin:skill"
 for (const entry of marketplace.plugins) {
   const dir = path.join(ROOT, entry.source);
   if (!fs.existsSync(dir)) { fail(`${entry.name}: source dir missing (${entry.source})`); continue; }
@@ -59,6 +61,11 @@ for (const entry of marketplace.plugins) {
     const pj = JSON.parse(read(manifest));
     if (pj.name !== entry.name) fail(`${entry.name}: plugin.json name mismatch (${pj.name})`);
     else ok(`${entry.name}: manifest valid`);
+    for (const dep of pj.dependencies || []) {
+      const depName = typeof dep === 'string' ? dep : dep.name;
+      if (!knownPlugins.has(depName)) fail(`${entry.name}: dependency "${depName}" is not in this marketplace`);
+      if (depName === entry.name) fail(`${entry.name}: depends on itself`);
+    }
   } catch (e) {
     fail(`${entry.name}: plugin.json invalid — ${e.message}`);
   }
@@ -73,7 +80,12 @@ for (const entry of marketplace.plugins) {
     const txt = read(skillMd);
     const fm = frontmatter(txt);
     const name = (fm.match(/^name:\s*(\S+)/m) || [])[1];
+    knownSkills.add(`${entry.name}:${s.name}`);
     if (!name || !/^description:\s*\S+/m.test(fm)) { fail(`${tag}: SKILL.md frontmatter missing name/description`); continue; }
+    // A skill that injects live context (!`cmd`) must pre-approve Bash, or a
+    // permission prompt aborts the invocation.
+    if (/^!`/m.test(txt) && !/^allowed-tools:\s*\S/m.test(fm))
+      fail(`${tag}: uses !\`cmd\` injection but declares no allowed-tools`);
     if (name !== s.name) fail(`${tag}: frontmatter name "${name}" ≠ directory name`);
     // Rule #4: router (every action has ## Test) or contract (SKILL.md has ## Test)
     const actionsDir = path.join(skillDir, 'actions');
@@ -195,10 +207,18 @@ for (const { name, dir } of pluginDirs) {
       const tools = toolsLine.split(/[,\s]+/).filter(Boolean);
       if (isAgent && /checker|advocate|reviewer|auditor|critic/i.test(f) && role !== 'reviewer')
         problems.push('looks like a reviewer but has no "role: reviewer"');
+      const disallowedLine = (fm.match(/^disallowedTools:\s*(.+)$/m) || [])[1] || '';
+      const disallowed = disallowedLine.split(/[,\s]+/).filter(Boolean);
+      if (isAgent) {
+        const skillRefs = [...fm.matchAll(/^\s+-\s+([a-z0-9-]+:[a-z0-9-]+)\s*$/gm)].map((m) => m[1]);
+        for (const ref of skillRefs) if (!knownSkills.has(ref)) problems.push(`preloads unknown skill "${ref}"`);
+      }
       if (role === 'reviewer') {
         if (!tools.length) problems.push('reviewer without a tools: allowlist');
         const bad = tools.filter((t) => !REVIEWER_ALLOWLIST.has(t));
         if (bad.length) problems.push(`reviewer carries non-allowlisted tool(s): ${bad.join(', ')}`);
+        for (const t of ['Write', 'Edit']) if (!disallowed.includes(t)) problems.push(`reviewer must list ${t} in disallowedTools (belt and braces)`);
+        if (!/^maxTurns:\s*\d+/m.test(fm)) problems.push('reviewer without maxTurns');
         if (tools.includes('Bash') && !/instructed,\s+not enforced/i.test(read(path.join(d, f))))
           problems.push('reviewer with Bash must say "instructed, not enforced" in its body');
       }

@@ -13,7 +13,7 @@ by default; autonomous when the caller says `auto`.
 
 | #  | Action      | Role                                        | Delegate                       |
 |----|-------------|---------------------------------------------|--------------------------------|
-| 01 | `spec`      | Consolidate the request into a contract     | self (or maestro-pm when installed) |
+| 01 | `spec`      | Consolidate the request into a contract     | self (or `maestro-pm:02-specs` when installed) |
 | 02 | `plan`      | Produce the plan + phase files              | `maestro-dev:01-plan`          |
 | 03 | `implement` | Build the plan, phase by phase, gated       | `executor` via `maestro-dev:02-implement` |
 | 04 | `review`    | Independent verdict: ship or iterate        | `checker` agent                |

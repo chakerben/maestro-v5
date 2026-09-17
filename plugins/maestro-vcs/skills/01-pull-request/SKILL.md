@@ -2,17 +2,30 @@
 name: 01-pull-request
 description: Open a structured pull request from the current feature branch — body built from the task folder (objective, phases, review verdict), reviewers hinted by touched areas. Use to open or update a PR. Not for merging (humans merge) or committing (00-commit).
 argument-hint: "[draft]"
+allowed-tools: Bash(git *), Bash(bash *), Bash(gh pr *)
 ---
 
 # Skill: pull-request
 
+## Live state (computed at invocation)
+
+Branch and tree:
+!`echo "branch: $(git branch --show-current)"; git status --short | head -10; [ -z "$(git status --porcelain)" ] && echo "tree: clean" || echo "tree: DIRTY"`
+
+Commits on this branch vs the default branch:
+!`B=$(git rev-parse --verify -q origin/main >/dev/null && echo origin/main || echo main); git log --oneline "$B..HEAD" 2>/dev/null | head -30 || echo "(no base branch found)"`
+
+Secrets scan of the WHOLE branch diff (every commit, whatever created it):
+!`bash "${CLAUDE_PLUGIN_ROOT}/skills/00-commit/scripts/secret-scan.sh" branch`
+
 ## Process
 
 1. Preconditions: non-default branch, clean tree. Refuse on the default branch.
-2. **Last secrets net.** Scan `git diff <default-branch>...HEAD -U0` (added
-   lines only) against `../00-commit/assets/secret-patterns.md`. This covers
-   every commit on the branch, whatever path created it. A hit → stop, print
-   file + masked match, and refuse to push: a pushed secret is public history.
+2. **Last secrets net.** Read the branch scan in "Live state" above (it
+   covers every commit on the branch, whatever path created it). `RED` → stop
+   and refuse to push: a pushed secret is public history. If the base branch
+   was not found, run `secret-scan.sh branch <base>` with the right base
+   before going further — never skip.
 3. Push the branch after confirming.
 4. Build the body from the task folder when one exists:
    - **Objective** (from spec.md, one sentence)

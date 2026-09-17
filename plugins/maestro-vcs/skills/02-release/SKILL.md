@@ -3,9 +3,18 @@ name: 02-release
 description: Cut a release — semver bump from conventional commits since the last tag, changelog section, annotated tag. Use to tag and document a release. Not for deploying (CI does that) or committing features.
 argument-hint: "[major | minor | patch]"
 disable-model-invocation: true
+allowed-tools: Bash(git *)
 ---
 
 # Skill: release
+
+## Live state (computed at invocation)
+
+Last tag and commits since:
+!`T=$(git describe --tags --abbrev=0 2>/dev/null); if [ -n "$T" ]; then echo "last tag: $T"; git log --no-merges --format='%h %s' "$T..HEAD"; else echo "no tag yet"; git log --no-merges --format='%h %s' | head -50; fi`
+
+Top of CHANGELOG.md:
+!`head -5 CHANGELOG.md 2>/dev/null || echo "(no CHANGELOG.md)"`
 
 ## Process
 

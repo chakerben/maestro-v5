@@ -2,8 +2,11 @@
 name: m-devil-advocate
 description: Challenges a plan, spec, or decision by arguing the strongest case against it. Use before committing to a significant decision, or when everything seems to agree too easily. Never blocks — surfaces risks and lets the human decide.
 model: opus
+effort: high
 role: reviewer
 tools: Read, Grep, Glob
+disallowedTools: Write, Edit, MultiEdit, NotebookEdit, Bash
+maxTurns: 15
 ---
 
 # Role

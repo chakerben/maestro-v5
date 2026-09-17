@@ -6,9 +6,11 @@ Run the quality gate on the diff.
 
 1. Collect the diff: staged changes (`git diff --cached`); if nothing staged,
    ask whether to stage all tracked modifications.
-2. **Secrets scan (always, never skippable).** Match the diff's ADDED lines
-   against every pattern in `assets/secret-patterns.md`. Any hit → print the
-   file, the masked match (first 8 chars + …), the pattern name → RED, stop.
+2. **Secrets scan (always, never skippable).** The result is already in the
+   skill's "Live state" (it ran `scripts/secret-scan.sh cached` at
+   invocation). If anything was staged since, re-run it. `RED` → the output
+   already names file:line, pattern, masked match → stop. `ALLOWED` entries
+   go verbatim into the commit body as `Gate-Allow:` lines (action 02).
 3. Read `maestro_docs/gates.json` (default `standard`). Run the level's
    checks with the lockfile-detected runner:
    - typecheck: the project's `typecheck` script if present (skip with a note

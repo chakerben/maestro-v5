@@ -1,5 +1,57 @@
 # Changelog
 
+## 5.7.0 — the platform does the enforcing (2026-09-17)
+
+Every item uses a documented Claude Code plugin/skill/agent feature that
+Maestro was not using. No new hook (still 2). No new orchestration layer.
+
+### Added
+
+- **`!` live state in five skills.** `00-commit`, `01-pull-request`,
+  `02-release`, `04-doctor`, `00-quality-gate` compute what they need at
+  invocation — staged diff, secrets verdict, gate level, runner, commits since
+  the last tag, installed plugins, v4 leftovers — before the model reads the
+  skill. Philosophy rule **2b** names the principle: *what a skill must know, it
+  computes.* Each of these declares `allowed-tools` so the injection cannot be
+  aborted by a permission prompt; `validate.js` refuses a `!` without it.
+- **`scripts/secret-scan.sh`** (in `00-commit`): the executable form of
+  `secret-patterns.md` — parses the table, scans added lines of the staged diff
+  (`cached`) or of the whole branch (`branch [base]`), masks matches, lists
+  `gate:allow` lines separately for the `Gate-Allow:` commit trailer, always
+  exits 0 so it can be injected. 8-case suite in `npm test`.
+- **Agents preload the skills they are told to apply** (`skills:`): executor
+  gets web/mobile standards + rtl-i18n, checker and m-i18n-checker get
+  rtl-i18n, m-architect gets web-standards. Reviewers carry
+  `disallowedTools: Write, Edit, MultiEdit, NotebookEdit` on top of their
+  `tools:` allowlist, and `maxTurns` (checker 30, i18n 20, devil 15). `effort`
+  set per agent (opus reviewers/architect `high`).
+- **`paths:` on the three background-knowledge skills** (`00-web-standards`,
+  `01-ux-standards`, `00-mobile-standards`): they load when Claude touches
+  matching files, not when a description happens to match.
+- **`dependencies` in plugin.json**: maestro-dev → core, vcs, quality;
+  quality → vcs; web/mobile/pm → core. The platform enables them together, so
+  the "if maestro-vcs is installed" branches in `05-ship` and `02-execute`
+  are gone — a phase can no longer land through a bare `git commit`.
+- `effort: high` on brainstorm, plan; `effort: low` on condense;
+  `model: opus` + `effort: high` on security-audit; `arguments: [action, level]`
+  on quality-gate.
+- `npm run test:platform` → `claude plugin validate --strict` on each plugin
+  (needs the CLI; not in CI yet).
+
+### Validator
+
+`validate.js` now also checks: `dependencies` name plugins of this
+marketplace; `skills:` preloads in agents name existing `plugin:skill` ids;
+reviewers list Write/Edit in `disallowedTools` and carry `maxTurns`; a `!`
+injection comes with `allowed-tools`; hooks declared in any skill/agent
+frontmatter count against rule #1.
+
+### Deliberately not used
+
+Monitors, `prompt`/`agent` hooks, channels, output styles, `context: fork`
+on the audit skills and `isolation: worktree` on the executor — the last two
+are worth trying on one project before they become framework policy.
+
 ## 5.6.0 — audit fixes (2026-09-17)
 
 Everything below comes from `docs/AUDIT-5.5.0.md`; the letters are its item ids.

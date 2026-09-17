@@ -34,7 +34,7 @@ project memory bank.
 | `maestro-mobile` | RN/Expo/Flutter, RTL Arabic, RTL PDF | 0 |
 | `maestro-web` | Next.js/Prisma/Clerk stack, UX, design review | 0 |
 | `maestro-pm` | PRD, user stories, specs (FR/EN/AR) | 0 |
-| `maestro-vcs` | Commits with gates, PRs, releases | 0 |
+| `maestro-vcs` | Commits with gates (executable secrets scan), PRs, releases | 0 |
 
 ## Philosophy
 

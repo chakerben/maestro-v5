@@ -2,6 +2,7 @@
 name: 01-plan
 description: Turn a request, spec, or ticket into a phased implementation plan with resumable state. Use to plan a feature before building, or to turn a spec into executable phases. Never writes code. Not for reviewing a diff or debugging.
 argument-hint: "<spec path or request>"
+effort: high
 ---
 
 # Skill: plan

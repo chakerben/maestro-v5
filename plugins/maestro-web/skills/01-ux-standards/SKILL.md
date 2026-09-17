@@ -2,6 +2,10 @@
 name: 01-ux-standards
 description: Product-grade UX rules — mobile-first, accessibility, the four UI states, form ergonomics. Auto-applies when building screens or components. Visual/aesthetic direction is the official frontend-design plugin's job; this skill covers behavior and inclusivity.
 user-invocable: false
+paths:
+  - "**/*.tsx"
+  - "**/*.vue"
+  - "**/*.svelte"
 ---
 
 # Skill: ux-standards

@@ -1,6 +1,6 @@
 {
   "name": "@chakerben/maestro",
-  "version": "5.6.0",
+  "version": "5.7.0",
   "description": "Maestro 5 — Claude Code plugin marketplace. Business-layer framework for web & mobile development (RTL/Arabic-native). Install via: claude plugin marketplace add chakerben/maestro-v5",
   "keywords": [
     "claude-code",
@@ -30,6 +30,7 @@
   ],
   "scripts": {
     "validate": "node scripts/validate.js",
-    "test": "node scripts/check-versions.js && node scripts/validate.js && bash scripts/tests/bash-guard.test.sh && bash scripts/tests/memory-sync.test.sh"
+    "test": "node scripts/check-versions.js && node scripts/validate.js && bash scripts/tests/bash-guard.test.sh && bash scripts/tests/memory-sync.test.sh && bash scripts/tests/secret-scan.test.sh",
+    "test:platform": "for p in plugins/*; do claude plugin validate --strict \"$p\" || exit 1; done"
   }
 }

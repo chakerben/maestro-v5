@@ -15,9 +15,9 @@ For each phase in order (skipping `done`):
    - Green → set `status: done`, commit the phase as ONE unit (code + status)
      **through `maestro-vcs:00-commit`** (its gate scans the phase diff for
      secrets before anything lands in history), message
-     `feat(<slug>): phase <n> — <name>`. If maestro-vcs is not installed, run
-     the `secret-patterns.md` scan on `git diff --cached -U0` yourself and
-     refuse to commit on a hit — the gate is never skipped, it is only relocated.
+     `feat(<slug>): phase <n> — <name>`. maestro-vcs is a declared dependency
+     of maestro-dev, so the gate is always there; a phase never lands through
+     a bare `git commit`.
    - Red → repair loop (new executor dispatch WITH the failure output),
      max 3 attempts, then set `status: blocked` with the last failure and stop.
 4. **Drift check.** If the executor reports the plan doesn't match reality,

@@ -3,6 +3,7 @@ name: 03-condense
 description: Toggle terse output mode (lite, full, ultra) that strips filler while code and errors stay verbatim. Use to condense output, switch intensity, or stop terse mode. Not for editing prose or compressing code.
 argument-hint: lite | full | ultra | stop
 disable-model-invocation: true
+effort: low
 ---
 
 # Skill: condense
