@@ -43,3 +43,10 @@ Touch targets >= 44px. Sticky CTAs on long mobile forms.
 Every action acknowledges within 100ms (optimistic or pending state). Toasts
 for background outcomes; inline for field-level; never toast a form error the
 user must fix.
+
+## Test
+
+Every data surface built under this skill renders the four states (loading,
+empty, error with retry, data); every input has a real `<label>`; the
+keyboard path reaches every interactive element; and destructive actions name
+their consequence in the confirmation.

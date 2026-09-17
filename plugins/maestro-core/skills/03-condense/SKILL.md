@@ -2,6 +2,7 @@
 name: 03-condense
 description: Toggle terse output mode (lite, full, ultra) that strips filler while code and errors stay verbatim. Use to condense output, switch intensity, or stop terse mode. Not for editing prose or compressing code.
 argument-hint: lite | full | ultra | stop
+disable-model-invocation: true
 ---
 
 # Skill: condense
@@ -31,3 +32,11 @@ quoted errors, and security warnings.
 - `lite` — drop pleasantries and hedging only.
 - `full` (default) — drop all filler, short synonyms preferred.
 - `ultra` — telegraphic fragments, max compression.
+
+## Test
+
+- After `lite|full|ultra`, the next three responses contain no filler word
+  from the Drop list and every code block / quoted error is byte-identical to
+  what it would have been in normal mode.
+- After `stop`, the following response is normal prose again.
+- A security warning during condense mode was printed in full, not condensed.

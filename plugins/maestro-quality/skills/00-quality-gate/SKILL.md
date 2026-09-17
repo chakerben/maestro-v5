@@ -23,3 +23,11 @@ Owns `maestro_docs/gates.json` and the on-demand gate run.
 - The secrets scan is constitutional: no level disables it.
 - Level guidance: `standard` for solo work, `high` for client deliverables,
   `paranoid` before releases. Recommend, never impose.
+
+## Test
+
+- `set <level>` wrote `maestro_docs/gates.json` with exactly `{ "level": "<level>" }`
+  and refused any value outside off|standard|high|paranoid.
+- `run` at level `off` still executed the secrets scan and printed its result.
+- `run` executed no check with `--silent`, and reported each command with its
+  exit code and duration.

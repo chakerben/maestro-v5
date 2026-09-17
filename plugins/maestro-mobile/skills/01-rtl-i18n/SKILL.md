@@ -67,3 +67,13 @@ Scan the scope and report: physical CSS properties, hardcoded strings
 outside the i18n layer, count strings without plural syntax, icons flipped
 wrong, `letter-spacing` on Arabic text, date/number formatting without
 locale. Each finding: file, evidence, fix. See `references/rtl-checklist.md`.
+
+## Test
+
+- Code written under this skill contains no physical `left|right|ml-|mr-|pl-|pr-`
+  property on a directional element, no `letter-spacing` other than 0 on
+  Arabic text, and every count string uses ICU plural with the six Arabic
+  categories.
+- `audit` output lists each finding as file:line + quoted evidence + fix, and
+  the arab-vs-latn digits choice is either read from tech-decisions.md or
+  flagged as "decision needed" — never assumed.

@@ -4,7 +4,7 @@
 > official Claude Code plugin ecosystem. RTL/Arabic-native. Workflow-enforced
 > quality. Zero runtime bloat.
 
-**7 plugins · 2 hooks total · FR/EN/AR**
+**7 plugins · 24 skills · 5 agents · 2 hooks total · FR/EN/AR**
 
 ## Install
 
@@ -29,7 +29,7 @@ project memory bank.
 | Plugin | Purpose | Hooks |
 |---|---|---|
 | `maestro-core` | Onboarding, memory bank, CLAUDE.md gardener, condense, doctor | 1 (SessionStart memory-sync) |
-| `maestro-dev` | sdlc, plan, implement, review, TDD, debug + executor/checker agents | 0 |
+| `maestro-dev` | brainstorm, sdlc, plan, implement + executor/checker/m-architect/m-devil-advocate/m-i18n-checker agents | 0 |
 | `maestro-quality` | Quality gates at commit/review time | 1 (PreToolUse bash-guard) |
 | `maestro-mobile` | RN/Expo/Flutter, RTL Arabic, RTL PDF | 0 |
 | `maestro-web` | Next.js/Prisma/Clerk stack, UX, design review | 0 |
@@ -45,7 +45,8 @@ runtime**, and **never rebuild what Anthropic maintains**.
 ## Docs
 
 - [Architecture](docs/ARCHITECTURE.md)
-- [Migration from Maestro v4](docs/MIGRATION-FROM-V4.md)
+- [Audit 5.5.0](docs/AUDIT-5.5.0.md) — what was found, what was fixed in 5.6.0
+- [Migration from Maestro v4](docs/archive/MIGRATION-FROM-V4.md) (archived — done in July 2026)
 
 ## License
 

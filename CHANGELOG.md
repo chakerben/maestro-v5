@@ -1,5 +1,75 @@
 # Changelog
 
+## 5.6.0 — audit fixes (2026-09-17)
+
+Everything below comes from `docs/AUDIT-5.5.0.md`; the letters are its item ids.
+
+### Fixed — the framework now does what it says
+
+- **B-1 · Phase commits go through the secrets gate.** `02-implement` committed
+  each phase with a bare `git commit`; the "never skippable" scan in
+  `maestro-vcs:00-commit` only ever saw the near-empty diff at ship time.
+  `02-execute` now commits every phase via `00-commit` (or runs the scan itself
+  when maestro-vcs is absent), and `01-pull-request` scans
+  `git diff <default>...HEAD` before pushing — the last net before history
+  becomes public. Both actions carry the `sk_live_…` test.
+- **B-2 · `bash-guard.js` is an accident guard, and says so.** Header,
+  PHILOSOPHY rule #1 and the metrics table now describe it as what it is:
+  canonical-spelling blocking, bypassable, with `permissions.deny` as the
+  enforced layer. Cheap misses closed: `rm -Rf`, `rm -rf /*`, `${HOME}`,
+  trailing `# comment`, `git push -f` / `+ref`, `| sudo bash`,
+  `bash <(curl …)`, `chmod -R 777` / `0777`, `dd of=/dev/…`, `mkfs`. The test
+  suite (71 cases, JSON built by `JSON.stringify` — C-13) asserts the
+  documented bypasses as *passing*, so any future change to that policy is
+  deliberate.
+- **B-3 · `validate.js` would now see v4 coming back.** Hooks are counted from
+  `plugins/**/hooks*.json`, the `hooks` key of every `plugin.json`, and any
+  versioned `.claude/settings*.json` (which is forbidden outright). Each hook
+  must carry `${CLAUDE_PLUGIN_ROOT}` and a `timeout`. Hook scripts are scanned
+  with strings and comments stripped, for `child_process`/`exec*`/`spawn*`
+  and for tooling names. Reviewer agents are identified by frontmatter
+  `role: reviewer` and checked against an allowlist; an agent whose file name
+  looks like a reviewer without that key fails. Skill `name:` must equal the
+  directory. Self-test: a `PostToolUse: npx tsc` smuggled into a plugin.json
+  fails on three counts.
+- **E · Rule #4 has two shapes and is enforced.** Router skill (`actions/`,
+  every action with `## Test`) or contract skill (`## Test` in `SKILL.md`).
+  Seven skills had neither; each got a `## Test` that checks the artifact.
+  `validate.js` refuses a skill with no test anywhere.
+- **C-1** CI runs `npm test` instead of re-listing its steps — `check-versions.js`
+  now runs on every push, not only at tag time.
+- **C-2** `publish.yml` scope `@arabiipte` → `@chakerben`.
+- **C-3/C-5** README no longer advertises `review, TDD, debug`; counts say 24 skills.
+- **C-4** PHILOSOPHY rule #2 pointed at `maestro-dev:03-review`, which does not exist.
+- **C-7/C-8** `marketplace.json`: `strict` (platform default) and `recommended`
+  (undocumented, ignored) removed; the validator rejects `recommended`.
+- **C-10** `release.sh` fetches `origin/main` before deciding it is not behind.
+- **C-14** `03-condense` is `disable-model-invocation: true` — a persistent
+  output mode is not something the model should switch on by itself.
+- **C-15** `secret-patterns.md` names its executor (`grep -Ei` on added diff
+  lines, POSIX ERE, `[[:space:]]`), all 15 patterns verified against samples;
+  a `gate:allow` is written into the commit body as `Gate-Allow:` so it is
+  visible in `git log`.
+
+### Removed / archived
+
+- `scripts/release-5.4.0.sh`, `scripts/update-projects-5.4.0.sh` — one-shot,
+  release done (C-9).
+- `migrate-v4-to-v5.sh`, `verify-migration.sh`, `setup-all.sh`,
+  `install-shortcuts.sh` → `scripts/archive/v4-migration/` with a README
+  listing their known defects; `RUNBOOK-v5.4.0.md`, `MIGRATION-FROM-V4.md`
+  → `docs/archive/` (D, C-12). The 32 projects were migrated in July; the
+  only live sentence of the runbook moved to the top of `ROADMAP.md`.
+
+### Not changed (decisions left to the owner)
+
+- `owner.name` / `author.name` stay `ARABII` (C-6).
+- `m-architect` keeps `Write` (needed for tech-decisions.md); PHILOSOPHY #5
+  now names it as instructed, not enforced.
+- `role: reviewer` is a Maestro-side frontmatter key; the platform ignores
+  unknown keys. If `claude plugin validate` ever complains, move it to a
+  `<!-- role: reviewer -->` comment and adjust the validator regex.
+
 ## 5.5.0 — brainstorm (2026-08-01)
 
 - **`maestro-dev:03-brainstorm`** — from an open idea to a recorded decision.

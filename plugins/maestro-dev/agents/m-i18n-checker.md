@@ -2,6 +2,7 @@
 name: m-i18n-checker
 description: Audits code for i18n and RTL correctness — hardcoded strings, missing plurals, direction-unsafe styles, wrong number/date formatting. Use before shipping any user-facing change in a multilingual project. Never fixes — reports with evidence.
 model: sonnet
+role: reviewer
 tools: Read, Grep, Glob
 ---
 

@@ -2,6 +2,7 @@
 name: checker
 description: Judges finished work against its acceptance criteria and the real need, leaving nothing unchecked. Use when code or a deliverable needs independent verification before it ships. Never edits the work, never implements the fix.
 model: opus
+role: reviewer
 tools: Read, Grep, Glob, Bash
 ---
 

@@ -1,6 +1,13 @@
 # Roadmap
 
-Candidate improvements, prioritized. Nothing here blocks the pilot rollout.
+Candidate improvements, prioritized.
+
+## Prerequisite before anything below
+
+**The first real feature through `/sdlc` has still never been executed.**
+Every rule in this repo is theory until one feature has gone spec → plan →
+implement → review → ship with its task folder as evidence. Do that first,
+journal included, and file what broke as the next release's changelog.
 
 ## v5.3 candidates (after pilot feedback)
 

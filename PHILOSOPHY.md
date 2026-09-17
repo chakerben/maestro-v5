@@ -18,23 +18,31 @@ The lesson, learned the hard way:
 
 ### 1. Maximum 2 hooks in the entire framework
 - `SessionStart` → `memory-sync.js` (maestro-core) — injects project memory.
-- `PreToolUse(Bash)` → `bash-guard.js` (maestro-quality) — pure security gate.
+- `PreToolUse(Bash)` → `bash-guard.js` (maestro-quality) — **accident guard**:
+  blocks the canonical spellings of a few irreversible commands. It is not a
+  security boundary and is documented as bypassable (the enforced layer is the
+  platform's `permissions.deny`, rule #8).
 
 No other hook, ever. Not for quality. Not for convenience. Not "just this once".
 
 ### 2. Never typecheck, test, or format inside a hook
 - Formatting → the executor agent formats what it touches (agent instruction).
 - Typecheck → real-time via official LSP plugins; final gate at commit.
-- Tests → gates of `maestro-vcs:00-commit` and `maestro-dev:03-review`.
+- Tests → gates of `maestro-vcs:00-commit` (every commit, phase commits included) and the `checker` agent at `maestro-dev:00-sdlc` step 04.
 
 ### 3. Every hook must prove itself
 - < 100 ms wall time.
 - `exit 0` on any internal error (fail open, never block on our own bugs).
 - No heavy subprocess spawning. No network. Lock required if anything async.
 
-### 4. Router-based skills
-Every skill = `SKILL.md` (contract + actions table) + `actions/*.md` (atomic,
-each with a `## Test` section) + optional `assets/` and `references/`.
+### 4. Every skill states how it is tested
+Two shapes, and `validate.js` enforces both:
+- **Router skill** — `SKILL.md` (contract + actions table) + `actions/*.md`
+  (atomic, each with its own `## Test` section). For anything with more than
+  one step or any persistent state.
+- **Contract skill** — `SKILL.md` alone, carrying one `## Test` section that
+  says what a correct run leaves behind (or what it must never do).
+A skill with no `## Test` anywhere is not a skill, it is a wish.
 
 ### 5. Agents with model pinning and strict separation
 - `executor` (sonnet): builds, never judges its own work.
@@ -45,7 +53,11 @@ allowlist without Edit/Write, so the platform prevents them from editing files.
 `m-devil-advocate` and `m-i18n-checker` (Read/Grep/Glob only) are fully
 enforced. `checker` additionally carries `Bash`, because a verdict without a
 validation run is a vibe — and `Bash` can write. That residual gap is
-**instructed, not enforced**, and named as such in `checker.md`. Side-effect
+**instructed, not enforced**, and named as such in `checker.md`. Same for
+`m-architect`: it carries `Write` to record decisions, and `Write` has no
+path restriction — "never production code" is instructed there too.
+Reviewer agents declare `role: reviewer` in their frontmatter; that key, not
+the file name, is what the validator keys on. Side-effect
 skills use `disable-model-invocation`; hooks carry a platform `timeout`.
 
 Say what is enforced and what is instructed. A rule described as guaranteed
@@ -76,7 +88,7 @@ Maestro is a **business layer**, not a platform competitor.
 | Metric | v4 | v5 target |
 |---|---|---|
 | Processes spawned per file edit | 5–6 | 0 |
-| Processes spawned per bash command | 3 | 1 (bash-guard, <20 ms) |
+| Processes spawned per bash command | 3 | 1 (bash-guard, ≈ Node start-up, 40–60 ms) |
 | Parallel typechecks possible | unbounded (bug) | 0 (LSP handles it) |
 | Tests launched on Stop | yes (RAM crash) | never |
 | Total hooks | 14 | 2 |

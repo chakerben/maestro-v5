@@ -138,6 +138,7 @@ ORIGIN=$(git config --get remote.origin.url)
 echo "     origin : $ORIGIN"
 if [ "$DRY_RUN" = "0" ]; then
   git ls-remote --exit-code origin >/dev/null 2>&1 || { err "origin injoignable"; exit 1; }
+  git fetch -q origin main || { err "git fetch origin main a échoué"; exit 1; }
   BEHIND=$(git rev-list --count "HEAD..origin/main" 2>/dev/null || echo 0)
   [ "$BEHIND" = "0" ] || { err "$BEHIND commit(s) distants non fusionnés — git pull d'abord"; exit 1; }
   ok "origin joignable, rien en retard"

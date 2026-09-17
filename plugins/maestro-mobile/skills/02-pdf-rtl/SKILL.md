@@ -46,3 +46,9 @@ disconnected and left-to-right. This skill encodes the reliable route.
 - Text is selectable and copies in logical order (copy a sentence out).
 - A mixed line ("فاتورة رقم INV-2024 بتاريخ...") reads correctly.
 - Amounts align to the start edge of their column, digits consistent.
+
+## Test
+
+Every PDF produced under this skill passes the four checks in
+"Validation" above, and the run reports the shaping smoke test explicitly
+(a screenshot or the copied text of one Arabic sentence).

@@ -38,3 +38,10 @@ violated rule when reviewing.
 Before any store submission talk: versionCode/buildNumber bumped, permissions
 justified in the manifest, RTL verified if `ar` supported (01-rtl-i18n),
 crash reporting wired (Sentry), privacy manifest fields current.
+
+## Test
+
+A review of RN/Expo code under this skill cites the violated rule by name for
+each finding (e.g. "Non-negotiables: lists"), and code written under it leaves
+no long scrollable rendered with `.map()`, no hardcoded inset, and no secret
+outside `EXPO_PUBLIC_`-safe values.

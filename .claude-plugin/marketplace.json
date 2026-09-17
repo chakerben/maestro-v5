@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "maestro",
-  "version": "5.5.0",
+  "version": "5.6.0",
   "description": "Maestro 5 — Business-layer framework for web & mobile development on top of official Claude Code plugins. RTL/Arabic-native, opinionated stack (Next.js, Prisma, Clerk, Expo), workflow-enforced quality.",
   "owner": {
     "name": "ARABII"
@@ -10,47 +10,37 @@
     {
       "name": "maestro-core",
       "source": "./plugins/maestro-core",
-      "description": "The foundation: project onboarding (detects stack, installs official plugins), memory bank, CLAUDE.md gardener, condense mode, install doctor. Ships the single SessionStart memory-sync hook.",
-      "strict": true,
-      "recommended": true
+      "description": "The foundation: project onboarding (detects stack, installs official plugins), memory bank, CLAUDE.md gardener, condense mode, install doctor. Ships the single SessionStart memory-sync hook."
     },
     {
       "name": "maestro-dev",
       "source": "./plugins/maestro-dev",
-      "description": "Development pipeline: brainstorm (open questions to a recorded decision), sdlc orchestration, plan, implement (phased, resumable). Hosts the executor, checker, m-architect, m-devil-advocate and m-i18n-checker agents.",
-      "strict": true,
-      "recommended": true
+      "description": "Development pipeline: brainstorm (open questions to a recorded decision), sdlc orchestration, plan, implement (phased, resumable). Hosts the executor, checker, m-architect, m-devil-advocate and m-i18n-checker agents."
     },
     {
       "name": "maestro-quality",
       "source": "./plugins/maestro-quality",
-      "description": "Workflow-time quality: configurable quality gates (off/standard/high/paranoid) invoked at commit and review — never at runtime. Ships the single PreToolUse bash-guard security hook.",
-      "strict": true,
-      "recommended": true
+      "description": "Workflow-time quality: configurable quality gates (off/standard/high/paranoid) invoked at commit and review — never at runtime. Ships the single PreToolUse bash-guard security hook."
     },
     {
       "name": "maestro-mobile",
       "source": "./plugins/maestro-mobile",
-      "description": "Mobile standards: React Native / Expo / Flutter conventions, RTL Arabic i18n, RTL PDF generation, SAR currency handling. The Maestro differentiator.",
-      "strict": true
+      "description": "Mobile standards: React Native / Expo / Flutter conventions, RTL Arabic i18n, RTL PDF generation, SAR currency handling. The Maestro differentiator."
     },
     {
       "name": "maestro-web",
       "source": "./plugins/maestro-web",
-      "description": "Web standards: Next.js + Prisma + Clerk + PostgreSQL + Zod stack enforcement, UX standards, design review with RTL awareness — layered on top of the official frontend-design plugin.",
-      "strict": true
+      "description": "Web standards: Next.js + Prisma + Clerk + PostgreSQL + Zod stack enforcement, UX standards, design review with RTL awareness — layered on top of the official frontend-design plugin."
     },
     {
       "name": "maestro-pm",
       "source": "./plugins/maestro-pm",
-      "description": "Product management: PRD, user stories, and technical specs — FR/EN/AR templates.",
-      "strict": true
+      "description": "Product management: PRD, user stories, and technical specs — FR/EN/AR templates."
     },
     {
       "name": "maestro-vcs",
       "source": "./plugins/maestro-vcs",
-      "description": "Delivery: conventional commits with secret detection and quality gates at commit time (the right moment), pull requests, releases. Layered on top of the official commit-commands plugin.",
-      "strict": true
+      "description": "Delivery: conventional commits with secret detection and quality gates at commit time (the right moment), pull requests, releases. Layered on top of the official commit-commands plugin."
     }
   ]
 }

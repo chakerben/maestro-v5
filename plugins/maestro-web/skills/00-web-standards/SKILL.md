@@ -38,3 +38,11 @@ tech-decisions.md.
   with rollback.
 - Every user-facing string through the i18n layer if the project is
   multilingual (delegates depth to maestro-mobile:01-rtl-i18n — it covers web too).
+
+## Test
+
+Code written under this skill: every server action and route handler shows
+the order validate (Zod) → authorize (Clerk) → act → revalidate; no
+`process.env` read outside `env.ts`; no empty `catch`. A justified deviation
+from the stack exists only with a matching line in
+`maestro_docs/memory/tech-decisions.md`.

@@ -14,12 +14,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Validate structure, manifests, and Philosophy compliance
-        run: node scripts/validate.js
-      - name: Test bash-guard hook (34-case suite)
-        run: bash scripts/tests/bash-guard.test.sh
-      - name: Test memory-sync hook (10-case regression suite)
-        run: bash scripts/tests/memory-sync.test.sh
+      - name: npm test (version drift, validate.js, bash-guard + memory-sync suites)
+        run: npm test
 
   commitlint:
     name: Conventional commits
