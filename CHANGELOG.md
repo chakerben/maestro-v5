@@ -1,5 +1,22 @@
 # Changelog
 
+## 5.9.3 — hotfix: drop plugin `dependencies` (2026-09-17)
+
+`claude plugin list` on the fleet after 5.9.2: ~30 `maestro-web@maestro`
+entries `failed to load — Dependency "maestro-core@maestro" is not installed`,
+stuck at 5.5.0/5.6.0 because `claude plugin update` refuses a plugin that
+does not load. Cause: the `dependencies` field added in 5.7.0. The platform
+resolves it **per scope**; on this fleet core is not installed in every
+project, so every dependent plugin broke. Nothing in `npm test` could see it
+— it is an install-topology fault, visible only on a real machine.
+
+- `dependencies` removed from all 7 manifests; `validate.js` now refuses the
+  field; Philosophy **7b** records why.
+- `02-execute` / `05-ship` regain their "when maestro-vcs is installed, else
+  run the scan yourself" wording — the gate is relocated, never skipped.
+- `m-i18n-checker` no longer preloads a cross-plugin skill; it invokes
+  `maestro-mobile:01-rtl-i18n` as its first action and stops if absent.
+
 ## 5.9.2 — independent audit fixes (2026-09-17)
 
 From `docs/AUDIT-5.9.1.md`: an auditor with the code and no access to the

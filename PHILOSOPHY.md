@@ -93,6 +93,14 @@ pick up exactly where the last one stopped.
 Superpowers, GSD, AIDD, and others are **sources we absorb ideas from**,
 never layers we stack. Stacking orchestrators is how the v4 crash happened.
 
+### 7b. Plugins stand alone
+No `dependencies` between Maestro plugins. The platform resolves that field
+per scope; with core at user scope and the rest at project scope — the
+fleet's real shape — every dependent plugin failed to load and could not be
+updated (5.9.3). Cross-plugin needs are written as "when installed, else …"
+in the skill text, never as a manifest constraint. `validate.js` refuses
+the field.
+
 ### 8. Never rebuild what Anthropic maintains
 Any capability covered by an official plugin (`claude-plugins-official`) is
 out of Maestro's scope and becomes a recommendation in `00-onboard`:

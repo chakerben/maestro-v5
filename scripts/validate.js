@@ -61,11 +61,8 @@ for (const entry of marketplace.plugins) {
     const pj = JSON.parse(read(manifest));
     if (pj.name !== entry.name) fail(`${entry.name}: plugin.json name mismatch (${pj.name})`);
     else ok(`${entry.name}: manifest valid`);
-    for (const dep of pj.dependencies || []) {
-      const depName = typeof dep === 'string' ? dep : dep.name;
-      if (!knownPlugins.has(depName)) fail(`${entry.name}: dependency "${depName}" is not in this marketplace`);
-      if (depName === entry.name) fail(`${entry.name}: depends on itself`);
-    }
+    if (Array.isArray(pj.dependencies) && pj.dependencies.length)
+      fail(`${entry.name}: "dependencies" is forbidden — the platform resolves it per scope, and on a user-scope core + project-scope plugins install (the fleet's shape) every dependent plugin fails to load and cannot be updated (5.9.3 incident)`);
   } catch (e) {
     fail(`${entry.name}: plugin.json invalid — ${e.message}`);
   }

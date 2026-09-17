@@ -1,11 +1,8 @@
 {
   "name": "maestro-quality",
-  "version": "5.9.2",
+  "version": "5.9.3",
   "description": "Workflow-time quality gates (off/standard/high/paranoid) invoked at commit and review. Ships the PreToolUse bash-guard security hook.",
   "author": {
     "name": "Ben Moussa Chaker"
-  },
-  "dependencies": [
-    "maestro-vcs"
-  ]
+  }
 }

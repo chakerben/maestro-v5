@@ -4,8 +4,9 @@ Commit and open the change request.
 
 ## Process
 
-1. Delegate to `maestro-vcs:00-commit` (gates + secret detection). It is a
-   declared dependency of maestro-dev, so it is always present.
+1. Delegate to `maestro-vcs:00-commit` (gates + secret detection) when
+   maestro-vcs is installed in this project. Otherwise run the secrets scan
+   yourself (see 02-implement/02-execute step 3) before any commit.
 2. Conventional commit message from the spec objective. Push the feature
    branch. Open the PR with: objective, phase summary, review score, and the
    task-folder path.
