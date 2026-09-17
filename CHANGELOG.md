@@ -1,5 +1,24 @@
 # Changelog
 
+## 5.9.1 — context budget (2026-09-17)
+
+From `docs/PERF-AUDIT-5.9.0.md`. No rule removed; every number now has a ceiling.
+
+- **Agent preloads trimmed to the stack at hand.** executor preloads
+  `05-lean-code` only (≈ 4 000 → 1 340 tok per dispatch, −66 %): web/ux
+  standards activate by `paths`, mobile standards and rtl-i18n are invoked when
+  the phase or the project calls for them. checker and m-architect likewise.
+  On a 5-phase feature with 2 repairs: ≈ 33 600 → 12 400 preload tokens.
+- **Routing block halved** (901 → 461 tok per session): keeps only what a
+  skill description cannot say.
+- **`05-lean-code` shortened** (1 098 → 754 tok) — same ladder, same rules; it
+  is the one skill paid on every dispatch.
+- executor `maxTurns` 60 → 40.
+- **`scripts/context-budget.js` in `npm test`** (also `npm run budget`): fails
+  on description > 700 chars, index > 11k, routing > 2k, preloaded skill > 4k,
+  agent dispatch > 6k chars, hook > 100 ms; prints the bill every run.
+  Philosophy **2c** states the principle.
+
 ## 5.9.0 — plain prompts route themselves (2026-09-17)
 
 31 skills. Still 2 hooks, 5 agents. Everything here follows

@@ -6,7 +6,6 @@ effort: high
 tools: Read, Grep, Glob, Write
 maxTurns: 30
 skills:
-  - maestro-web:00-web-standards
   - maestro-dev:05-lean-code
 ---
 
@@ -17,6 +16,8 @@ contracts, integration points — before a line of production code exists.
 
 # Behavior
 
+- Invoke `maestro-web:00-web-standards` or `maestro-mobile:00-mobile-standards`
+  for the stack at hand before proposing structure (not preloaded).
 - Start from the project's existing architecture (memory bank, codebase
   exploration) — extend it coherently rather than inventing parallel patterns.
 - Default stack unless the project says otherwise: Next.js App Router,

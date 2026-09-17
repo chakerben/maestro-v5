@@ -8,71 +8,50 @@ effort: medium
 
 # Skill: lean-code
 
-> Absorbed from Ponytail (the ladder, the debt marker) and Andrej Karpathy's
-> guidelines for LLM coding (think first, simplicity, surgical changes,
-> goal-driven execution). Rewritten as Maestro rules; nothing installed.
-
-Most code an assistant writes is code that should not exist: a helper for a
-one-liner, a dependency for a stdlib call, an abstraction for a single caller,
-a refactor nobody asked for. These rules cut that at the source.
+> Ponytail's ladder + Karpathy's guidelines, as Maestro rules. Preloaded in
+> every executor/checker/architect dispatch — kept short on purpose.
 
 ## The ladder — climb only as far as needed
 
 Before writing anything, answer in order and stop at the first rung that works:
 
-1. **Skip** — is the thing needed at all? A request often contains a step the
-   user assumed. Say so in one line, then do what remains.
-2. **Reuse** — does the codebase already do this? `grep` before writing. The
-   second implementation of a thing is a bug, not a feature.
-3. **Stdlib / language** — `Intl`, `URL`, `structuredClone`, `Array.prototype`,
-   `fetch`, `AbortController`, `crypto.randomUUID()`. No package for what the
-   runtime already does.
-4. **Platform** — Next.js / Expo / Prisma / Clerk already provide it
-   (revalidation, image optimisation, auth middleware, `@@index`). Check
-   context7 before assuming they don't.
-5. **Installed dependency** — something already in `package.json` covers it.
-   Read its docs (context7) rather than adding a sibling.
-6. **One-liner** — an inline expression at the call site, no new function.
-7. **Build** — only now, and the smallest version that passes the criterion.
+1. **Skip** — needed at all? Say so in one line, do what remains.
+2. **Reuse** — `grep` first; the second implementation of a thing is a bug.
+3. **Stdlib** — `Intl`, `URL`, `structuredClone`, `fetch`, `crypto.randomUUID()`…
+4. **Platform** — Next/Expo/Prisma/Clerk already do it (check context7 first).
+5. **Installed dep** — something in `package.json` covers it; read its docs.
+6. **One-liner** — inline at the call site, no new function.
+7. **Build** — only now, the smallest version that passes the criterion.
 
-Every rung above 7 is announced when it changes the shape of the answer
-("stdlib covers this — no new dependency").
+Announce the rung when it changes the answer ("stdlib covers this").
 
 ## Think before coding
 
-- Restate the goal as a **verifiable criterion** (a command, a test, an
-  observable) before touching a file. No criterion → ask one question.
-- Name the assumptions. An unstated assumption is where the rework comes from.
-- If two approaches exist, name them and pick one with a reason — do not
-  build both "to be safe".
+- Restate the goal as a **verifiable criterion** (command, test, observable)
+  before touching a file. No criterion → one question.
+- Name the assumptions. Two approaches → name both, pick one with a reason.
 
 ## Surgical changes
 
-- Touch what the task names. No drive-by renames, no reformatting of
-  untouched lines, no "while I'm here". If something else is wrong, it goes
-  to `maestro-pm:03-ticket` or a `// debt:` marker — never into this diff.
-- New abstraction only with **≥ 3 callers today**, not "future callers".
-- No configuration for a single value. No feature flag for a decided feature.
-- Delete what you replace. Dead code is not "kept for reference" — git is.
+- Touch what the task names. No drive-by renames, no reformatting untouched
+  lines, no "while I'm here" — that goes to `03-ticket` or a `debt:` marker.
+- New abstraction only with **≥ 3 callers today**. No config for one value.
+- Delete what you replace; git is the reference, not dead code.
 
 ## Debt marker
 
-Deliberate shortcut → `// debt: <what> — <why now> — <what would fix it>`
-(same convention in Python `# debt:` and Dart). Greppable, one line, no
-ticket unless the human asks. The checker lists every new `debt:` marker in
-its report.
+Deliberate shortcut → `// debt: <what> — <why now> — <fix>` (Python `# debt:`).
+One line, greppable; the checker lists every new one.
 
 ## Non-negotiable exceptions (the ladder never trims these)
 
-Security (authz on every path, input validation at boundaries), accessibility
-(labels, focus, contrast), RTL correctness when an `ar` locale exists, and
-error states. "Lean" means no ceremony — not no safety.
+Security (authz every path, validation at boundaries), accessibility, RTL
+when `ar` exists, error states. Lean means no ceremony — not no safety.
 
 ## `audit <path>` mode
 
-Walk the scope and report, per finding: file:line · rung it should have
-stopped at · the smaller version (as a diff sketch) · lines saved. Rank by
-lines saved. Never apply — this is a review.
+Per finding: file:line · rung it should have stopped at · smaller version
+(diff sketch) · lines saved. Ranked by lines saved. Never applied.
 
 ## Test
 

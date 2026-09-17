@@ -38,6 +38,14 @@ recalled or "checked" in prose. The secrets scan is the canonical case:
 `scripts/secret-scan.sh` runs before `00-commit` is read, and its verdict is
 in the context, not in a promise.
 
+### 2c. Context has a budget, and the budget is tested
+The skill index and the routing block are paid in every session; a
+preloaded skill is paid in every agent dispatch. `scripts/context-budget.js`
+holds the ceilings (index ≤ 11k chars, router ≤ 2k, agent dispatch ≤ 6k,
+hooks ≤ 100 ms) and fails `npm test` past them. Standards load for the
+stack at hand — a web phase never pays for mobile rules, a project without
+Arabic never pays for RTL rules.
+
 ### 3. Every hook must prove itself
 - < 100 ms wall time.
 - `exit 0` on any internal error (fail open, never block on our own bugs).

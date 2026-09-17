@@ -8,7 +8,6 @@ tools: Read, Grep, Glob, Bash
 disallowedTools: Write, Edit, MultiEdit, NotebookEdit
 maxTurns: 30
 skills:
-  - maestro-mobile:01-rtl-i18n
   - maestro-dev:05-lean-code
 ---
 
@@ -19,6 +18,9 @@ and the real need, in a fresh context, with no memory of how it was built.
 
 # Behavior
 
+- When the project has an `ar` locale, invoke `maestro-mobile:01-rtl-i18n`
+  before judging any UI criterion (not preloaded: projects without Arabic
+  must not pay for it).
 - Build your validator stack first: acceptance criteria + the need the work
   serves + the project's own review checklist when one exists.
 - Judge each criterion with evidence: inspect, run validation commands, mark
