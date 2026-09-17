@@ -218,6 +218,7 @@ cat <<EOF
   installées dans tes projets non plus. Une fois la CI verte :
 
     claude plugin marketplace update maestro
+    ./scripts/prune-installed.sh            # entrées mortes (worktrees disparus) — dry-run
     ./scripts/update-projects.sh --list
     ./scripts/update-projects.sh <un-projet>     # pilote
     ./scripts/update-projects.sh --all

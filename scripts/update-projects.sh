@@ -45,20 +45,48 @@ act()  { if [ "$DRY_RUN" = "1" ]; then echo -e "  ${B}[dry-run] $1${N}"; else ec
 command -v claude >/dev/null || { err "claude CLI introuvable"; exit 1; }
 command -v python3 >/dev/null || { err "python3 requis"; exit 1; }
 
-# Quels plugins maestro ce projet déclare-t-il ?
+# Quels plugins maestro ce projet déclare-t-il ? (settings.json ET settings.local.json —
+# 5.9.4 : uma-place ne déclarait les siens que dans le .local et était invisible)
 plugins_of() {
   python3 - "$1" <<'PY' 2>/dev/null
 import json, sys, os
-p = os.path.join(sys.argv[1], ".claude", "settings.json")
+seen = set()
+for f in ("settings.json", "settings.local.json"):
+    p = os.path.join(sys.argv[1], ".claude", f)
+    try:
+        d = json.load(open(p))
+    except Exception:
+        continue
+    for k in (d.get("enabledPlugins") or {}):
+        name, _, mk = k.partition("@")
+        if mk == "maestro" and name not in seen:
+            seen.add(name); print(name)
+PY
+}
+
+# La source de vérité de `claude plugin list` : installed_plugins.json. Chaque copie
+# --scope project y a son chemin. On prend celles dont le chemin existe encore.
+installed_projects() {
+  python3 - <<'PYI' 2>/dev/null
+import json, os
+p = os.path.expanduser("~/.claude/plugins/installed_plugins.json")
 try:
     d = json.load(open(p))
 except Exception:
-    sys.exit(0)
-for k in (d.get("enabledPlugins") or {}):
-    name, _, mk = k.partition("@")
-    if mk == "maestro":
-        print(name)
-PY
+    raise SystemExit(0)
+out = set()
+def walk(o):
+    if isinstance(o, dict):
+        if o.get("scope") == "project":
+            path = o.get("projectPath") or o.get("project")
+            if isinstance(path, str) and os.path.isdir(path):
+                out.add(path)
+        for v in o.values(): walk(v)
+    elif isinstance(o, list):
+        for v in o: walk(v)
+walk(d)
+for x in sorted(out): print(x)
+PYI
 }
 
 # Les projets que Claude Code connaît lui-même (~/.claude.json). C'est de là
@@ -77,9 +105,11 @@ for path in (d.get("projects") or {}):
 PYK
 }
 
-# Découverte = scan de PROJECTS_ROOT (profondeur 2) + projets connus, dédoublonnés.
+# Découverte = installed_plugins.json (vérité) + scan de PROJECTS_ROOT (profondeur 3,
+# pour .worktrees/<repo>/<branche>) + projets connus de ~/.claude.json, dédoublonnés.
 discover() {
-  { [ -d "$PROJECTS_ROOT" ] && find "$PROJECTS_ROOT" -maxdepth 2 -mindepth 1 -type d -name '.claude' -exec dirname {} \; 2>/dev/null
+  { installed_projects
+    [ -d "$PROJECTS_ROOT" ] && find "$PROJECTS_ROOT" -maxdepth 3 -mindepth 1 -type d -name '.claude' -exec dirname {} \; 2>/dev/null
     known_projects
   } | sort -u
 }

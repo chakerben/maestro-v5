@@ -1,5 +1,23 @@
 # Changelog
 
+## 5.9.4 — fleet hygiene (2026-09-17)
+
+`claude plugin list` after 5.9.3: 59 enabled copies still at 5.5.0/5.6.0 while
+`update-projects.sh --all` reported 34 ok. Reading
+`~/.claude/plugins/installed_plugins.json` explained all of them.
+
+- **`update-projects.sh` reads the source of truth.** Discovery now starts
+  from `installed_plugins.json` (every `--scope project` copy whose path still
+  exists), then `PROJECTS_ROOT` at depth 3 (`.worktrees/<repo>/<branch>`),
+  then `~/.claude.json`. `plugins_of` reads `settings.local.json` as well as
+  `settings.json` — uma-place declared its five plugins only in the local
+  file and was invisible.
+- **`scripts/prune-installed.sh`** — removes `scope: project` entries whose
+  path no longer exists (≈ 45 dead `/private/tmp/…` worktrees from past
+  sessions). Dry-run by default, `--apply` writes after a timestamped backup,
+  refuses to run while a `claude` process is alive.
+- `release.sh` step 5 mentions the prune.
+
 ## 5.9.3 — hotfix: drop plugin `dependencies` (2026-09-17)
 
 `claude plugin list` on the fleet after 5.9.2: ~30 `maestro-web@maestro`
