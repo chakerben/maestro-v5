@@ -61,6 +61,15 @@ covers the other 80%.
   clipping of diacritics and descenders.
 - letter-spacing MUST be 0 for Arabic — tracking breaks cursive joining.
 
+## Flutter
+
+Les règles ci-dessus sont web/RN. Flutter a ses propres API directionnelles,
+son propre système de chaînes (ARB) et un piège de police spécifique : lire
+`references/flutter-rtl.md` **avant** toute UI Flutter dans un projet qui a
+une locale `ar`. En une ligne : `EdgeInsetsDirectional` jamais
+`EdgeInsets.only(left:)`, ARB + `gen_l10n` jamais un ternaire `isArabic`, et
+une police latine n'a aucun glyphe arabe.
+
 ## Audit mode (`audit` argument)
 
 Scan the scope and report: physical CSS properties, hardcoded strings

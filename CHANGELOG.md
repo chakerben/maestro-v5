@@ -1,5 +1,48 @@
 # Changelog
 
+## 5.10.0 — Flutter, and deference to the project (2026-09-17)
+
+32 skills. Still 2 hooks, 5 agents. Written against a real Flutter codebase
+(a mosque audio-streaming app: GetX, Firebase with a named database,
+WebSocket PCM16 capture, Android PiP, 129 inline `isArabic ? … : …`
+ternaries and no ARB file), not from a template.
+
+### Added
+
+- **`maestro-mobile:04-flutter-standards`** — structure (a 400-line screen is
+  a refactor), state outside widgets whatever the library, and the section
+  that matters: **async & lifecycle** — every subscription/timer/controller
+  disposed, `mounted` after every `await`, foreground-service and wakelock
+  discipline, stream `onError`. Plus named Firebase instances behind one
+  accessor (`FirebaseFirestore.instance` in a project with a custom
+  `databaseId` is a silent wrong-database bug), platform-channel bridging,
+  perf, secrets. Loads by `paths` on `pubspec.yaml` / `lib/**.dart`.
+- **`01-rtl-i18n` gains a Flutter section** — none of the web rules transfer:
+  `EdgeInsetsDirectional`/`AlignmentDirectional`/`PositionedDirectional`, ARB
+  + `gen_l10n` (with the `isArabic ? … : …` ternary named as the anti-pattern
+  and a migration path), ICU plurals for the six Arabic categories, and the
+  font trap — a Latin family (Space Grotesk, Inter…) has **no Arabic glyphs**,
+  so Arabic silently falls back to the system font; declare Cairo/Tajawal/IBM
+  Plex Sans Arabic and set `height: 1.6–1.8`. The section ships as
+  `references/flutter-rtl.md` — the contract keeps a three-line pointer, so a
+  non-Flutter project pays nothing for it (rule 2c, context budget).
+
+### Changed — Maestro defers to the project it is a guest in
+
+A client repository often has its own conventions; imposing Maestro's would
+make the framework fight the codebase. Now:
+
+- `00-commit` reads `CLAUDE.md`, `.claude/rules/*.md` and the last 20 commits
+  **before composing**, follows a stated message format, version-bump rule or
+  language, and says which convention it followed. Conventional commits are
+  the default, not a law.
+- `02-implement/01-prepare` names branches by the project's stated convention
+  (e.g. `{type}/issue-{n}-{desc}`) when there is one.
+- The routing block states the precedence out loud.
+- `00-mobile-standards` stops claiming Flutter (it is RN/Expo only) and hands
+  `pubspec.yaml` / `lib/**.dart` to `04-flutter-standards`; the plugin and
+  marketplace descriptions match what ships.
+
 ## 5.9.5 — the last stragglers (2026-09-17)
 
 After 5.9.4 the fleet reported 5.9.4 everywhere except a handful of copies

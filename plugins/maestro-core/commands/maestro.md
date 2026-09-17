@@ -35,7 +35,7 @@ Present it grouped by INTENT (what the user wants to do), not by plugin:
 - Gate level config → `maestro-quality:00-quality-gate`
 
 **Mobile / Web / PM**
-- RN/Expo standards → `maestro-mobile:00-mobile-standards`
+- RN/Expo standards → `maestro-mobile:00-mobile-standards` · Flutter → `04-flutter-standards`
 - Arabic RTL i18n (or `audit`) → `maestro-mobile:01-rtl-i18n`
 - Arabic PDF generation → `maestro-mobile:02-pdf-rtl`
 - Stack enforcement → `maestro-web:00-web-standards` · UX → `01-ux-standards` · Review a screen → `02-design-review` · Landing motion → `03-motion`

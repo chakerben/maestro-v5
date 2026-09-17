@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "maestro",
-  "version": "5.9.5",
+  "version": "5.10.0",
   "description": "Maestro 5 — Business-layer framework for web & mobile development on top of official Claude Code plugins. RTL/Arabic-native, opinionated stack (Next.js, Prisma, Clerk, Expo), workflow-enforced quality.",
   "owner": {
     "name": "Ben Moussa Chaker"
@@ -25,7 +25,7 @@
     {
       "name": "maestro-mobile",
       "source": "./plugins/maestro-mobile",
-      "description": "Mobile standards: React Native / Expo / Flutter conventions, RTL Arabic i18n, RTL PDF generation, SAR currency handling. The Maestro differentiator."
+      "description": "Mobile standards: React Native / Expo and Flutter conventions (each with its own skill), Arabic RTL i18n across web/RN/Flutter, RTL PDF generation, SAR currency, store submission checklist. The Maestro differentiator."
     },
     {
       "name": "maestro-web",

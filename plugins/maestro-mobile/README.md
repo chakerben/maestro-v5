@@ -10,6 +10,9 @@ Mobile + Arabic — the Maestro differentiator.
   6 Arabic plural categories, Hijri dates, arab/latn numerals, SarIcon,
   Arabic typography (line-height, letter-spacing:0). Ships
   `references/rtl-checklist.md`.
+- `04-flutter-standards` — Flutter/Dart: structure, state out of widgets,
+  dispose/async discipline (where Flutter apps actually break), named
+  Firebase instances, platform channels, perf
 - `03-store-release` — go/no-go submission checklist with evidence: build,
   compliance (permissions, account deletion, IAP vs PSP), listing, KSA
   specifics (Hijri, SAR, +966 OTP, regulatory notices); works a rejection

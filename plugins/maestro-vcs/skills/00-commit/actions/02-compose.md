@@ -1,5 +1,13 @@
 # 02 - Compose
 
+## Convention check — first, always
+
+Read `CLAUDE.md`, `.claude/rules/*.md`, and `git log --oneline -20`. A
+project that states its own format gets its own format (and its own
+version-bump rule, and its own language). Announce the detected convention
+in one line before proposing the message. Only when nothing is stated do
+you use Maestro's default (conventional commits).
+
 Write the conventional commit message.
 
 ## Process

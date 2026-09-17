@@ -57,6 +57,12 @@ Read `maestro_docs/gates.json` (fallback: level `standard`):
 
 ## Transversal rules
 
+- **The project's stated convention wins.** Before composing, read
+  `CLAUDE.md`, `.claude/rules/*.md` and the last 20 `git log --oneline`. If
+  the project states its own message format (`vX.Y.Z: …`, a ticket prefix, a
+  language other than English) or a required version bump, follow it and say
+  so in one line. Conventional commits are Maestro's DEFAULT, not a law
+  imposed on someone else's repository.
 - Detect the project's package runner from the LOCKFILE (bun.lockb → bun,
   pnpm-lock.yaml → pnpm, yarn.lock → yarn, package-lock.json → npm). Never
   pass `--silent` to runners (it leaks into tsc and breaks it — v4 bug).
