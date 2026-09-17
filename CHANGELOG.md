@@ -30,6 +30,10 @@
 
 ### Changed
 
+- `release.sh` step 0b: switches `gh` to the `chakerben` account (override with
+  `MAESTRO_GIT_USER`), pins `credential.username` in the repo's local git
+  config, and refuses to run without a commit author. Multi-account machines
+  no longer push with whichever account happened to be active.
 - `checker` separates in-scope from out-of-scope findings; `00-sdlc/04-review`
   routes the second list to `03-ticket` instead of folding it into the
   iteration loop.

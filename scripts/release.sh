@@ -9,6 +9,7 @@
 #   ./scripts/release.sh 5.5.0 --dry-run   # montre tout, ne touche à rien
 #   ./scripts/release.sh 5.5.0             # exécute, confirmation par phase
 #   ./scripts/release.sh                   # reprend la version de package.json
+#   MAESTRO_GIT_USER=autre ./scripts/release.sh 5.9.0   # pousser avec un autre compte gh
 #
 # PRINCIPES :
 #   - set -euo pipefail, option inconnue = exit 2
@@ -72,6 +73,39 @@ if [ -f "$ROOT/.git/index.lock" ]; then
 else
   ok "pas de verrou git"
 fi
+
+# ── 0b. Identité GitHub ─────────────────────────────────────
+# Le dépôt vit sous le compte `chakerben`. Sur une machine avec plusieurs
+# comptes gh (arabiipte, client…), un push part avec le compte ACTIF de gh —
+# pas forcément le bon. On bascule explicitement, et on épingle le compte
+# dans la config LOCALE du dépôt pour que le credential helper le retienne.
+GIT_USER="${MAESTRO_GIT_USER:-chakerben}"
+step "0b/5 Identité GitHub ($GIT_USER)"
+if command -v gh >/dev/null 2>&1; then
+  ACTIVE=$(gh api user -q .login 2>/dev/null || echo "")
+  if [ "$ACTIVE" = "$GIT_USER" ]; then
+    ok "gh est déjà sur $GIT_USER"
+  else
+    act "gh auth switch --user $GIT_USER (actif : ${ACTIVE:-aucun})"
+    if [ "$DRY_RUN" = "0" ]; then
+      gh auth switch --user "$GIT_USER" >/dev/null 2>&1 \
+        || { err "gh ne connaît pas le compte $GIT_USER — lance : gh auth login --hostname github.com (choisir $GIT_USER)"; exit 1; }
+      ACTIVE=$(gh api user -q .login 2>/dev/null || echo "")
+      [ "$ACTIVE" = "$GIT_USER" ] && ok "gh basculé sur $GIT_USER" || { err "bascule ratée (actif : ${ACTIVE:-aucun})"; exit 1; }
+    fi
+  fi
+  if ! git config --get credential.helper 2>/dev/null | grep -q gh; then
+    warn "git n'utilise pas gh comme credential helper — lance une fois : gh auth setup-git"
+  fi
+else
+  warn "gh introuvable : impossible de garantir que le push part avec $GIT_USER"
+fi
+act "git config --local credential.username $GIT_USER"
+[ "$DRY_RUN" = "0" ] && git config --local credential.username "$GIT_USER"
+if [ -z "$(git config --get user.name)" ] || [ -z "$(git config --get user.email)" ]; then
+  err "user.name / user.email git non définis — git config user.name 'Chaker Ben Moussa' && git config user.email <ton email>"; exit 1
+fi
+ok "auteur des commits : $(git config --get user.name) <$(git config --get user.email)>"
 
 if git rev-parse "$TAG" >/dev/null 2>&1; then
   warn "le tag $TAG existe déjà localement"
