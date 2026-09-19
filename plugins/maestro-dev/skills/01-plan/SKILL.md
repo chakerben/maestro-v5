@@ -1,8 +1,8 @@
 ---
 name: 01-plan
 description: Turn a request, spec, or ticket into a phased implementation plan with resumable state. Use to plan a feature before building, or to turn a spec into executable phases. Never writes code. Not for reviewing a diff or debugging.
-argument-hint: "<spec path or request>"
 effort: high
+argument-hint: "<spec path or request>"
 ---
 
 # Skill: plan
@@ -22,10 +22,11 @@ Run `01 → 03`. Before running an action, read its file in `actions/`.
 
 ## Transversal rules
 
-- Adopt the domain expert posture (`../references/expert-postures.md`) —
+- Adopt the domain expert posture
+  (`${CLAUDE_PLUGIN_ROOT}/references/expert-postures.md`) —
   the plan must contain what the expert would insist on, not just what was asked.
-- Apply `../references/cognitive-protocols.md` rule 3: every phase criterion
-  is falsifiable.
+- Apply protocols rule 3 (`${CLAUDE_PLUGIN_ROOT}/skills/06-protocols/SKILL.md`):
+  every phase criterion is falsifiable.
 - Phases are small enough that one executor run completes one phase (rule of
   thumb: ≤ 5 files touched per phase).
 - Templates in `assets/` are the required format — frontmatter `status:` is

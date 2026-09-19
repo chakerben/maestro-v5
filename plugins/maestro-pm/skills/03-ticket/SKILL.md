@@ -2,7 +2,6 @@
 name: 03-ticket
 description: Use when a defect, gap, or improvement has been FOUND and must be handed to the team instead of fixed on the spot — a bug seen during QA or an audit, a checker finding, a "seen on the way" note from 04-debug, "crée un ticket", "mets ça sur Trello". Turns each finding into one Trello card in the project's backlog list, following the Maestro card convention. Not for fixing the bug (maestro-dev:04-debug), not for product framing (00-prd), not for user stories of a new feature (01-user-stories).
 argument-hint: "<finding, or 'from <report path>'>"
-arguments: [source]
 allowed-tools: Bash   # turn-scoped: the !`…` injections above use shell builtins, pipes and $(…) that pattern grants do not cover
 ---
 
@@ -20,7 +19,7 @@ Target board / list (from the plugin's user config, set at enable time):
 Repo context for the card body:
 !`echo "repo: $(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")  branch: $(git branch --show-current 2>/dev/null)  head: $(git rev-parse --short HEAD 2>/dev/null)"`
 
-Source: `$source`
+Source: `$ARGUMENTS`
 
 ## Process
 
@@ -29,9 +28,9 @@ Source: `$source`
    the conversation. One finding = one card. Merge duplicates; split
    compound findings.
 2. **Draft every card** with `assets/card-template.md` — all of them before
-   creating any. Priority from the table below, labels from the routing
-   table. Repro steps must be runnable by someone who was not in this
-   session; "see above" is not a step.
+   creating any; priority and labels from its tables. Repro steps must be
+   runnable by someone who was not in this session; "see above" is not a
+   step.
 3. **Show the batch** as a table (title · priority · labels) and wait for one
    approval. Edits requested → redraft, show again.
 4. **Create** each approved card in list `${user_config.TRELLO_LIST}` of
@@ -42,38 +41,20 @@ Source: `$source`
 5. **Report** the card URLs (or file paths). If the findings came from a
    `debug.md` / `review.md`, append the URLs there under the finding.
 
-## Priority
-
-| Emoji | Level | Meaning |
-|---|---|---|
-| 🔴 | P0 | blocks users, payment, auth, data loss, security |
-| 🟠 | P1 | wrong result on a main flow, no workaround |
-| 🟡 | P2 | wrong but workaround exists, or secondary flow |
-| ⚪ | P3 | polish, nice-to-have, tech debt |
-
-The emoji is the first character of the card title.
-
-## Labels
-
-| Finding touches | Labels |
-|---|---|
-| security, payment, auth, anything P0 | `quality` |
-| refactor, docs, minor bug | `fast` |
-| RTL / Arabic / i18n | add `rtl` when the board has it |
-
 ## Binding rules
 
 - Never fix the defect, never open a branch, never edit source in this skill.
 - Never a `Co-Authored-By` or any AI attribution in a card or a comment.
 - Language of the card = language of the board (read existing cards; when
   in doubt, French for the Maestro-managed boards, Arabic when the board is).
-- Card body ends with `Trouvé : <repo>@<short-sha> — <date>` so the team can
-  find the state the bug was seen in.
+- Card body ends with the `Trouvé :` / `Found:` / `رُصد في:` line
+  (`<repo>@<short-sha> — <date>`) so the team can find the state the bug was
+  seen in.
 
 ## Test
 
 - Each created card: title starts with one of 🔴🟠🟡⚪, body has the four
-  sections (Repro · Attendu · Critères d'acceptation · Pistes techniques),
-  at least one label, and the `Trouvé :` line.
+  sections of `assets/card-template.md` in the board's language (FR/EN/AR),
+  at least one label, and the `Trouvé :` / `Found:` / `رُصد في:` line.
 - No source file changed (`git status` unchanged by this skill).
 - The user approved the batch before the first card was created.

@@ -4,7 +4,7 @@
 > official Claude Code plugin ecosystem. RTL/Arabic-native. Workflow-enforced
 > quality. Zero runtime bloat.
 
-**7 plugins · 32 skills · 5 agents · 2 hooks total · FR/EN/AR**
+**7 plugins · 33 skills · 5 agents · 2 hooks total · FR/EN/AR**
 
 ## Install
 
@@ -29,9 +29,9 @@ project memory bank.
 | Plugin | Purpose | Hooks |
 |---|---|---|
 | `maestro-core` | Onboarding, memory bank, CLAUDE.md gardener, condense, doctor | 1 (SessionStart memory-sync) |
-| `maestro-dev` | brainstorm, sdlc, plan, implement, debug, lean-code + executor/checker/m-architect/m-devil-advocate/m-i18n-checker agents | 0 |
+| `maestro-dev` | brainstorm, sdlc, plan, implement, debug, lean-code, protocols + executor/checker/m-architect/m-devil-advocate/m-i18n-checker agents | 0 |
 | `maestro-quality` | Quality gates at commit/review time | 1 (PreToolUse bash-guard) |
-| `maestro-mobile` | RN/Expo + Flutter standards, RTL Arabic (web/RN/Flutter), RTL PDF, store release | 0 |
+| `maestro-mobile` | RN/Expo + Flutter standards, RTL Arabic (web/RN/Flutter), RTL PDF (+ ZATCA), store release | 0 |
 | `maestro-web` | Next.js/Prisma/Clerk stack, UX, design review, motion (GSAP+Lenis, RTL-safe) | 0 |
 | `maestro-pm` | PRD, user stories, specs (FR/EN/AR), tickets → Trello, writing rules (anti-slop, AR register) | 0 |
 | `maestro-vcs` | Commits with gates (executable secrets scan), PRs, releases, one-worktree-per-branch | 0 |
@@ -45,6 +45,7 @@ runtime**, and **never rebuild what Anthropic maintains**.
 ## Docs
 
 - [Architecture](docs/ARCHITECTURE.md)
+- [Audit 5.10.0](docs/AUDIT-5.10.0.md) — independent deep pass, 30 findings, closed in 5.11.0
 - [Audit 5.9.1](docs/AUDIT-5.9.1.md) — independent adversarial pass on the day's six releases; 17 findings, all closed in 5.9.2
 - [Performance & token audit 5.9.0](docs/PERF-AUDIT-5.9.0.md) — what a session and a dispatch cost, and the budget guard
 - [Tooling audit 2026-09](docs/TOOLING-AUDIT-2026-09.md) — 25 TikTok-famous tools, what was absorbed, what was rejected and why

@@ -11,9 +11,17 @@
  * 45 bypasses; the 5.5.0 audit re-confirmed 30. That is the nature of the
  * tool, and it is stated here so nobody relies on it for more.
  *
- * The ENFORCED layer is the platform: `permissions.deny` in settings.json
- * (Philosophy rule #8 — never rebuild what Anthropic maintains). This guard
+ * The ENFORCED layer is the platform's `permissions.deny` in settings.json
+ * (Philosophy rule #8 — never rebuild what Anthropic maintains), written by
+ * maestro-core:00-onboard (04-scaffold) and checked by 04-doctor. This guard
  * is the belt; that is the braces.
+ *
+ * Quoted strings: rules 1–3 (rm / curl|sh / chmod) are matched on a copy of
+ * the command whose quoted strings are blanked, so `git commit -m "fix: chmod
+ * 777 removed"` passes. Rule 1 keeps a second pass on the raw command for the
+ * QUOTED spellings of its targets (`rm -rf "$HOME"`, `rm -rf '~'`). Rules 4–7
+ * (disk, .env, secrets, git push) read the raw command: there the quotes are
+ * the workaround, not the false positive.
  *
  * Nothing else runs here: no quality checks, no typecheck, no format
  * (Philosophy rule #2 — quality lives in the workflow, this is safety only).
@@ -30,27 +38,44 @@
 
 'use strict';
 
+// rm -rf flag lookaheads (any order: -rf/-fr/-Rf, -r -f, --recursive --force)
+const RM_FLAGS = '\\brm(?=[^\\n]*\\s(?:-[a-zA-Z]*[rR][a-zA-Z]*|--recursive)\\b)(?=[^\\n]*\\s(?:-[a-zA-Z]*f[a-zA-Z]*|--force)\\b)\\s+[^\\n]*\\s';
+const RM_TAIL = '(\\s|;|&&|\\|\\||\\||#|[0-9]?>|$)';
+// root, root wildcard, home ITSELF, $HOME itself — never subpaths
+const RM_TARGET = '(?:\\/|~|\\$HOME|\\$\\{HOME\\})\\/?(?:\\*|\\.\\.?)?';
+// interpreters that execute what a pipe feeds them (plain or /bin, /usr/bin);
+// `python -m/-c`, `node -e/-p`, `perl -e/-pe/-ne` run their argument, not stdin
+const PIPE_EXEC = '(?:(?:\\/usr)?\\/bin\\/)?(?:(?:ba|z|da)?sh\\b|python[23]?\\b(?!\\s+-[mc]\\b)|perl\\b(?!\\s+-\\S*e\\b)|node\\b(?!\\s+-[ep]\\b))';
+const DISK = '\\/dev\\/(?:sd|vd|xvd|nvme|mmcblk|r?disk)\\w*';
+
 const RULES = [
   {
-    // rm recursive+force targeting root, root wildcard, home ITSELF, or
-    // $HOME itself. Flags in any order: combined (-rf/-fr/-Rf), separate
-    // (-r -f), or long (--recursive --force). Deliberately does NOT block
-    // subpaths (rm -rf ~/x/node_modules is legit). A trailing "# comment"
-    // is tolerated.
-    re: /\brm(?=[^\n]*\s(?:-[a-zA-Z]*[rR][a-zA-Z]*|--recursive)\b)(?=[^\n]*\s(?:-[a-zA-Z]*f[a-zA-Z]*|--force)\b)\s+[^\n]*\s(?:"(?:\/|~|\$HOME|\$\{HOME\})\/?(?:\*|\.\.?)?"|'(?:\/|~)\/?(?:\*|\.\.?)?'|(?:\/|~|\$HOME|\$\{HOME\}|"\$HOME"|"\$\{HOME\}")\/?(?:\*|\.\.?)?)(\s|;|&&|\|\||\||#|[0-9]?>|$)/,
+    // Unquoted targets, on the blanked command (a quoted "rm -rf /" in a
+    // commit message or an echo is text, not a command). A trailing
+    // "# comment" is tolerated.
+    re: new RegExp(RM_FLAGS + RM_TARGET + RM_TAIL),
+    blank: true,
     msg: 'BLOCKED: recursive force-delete targeting / or home itself',
   },
   {
-    // piped remote execution — also via sudo, and process substitution
-    re: /\b(curl|wget)\b[^|;&]*\|\s*(sudo(\s+-\S+)*\s+)?(ba|z|da)?sh\b|\b(ba|z|da)?sh\s+<\(\s*(curl|wget)\b/i,
+    // Same targets, quoted ("$HOME", '~', "/"), on the raw command.
+    re: new RegExp(RM_FLAGS + '(?:"' + RM_TARGET + '"|\'' + RM_TARGET + '\'|"\\$HOME"\\/?(?:\\*|\\.\\.?)?|"\\$\\{HOME\\}"\\/?(?:\\*|\\.\\.?)?)' + RM_TAIL),
+    msg: 'BLOCKED: recursive force-delete targeting / or home itself',
+  },
+  {
+    // piped remote execution — also via sudo, /bin paths, python/perl/node,
+    // and process substitution
+    re: new RegExp('\\b(?:curl|wget)\\b[^|;&]*\\|\\s*(?:sudo(?:\\s+-\\S+)*\\s+)?' + PIPE_EXEC + '|(?:^|[\\s;&|(])' + PIPE_EXEC + '\\s+<\\(\\s*(?:curl|wget)\\b', 'i'),
+    blank: true,
     msg: 'BLOCKED: piping remote content into a shell',
   },
   {
-    re: /\bchmod\s+(?:-[a-zA-Z]+\s+)*0?777\b|\bchmod\s+(?:-[a-zA-Z]+\s+)*a\+rwx\b/,
+    re: /\bchmod\s+(?:-[a-zA-Z]+\s+|--[a-z-]+\s+)*0?777\b|\bchmod\s+(?:-[a-zA-Z]+\s+|--[a-z-]+\s+)*a\+rwx\b/,
+    blank: true,
     msg: 'BLOCKED: world-writable permissions (chmod 777)',
   },
   {
-    re: />\s*\/dev\/(sd[a-z]|disk\d|nvme\d)|\bdd\b[^\n]*\bof=\/dev\/(sd[a-z]|disk\d|nvme\d)|\bmkfs(\.\w+)?\s+[^\n]*\/dev\//,
+    re: new RegExp('>\\s*' + DISK + '|\\bdd\\b[^\\n]*\\bof=' + DISK + '|\\bmkfs(?:\\.\\w+)?\\s+[^\\n]*\\/dev\\/'),
     msg: 'BLOCKED: writing directly to a system disk device',
   },
   {
@@ -95,8 +120,11 @@ function main() {
   // matching (only when the # is preceded by whitespace and not inside quotes
   // — good enough for an accident guard).
   const stripped = cmd.replace(/\s+#(?=(?:[^"']*["'][^"']*["'])*[^"']*$)[^\n]*/g, '');
+  // Quoted strings blanked (quotes kept, content → spaces) for the rules
+  // that would otherwise fire on text: see the header.
+  const blanked = stripped.replace(/"(?:[^"\\]|\\.)*"|'[^']*'/g, (q) => q[0] + ' '.repeat(q.length - 2) + q[0]);
   for (const rule of RULES) {
-    if (rule.re.test(stripped)) {
+    if (rule.re.test(rule.blank ? blanked : stripped)) {
       process.stderr.write(rule.msg + '\n');
       return 2;
     }

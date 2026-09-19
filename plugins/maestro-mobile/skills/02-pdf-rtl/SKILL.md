@@ -13,9 +13,11 @@ disconnected and left-to-right. This skill encodes the reliable route.
 ## The decision tree (binding)
 
 1. **Default route — browser print engine.** Render HTML/CSS with
-   `dir="rtl"` and print via Playwright/Puppeteer (`page.pdf()`). The browser
-   does bidi + shaping natively. Server-side: a headless Chromium worker;
-   Next.js: an API route or queued job (NEVER in the request path for bulk).
+   `dir="rtl"` and print via Playwright/Puppeteer: `await
+   document.fonts.ready` before `page.pdf({ printBackground: true })`. The
+   browser does bidi + shaping natively. Server-side: a headless Chromium
+   worker; Next.js: an API route or queued job (NEVER in the request path
+   for bulk).
 2. **react-pdf / pdfkit / jsPDF direct text**: only for LTR or with an
    explicit shaping pipeline — treat as an exception requiring a
    tech-decisions.md entry. Their Arabic support ranges from partial to wrong.
@@ -33,12 +35,14 @@ disconnected and left-to-right. This skill encodes the reliable route.
 - Numbers in tables: decide arab vs latn digits per document type (invoices
   for government: follow the authority's requirement; record it).
 - Dual dates on official docs: Hijri (islamic-umalqura) + Gregorian.
-- Currency: SarIcon inline SVG (renders in PDF reliably; icon fonts often
-  don't load headless).
+- Currency: inline SVG from `01-rtl-i18n/assets/sar-icon.svg` (see its
+  `references/sar.md`); icon fonts often don't load headless.
 - Mixed content cells (Arabic + product codes): wrap LTR runs in
   `<bdi>` or `dir="ltr"` spans — invoice line items are the #1 bidi bug site.
-- Page footer/header via CSS `@page` margins or the print API's
-  header/footer templates; page numbers localized.
+- Page footer/header via CSS `@page` margins, or the print API's
+  header/footer templates — those inherit neither the page CSS nor its
+  fonts (inline both); page numbers localized.
+- `invoice` for a KSA seller → apply `references/zatca.md` (QR TLV, phases).
 
 ## Validation (every generated PDF)
 

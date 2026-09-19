@@ -25,7 +25,7 @@ Present it grouped by INTENT (what the user wants to do), not by plugin:
 **Context & memory**
 - Refresh project memory from the codebase → `maestro-core:01-memory`
 - Context feels bloated / rules conflict → `maestro-core:02-gardener`
-- Terse output mode → `maestro-core:03-condense`
+- Terse output mode → `maestro-core:03-condense` (invoke explicitly: `/maestro-core:03-condense` — not routed by description)
 - Any prose a human reads (README, PR, client message, AR/FR/EN) → `maestro-pm:04-writing`
 
 **Quality & delivery**

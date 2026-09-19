@@ -9,8 +9,8 @@ Close the design and name exactly one next step.
 ## Process
 
 1. **Self-review the document** before showing it. Scan for: a `<placeholder>`
-   left in place, a journal entry whose `Change :` contradicts the decision, an
-   approach mentioned in the decision but absent from `## Approches`, a claim
+   left in place, a journal entry whose `Changes:` contradicts the decision, an
+   approach mentioned in the decision but absent from `## Approaches`, a claim
    about the codebase with no path. Fix inline, do not narrate the fixes.
 2. **Route on what the brainstorm actually surfaced** — one destination, named
    explicitly:
@@ -20,7 +20,7 @@ Close the design and name exactly one next step.
    | Who this serves, what changes for them, how success is measured | `maestro-pm:00-prd` |
    | Data model, contracts, integration points, structural risk | `maestro-pm:02-specs`, or agent `m-architect` |
    | How to build it, in what order | `maestro-dev:01-plan` |
-   | Decision was **ne pas construire** | stop; `status: dropped` is the deliverable |
+   | Decision was **do not build** | stop; `status: dropped` is the deliverable |
 
    Naming two next steps means the routing question was not answered — pick the
    one the *unresolved* work belongs to.

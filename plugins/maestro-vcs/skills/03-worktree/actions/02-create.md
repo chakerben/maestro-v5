@@ -12,8 +12,11 @@ gwt new <branch> --from <base>
 cd "$(gwt path <branch>)"
 ```
 
-2. If `gwt` is missing (`command -v gwt` empty), install it once:
-   `bash ~/.claude/plugins/marketplaces/maestro/scripts/install-shortcuts.sh`.
+2. Check it is there: `command -v gwt || echo "gwt missing: run
+   install-shortcuts.sh from the maestro-v5 checkout
+   (https://github.com/chakerben/maestro-v5)"`. Install it once from that
+   checkout (`bash scripts/install-shortcuts.sh`) — the marketplace cache path
+   varies per machine, never hard-code it.
    Fall back to the raw commands ONLY if that is impossible, and reproduce what
    `gwt` guarantees — otherwise the worktree is unusable or dangerous:
 

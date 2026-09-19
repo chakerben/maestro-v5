@@ -2,6 +2,13 @@
 name: 01-rtl-i18n
 description: Arabic and RTL correctness for web and mobile — layout mirroring, Arabic typography and plurals, Hijri dates, numerals, currency. Auto-applies when the project has an ar locale or the task mentions Arabic/RTL. Use also to audit RTL readiness. The deepest Maestro expertise — read references/rtl-checklist.md before large RTL work.
 argument-hint: "[audit]"
+paths:
+  - "**/ar.json"
+  - "**/ar/**"
+  - "**/*.arb"
+  - "messages/ar*"
+  - "locales/ar*"
+  - "lib/l10n/**"
 ---
 
 # Skill: rtl-i18n
@@ -27,6 +34,9 @@ covers the other 80%.
 - `I18nManager.allowRTL(true)` + `forceRTL` per locale — **requires an app
   restart** to apply; design the language switcher accordingly (Expo:
   `expo-updates` reload).
+- Native flags: `android:supportsRtl="true"` in AndroidManifest; Expo: the
+  `expo-localization` config plugin (RTL on by default; `supportsRTL` /
+  `forcesRTL` options) plus `extra.supportsRTL: true` for Expo Go.
 - Use `start`/`end` style props (`marginStart`, `paddingEnd`) — RN maps them
   per direction. `writingDirection` for text alignment edge cases.
 - `flexDirection: 'row'` auto-mirrors under RTL. Never hand-reverse.
@@ -49,9 +59,10 @@ covers the other 80%.
 - Dates: Saudi context often requires **Hijri** —
   `new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura')`. Dual display
   (Hijri + Gregorian) for legal/official documents.
-- Currency: SAR renders via the **SarIcon SVG component**, never the ﷼
-  character or the new symbol codepoint (font support unreliable). Amount +
-  icon order follows locale direction.
+- Currency: format with `Intl.NumberFormat(…, { currencyDisplay: 'code' })`
+  and replace the `SAR` token by `assets/sar-icon.svg` (see
+  `references/sar.md`). U+20C1 SAUDI RIYAL SIGN (Unicode 17, Sept 2025) as
+  text only when every font in the render path has the glyph; never ﷼.
 
 ## Fonts
 
@@ -63,12 +74,12 @@ covers the other 80%.
 
 ## Flutter
 
-Les règles ci-dessus sont web/RN. Flutter a ses propres API directionnelles,
-son propre système de chaînes (ARB) et un piège de police spécifique : lire
-`references/flutter-rtl.md` **avant** toute UI Flutter dans un projet qui a
-une locale `ar`. En une ligne : `EdgeInsetsDirectional` jamais
-`EdgeInsets.only(left:)`, ARB + `gen_l10n` jamais un ternaire `isArabic`, et
-une police latine n'a aucun glyphe arabe.
+The rules above are web/RN. Flutter has its own directional APIs, its own
+string system (ARB) and a specific font trap: read
+`references/flutter-rtl.md` **before** any Flutter UI in a project with an
+`ar` locale. In one line: `EdgeInsetsDirectional`, never
+`EdgeInsets.only(left:)`; ARB + `gen_l10n`, never an `isArabic` ternary; a
+Latin font has no Arabic glyphs.
 
 ## Audit mode (`audit` argument)
 

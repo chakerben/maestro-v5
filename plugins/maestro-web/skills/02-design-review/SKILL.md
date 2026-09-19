@@ -26,8 +26,8 @@ Adopt the senior product designer posture. Judge, don't rebuild.
    centered-everything, gradient soup) — align with the frontend-design
    plugin's direction when installed.
 6. Report: findings by severity, each with evidence (line or region) and the
-   concrete fix. Score /10 per pass + overall. Offer to open a task folder
-   for criticals.
+   concrete fix. Score /10 per pass + overall. Criticals → `maestro-pm:03-ticket`
+   when installed, else list them in the review output.
 
 ## Test
 

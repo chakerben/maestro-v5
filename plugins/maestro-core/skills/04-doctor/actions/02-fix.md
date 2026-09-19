@@ -22,7 +22,9 @@ Corrections applied with per-item approval; a backup of everything touched.
      diff, approve, apply. Suggest `claude mcp remove <name>` for CLI-managed ones.
 3. **🟠 Broken:** re-scaffold missing `maestro_docs/` pieces (delegate to
    onboard 04-scaffold); re-sync the memory block (delegate to memory 03-sync);
-   list the `claude plugin install` commands for missing plugins.
+   list the `claude plugin install` commands for missing plugins; merge the
+   missing `permissions.deny` entries (delegate to onboard 04-scaffold step 4b
+   — it is idempotent and never drops other keys).
 4. **🟡 Drift:** recommend, don't apply — point to gardener and 01-memory.
 5. Re-run the check-scan logic and print the before/after severity counts.
 

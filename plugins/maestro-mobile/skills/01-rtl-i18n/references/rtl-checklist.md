@@ -20,7 +20,7 @@ checkout/summary.
 ## Formats
 - [ ] Numerals decision recorded (arab vs latn) and consistent
 - [ ] Hijri where the market requires; dual display on official docs
-- [ ] SAR via SarIcon; order follows direction
+- [ ] SAR via `assets/sar-icon.svg` per `references/sar.md`; order follows direction
 - [ ] Phone numbers forced LTR (dir=ltr isolate)
 
 ## Typography

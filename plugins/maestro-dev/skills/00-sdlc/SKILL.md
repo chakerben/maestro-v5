@@ -13,33 +13,36 @@ by default; autonomous when the caller says `auto`.
 
 | #  | Action      | Role                                        | Delegate                       |
 |----|-------------|---------------------------------------------|--------------------------------|
-| 01 | `spec`      | Consolidate the request into a contract     | self (or `maestro-pm:02-specs` when installed) |
+| 01 | `spec`      | Consolidate the request into `spec.md`      | self; `maestro-pm:02-specs` (when installed) only for a new table/collection, new external contract, or auth change — its `specs/spec-<slug>.md` is linked from `spec.md` |
 | 02 | `plan`      | Produce the plan + phase files              | `maestro-dev:01-plan`          |
 | 03 | `implement` | Build the plan, phase by phase, gated       | `executor` via `maestro-dev:02-implement` |
 | 04 | `review`    | Independent verdict: ship or iterate        | `checker` agent                |
 | 05 | `ship`      | Commit + open the change request            | `maestro-vcs:00-commit` |
 
-Run `01 → 05`. On `04 = iterate`, loop `03 → 04` (max 3 iterations, then
-`blocked`). `01` self-skips when the request already states an objective and
-acceptance criteria. Before running an action, read its file in `actions/`.
+Run `01 → 05`. On `04 = iterate`, loop `03 → 04` (`iterations` in plan.md
+counts them; `blocked` at 3). `01` self-skips when the request already
+states an objective and acceptance criteria. Before running an action, read
+its file in `actions/`.
 
 ## Modes
 
 - **interactive** (default): pause for approval after 01, 02, and 04.
-- **auto**: no pauses. Decide alone using `references/cognitive-protocols.md`
-  rule 4. HARD STOPS that always break auto: a `blocked` status, a gate still
-  red after 3 repair attempts, any payment or destructive action, any
-  credential need. On a hard stop: write the state into the plan frontmatter,
+- **auto**: no pauses. Decide alone using protocols rule 4
+  (`${CLAUDE_PLUGIN_ROOT}/skills/06-protocols/SKILL.md`). HARD STOPS that
+  always break auto: a `blocked` status, a gate still red after 3 repair
+  attempts, any payment or destructive action, any credential need. On a hard stop: write the state into the plan frontmatter,
   summarize what a human must decide, end the turn.
 
 ## Transversal rules
 
 - Delegate every step; the orchestrator never writes or judges code itself.
-- Adopt the expert posture of the detected domain (`references/expert-postures.md`)
-  and pass it to every delegate.
+- Adopt the expert posture of the detected domain
+  (`${CLAUDE_PLUGIN_ROOT}/references/expert-postures.md`) and pass it to
+  every delegate.
 - Every artifact lands in ONE feature folder
   `maestro_docs/tasks/<yyyy_mm_dd>_<slug>/`, resolved at entry.
-- Drive plan status `pending → in-progress → implemented → reviewed`, or `blocked`.
+- Drive plan status `pending → in-progress → implemented → reviewed`, or `blocked`;
+  02 writes `mode: interactive|auto` into the plan frontmatter.
 - Never auto-branch onto the default branch; a feature branch is created in 03.
 - Resume support: if the folder already exists with a plan, read its statuses
   and continue from the first incomplete step — never restart from scratch.

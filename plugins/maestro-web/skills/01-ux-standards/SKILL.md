@@ -3,15 +3,16 @@ name: 01-ux-standards
 description: Product-grade UX rules — mobile-first, accessibility, the four UI states, form ergonomics. Auto-applies when building screens or components. Visual/aesthetic direction is the official frontend-design plugin's job; this skill covers behavior and inclusivity.
 user-invocable: false
 paths:
-  - "**/*.tsx"
-  - "**/*.vue"
-  - "**/*.svelte"
+  - "app/**/*.tsx"
+  - "src/**/*.tsx"
+  - "components/**/*.tsx"
 ---
 
 # Skill: ux-standards
 
 frontend-design (official) makes it look distinctive; this skill makes it
-WORK for everyone.
+WORK for everyone. Applies to UI components, not to `*.test.tsx` or
+`*.stories.tsx`.
 
 ## The four states — every data surface
 
@@ -22,14 +23,15 @@ missing one is incomplete, not "MVP".
 ## Mobile-first
 
 Build at 360px first, enhance up. Test the layout at 360, 768, 1280.
-Touch targets >= 44px. Sticky CTAs on long mobile forms.
+Touch targets >= 44 pt (iOS) / 48 dp (Android). Sticky CTAs on long mobile forms.
 
 ## Accessibility floor (non-negotiable)
 
 - Full keyboard path: tab order logical, focus visible, Escape closes overlays.
 - Every input has a label (not placeholder-as-label); errors linked via
   aria-describedby and announced.
-- Contrast >= 4.5:1 body text; interactive states not color-only.
+- Contrast >= 4.5:1 body text; >= 3:1 for UI components and their states
+  (WCAG 1.4.11); interactive states not color-only.
 - Images: meaningful alt or empty alt for decorative. Icons-as-buttons carry
   aria-label.
 - Motion respects prefers-reduced-motion.

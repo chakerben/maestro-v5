@@ -13,7 +13,7 @@ Staged diff:
 !`git diff --cached --stat --no-color | tail -20; [ -n "$(git diff --cached --name-only)" ] || echo "(nothing staged)"`
 
 Secrets scan of the staged diff (`scripts/secret-scan.sh`, patterns from `assets/secret-patterns.md`):
-!`bash "${CLAUDE_SKILL_DIR}/scripts/secret-scan.sh" cached`
+!`bash "${CLAUDE_PLUGIN_ROOT}/skills/00-commit/scripts/secret-scan.sh" cached`
 
 Gate level:
 !`cat maestro_docs/gates.json 2>/dev/null || echo '{ "level": "standard" }  (default — no maestro_docs/gates.json)'`
@@ -68,8 +68,8 @@ Read `maestro_docs/gates.json` (fallback: level `standard`):
   pass `--silent` to runners (it leaks into tsc and breaks it — v4 bug).
 - The secrets scan is `scripts/secret-scan.sh` (its patterns live in
   `assets/secret-patterns.md`); it ran above before you read this line, and it
-  can never be skipped. If it was staged after invocation, re-run it: 
-  `bash ${CLAUDE_SKILL_DIR}/scripts/secret-scan.sh cached`.
+  can never be skipped. If it was staged after invocation, re-run it:
+  `bash "${CLAUDE_PLUGIN_ROOT}/skills/00-commit/scripts/secret-scan.sh" cached`.
 - Delegate the raw git mechanics to the official commit-commands plugin when
   installed; this skill owns the gate and the message.
 - The working directory may be shared with another session. Commit by paths,

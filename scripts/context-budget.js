@@ -21,7 +21,9 @@ const BUDGET = {
   preloadedSkillEach: 4000, // a SKILL.md preloaded into an agent is paid per dispatch
   agentPreloadTotal: 6000,  // agent body + all its preloaded skills
   skillMdEach: 5500,        // any SKILL.md (invocation cost; actions are read one by one)
-  hookScriptMs: 100,        // rule #3 — measured here as a smoke test, not a benchmark
+  // rule #3 — measured here as a smoke test, not a benchmark. CI runners start
+  // Node slowly (cold disk cache, shared vCPU): 250 ms there is still "nothing ran".
+  hookScriptMs: process.env.CI ? 250 : 100,
 };
 const tok = (n) => Math.round(n / 3.6);
 let bad = 0;

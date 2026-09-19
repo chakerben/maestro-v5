@@ -25,8 +25,8 @@ Run `01 → 03`. Before running an action, read its file in `actions/`.
   carrying only: the phase file, the plan objective, the memory-bank
   references, and the expert posture — never the full session history.
 - The gate is the phase's validation passing, never a self-report
-  (`../references/cognitive-protocols.md` rule 6).
-- Drift from the plan → stop with "replan needed" + the specific drift.
-  Never silently absorb scope.
+  (protocols rule 6, `${CLAUDE_PLUGIN_ROOT}/skills/06-protocols/SKILL.md`).
+- Drift from the plan → protocols rule 5: stop with "replan needed" + the
+  specific drift.
 - Resume: on entry, read all phase statuses; skip `done` phases; continue
   from the first `pending`/`in-progress`.

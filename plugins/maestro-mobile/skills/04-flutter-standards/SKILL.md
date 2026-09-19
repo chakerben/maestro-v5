@@ -34,6 +34,8 @@ read its CLAUDE.md and `.claude/rules/` first and say so when they differ.
   renders; it does not own the socket, the timer or the subscription.
 - Rebuild scope: wrap the smallest subtree (`Obx`/`Consumer`/`BlocBuilder`),
   never the whole `Scaffold`.
+- Every data screen renders the 4 states: loading, empty, error (with
+  retry), data — a `FutureBuilder` with only the success branch is incomplete.
 
 ## Async & lifecycle (where Flutter apps actually break)
 
@@ -41,33 +43,20 @@ read its CLAUDE.md and `.claude/rules/` first and say so when they differ.
   `TextEditingController`, socket and recorder is **cancelled/disposed** in
   `dispose()`. A leaked audio or socket subscription survives navigation and
   double-delivers.
-- `if (!mounted) return;` after every `await` before touching state or
-  context. Never `BuildContext` across an async gap.
-- Background/foreground: a long-running capture uses a foreground service
-  (`flutter_foreground_task`) and re-checks permissions on resume; audio and
-  wakelock are released on `AppLifecycleState.paused` unless the feature is
-  explicitly a background one.
+- `if (!context.mounted) return;` (Dart 3) after every `await` before
+  touching state or context; `mounted` alone in a `State`. Never a
+  `BuildContext` across an async gap.
+- Background/foreground: observe with `AppLifecycleListener` (not a hand
+  rolled `WidgetsBindingObserver`); a long-running capture uses a foreground
+  service (`flutter_foreground_task`) and re-checks permissions on resume;
+  audio and wakelock are released on `onPause`/`onHide` unless the feature
+  is explicitly a background one.
 - Errors from streams are handled (`onError`), not left to crash the zone.
 
-## Firebase
+## Firebase & platform channels
 
-- **Never assume the default instance** when the project uses a named
-  database or a secondary app: `FirebaseFirestore.instanceFor(app: …,
-  databaseId: '<id>')`. Put it behind ONE accessor in `services/` — a
-  `FirebaseFirestore.instance` anywhere else is a silent wrong-database bug.
-- Reads are paginated and scoped (`limit`, `where`) — a collection listener
-  without bounds is a bill.
-- Security rules are the boundary, not the client: client-side filtering is
-  not authorization. Auth tokens never travel in file metadata, URLs or logs.
-- FCM topics and payload keys live in a constants file shared with the
-  backend, not as string literals across screens.
-
-## Platform channels
-
-- One Dart bridge class per channel, in `utils/` or `services/`, with the
-  channel name as a `static const`. Every native call is wrapped in
-  try/catch with a documented fallback when the platform lacks the feature
-  (iOS vs Android PiP, overlay permissions).
+Named instances, bounded reads, one bridge class per channel: see
+`references/firebase-and-channels.md` when either is in the project.
 
 ## Performance
 
@@ -78,9 +67,10 @@ read its CLAUDE.md and `.claude/rules/` first and say so when they differ.
 
 ## Secrets & config
 
-- No key, URL or token hardcoded in `lib/`: `--dart-define` or a config
-  service, with the fallback documented. Anything in the Dart bundle is
-  public — treat it as such.
+- No key, URL or token hardcoded in `lib/`: `--dart-define-from-file`
+  (one JSON per environment, git-ignored) or a config service, with the
+  fallback documented. Anything in the Dart bundle is public — treat it as
+  such.
 
 ## Test
 

@@ -11,12 +11,15 @@ The development pipeline.
 - `02-implement` — phase loop: fresh executor context per phase, assertion
   gates, one commit per phase, resume support
 - `03-brainstorm` — one question at a time, journal, devil-advocate pass,
-  routed handoff (see docs/BRAINSTORM-SUPERPOWERS.md)
+  routed handoff (`design.md` with `status: exploring | decided | dropped`)
 - `04-debug` — reproduce → isolate → cause → fix + regression test; no edit
   before a repro; resumable `debug.md`; side-findings go to `03-ticket`
 - `05-lean-code` — the ladder (skip → reuse → stdlib → platform → installed dep
   → one-liner → build), surgical changes, `debt:` markers; preloaded in the
   executor, checker and architect
+- `06-protocols` — the 6 anti-complacency rules (evidence, confidence,
+  falsifiable plan, disagree once, no silent scope change, completion
+  honesty); not user-invocable, preloaded in all 5 agents
 
 ## Agents
 
@@ -31,7 +34,7 @@ The development pipeline.
 ## References
 
 - `references/expert-postures.md` — domain postures every step adopts
-- `references/cognitive-protocols.md` — anti-complacency rules
+- `references/cognitive-protocols.md` — pointer to `06-protocols`
 
 ## Hooks
 

@@ -5,7 +5,8 @@ Workflow-time quality. No runtime enforcement.
 ## Hooks
 
 Exactly one (Philosophy rule #1): `PreToolUse(Bash)` → `bash-guard.js` —
-pure security, <20ms, fail-open. Code-diff review is the official
+accident guard, ~30–60 ms (Node start-up; the regex work itself is < 1 ms),
+fail-open. Code-diff review is the official
 security-guidance plugin's job (rule #8).
 
 ## Skills

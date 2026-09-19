@@ -1,5 +1,114 @@
 # Changelog
 
+## 5.11.0 — independent deep audit, 30 findings closed (2026-09-19)
+
+33 skills (+`maestro-dev:06-protocols`), 5 agents, still 2 hooks. An external
+pass read every file, ran `npm test`, and reproduced each defect before it was
+listed (`docs/AUDIT-5.10.0.md`). Test cases 134 → 202. Nothing in this
+release changes what the framework promises; it makes the promises true.
+
+### Fixed — things that could not work as written
+
+- **maestro-dev**: every `../references/…` path was one level off
+  (`skills/references/` does not exist) — now `${CLAUDE_PLUGIN_ROOT}/references/…`.
+  `04-review` asked the `checker` to write `review.md` while denying it Write:
+  the checker now **returns** the structured verdict and the orchestrator
+  writes the file. The secrets fallback pointed at `${CLAUDE_PLUGIN_ROOT}/../maestro-vcs`,
+  a path that does not exist in the plugin cache: `02-implement` ships its own
+  mirror of `secret-patterns.md` (`validate.js` fails if it drifts) and 05-ship /
+  04-debug use the same fallback. `00-sdlc` and `maestro-pm:02-specs` agreed on
+  where the spec lives: `tasks/<date>_<slug>/spec.md` always, `specs/spec-<slug>.md`
+  only for a new table/collection, external contract or auth change, linked from it.
+- **secret-scan.sh**: 91 s → 0.03 s on 3 000 added lines (one `grep` pass over
+  a `file<TAB>line<TAB>content` extract instead of 3 forks × 15 patterns per line).
+  `\ No newline at end of file` no longer shifts line numbers; quoted (non-ASCII)
+  paths are de-quoted; `gate:allow` accepted as `//`, `#`, `--`, `/* */`, `<!-- -->`,
+  anchored at end of line, with any secret in the reason masked. Perf test added.
+- **secret-patterns.md**: unquoted credentials (`DB_PASSWORD=…` in `.env`/YAML)
+  are caught; placeholders (`example`, `changeme`, `<your-…>`, `${…}`) are not;
+  added GitHub `gh[opsru]_`, GitLab, npm, SendGrid, Supabase, Twilio, Sentry DSN.
+- **bash-guard.js**: `git commit -m "fix: chmod 777 removed"` no longer blocked
+  (quoted strings are blanked for the rm / curl|sh / chmod rules only — the
+  .env / secret-echo / push rules still read the raw command); now also blocks
+  pipes into `/bin/bash`, `python`, `perl`, `node` and writes to
+  `/dev/(vd|xvd|mmcblk|rdisk)*`. 95 → 126 cases.
+- **install-shortcuts.sh** aborted on `$ARGUMENTS` under `set -u` and wrote
+  nothing; fixed and smoke-tested in `npm test`.
+- **validate.js** rule #2 was blind to ~65 % of `memory-sync.js` (a backtick
+  inside a regex literal was read as a template string): a real `execSync`
+  passed. Replaced by a small JS scanner; a negative test suite
+  (`validate.test.sh`, 14 cases) injects `child_process`, `dependencies`, a
+  bad router reference and expects red.
+- **flutter-rtl.md**: `DateFormat` does not do the Umm al-Qura calendar (use
+  `hijri`/`hijri_calendar`); Material directional icons already mirror under
+  RTL — `Transform.flip` on `Icons.arrow_back` double-flipped them.
+- **paths were inverted on Expo Router**: `app/**` loaded the Next.js/Prisma
+  rules on `app/(tabs)/index.tsx` while `00-mobile-standards` never loaded.
+  Web standards now match App Router file conventions only (+ `proxy.ts`,
+  Next 16); mobile standards match `app/**/*.tsx`; `01-rtl-i18n` loads on
+  Arabic locale files; UX standards no longer match `.vue`/`.svelte`.
+- **memory-sync.js**: file mode preserved across the atomic rewrite (600 stayed
+  600), stale hash searched in the fence-masked text, symlinks in the memory
+  bank ignored, 4-backtick fences containing 3-backtick fences masked correctly.
+
+### Changed
+
+- **`permissions.deny` is now real**: `00-onboard/04-scaffold` merges the
+  canonical entries (rm -rf / ~ $HOME, curl|sh, wget|sh, git push --force) into
+  the project's `.claude/settings.json`; `04-doctor` flags their absence.
+  `bash-guard.js` header names that layer instead of promising it.
+- **`maestro-dev:06-protocols`** (contract skill, ~250 tok) carries the six
+  cognitive rules and is preloaded by all five agents — "binding" is now true.
+  `m-i18n-checker` carries a standalone RTL mini-checklist, invokes
+  `maestro-mobile:01-rtl-i18n` when installed, and is actually spawned by
+  `04-review` when an `ar` locale exists. `executor` gets
+  `disallowedTools: Task, Agent`; `m-architect` gets `Edit` (append, never
+  rewrite `tech-decisions.md`) and reads the stack from the project instead
+  of a hardcoded Next/Prisma list. `plan.md` persists `mode:` and
+  `iterations:`; review findings become `phase-N+1.md`.
+- **Doctor vs onboard**: hooks counted in three buckets — Maestro (≤ 2),
+  official plugins (allowed, listed), other (smuggled). Injections test
+  existence before piping; malformed JSON is reported as malformed.
+- **maestro-mobile**: `03-store-release` is invocable by the model again (the
+  human GO is already in the process) and routed; version injection reads
+  `app.json` → `expo config` → `pubspec.yaml` → `build.gradle` and honours
+  `eas.json appVersionSource: remote`; checklist gains Apple SDK minimum,
+  Play `targetSdk`, 16 KB page size, ATT, account-deletion URL,
+  `ITSAppUsesNonExemptEncryption`; the tag is created after GO, not before.
+  `android:supportsRtl` / Expo `supportsRTL` added. New Architecture replaces
+  the Hermes note. `references/zatca.md` (QR TLV phase 1, UBL phase 2) for
+  KSA invoices; `references/sar.md` + `assets/sar-icon.svg` replace the
+  never-shipped `SarIcon`; U+20C1 documented. Firebase/platform-channel
+  sections of `04-flutter-standards` moved to a reference.
+- **maestro-web**: `03-motion` gets rung 0 "CSS scroll-driven /
+  `@starting-style` first"; design-review criticals go to `maestro-pm:03-ticket`.
+- **maestro-pm**: PRD and card templates now exist in EN/FR/AR as the
+  description always claimed; `02-specs` is stack-agnostic (Prisma diff or
+  Firestore collections, Zod or Dart models); `04-writing` AR/FR sections
+  moved to references and its own prose follows its em-dash rule.
+- **maestro-vcs**: one path for the scan (`${CLAUDE_PLUGIN_ROOT}/skills/00-commit/scripts/secret-scan.sh`);
+  PR base resolution tries `master` too; `02-release` bumps the stack's
+  version file and ignores non-semver tags; worktree fallback no longer
+  hardcodes the marketplace cache path.
+- **Tooling**: `release.sh` commits an explicit file list (no `git add -A`)
+  and only touches `gh auth` when `MAESTRO_GIT_USER` is set; `prune-installed.sh`
+  sees a `claude` run through node and refuses an unknown schema; CI runs
+  commitlint on push and the bash suites on macOS; hook budget relaxed to
+  250 ms under `CI`; npm package no longer ships `release.sh` and the audits.
+  `validate.js` also checks that every `plugin:skill` and agent named in
+  `routing.md`, `/maestro` and `install-shortcuts.sh` exists, warns on
+  undocumented frontmatter keys (against the documented list), and keeps the
+  dev mirror of `secret-patterns.md` byte-identical.
+- All brainstorm/design templates in English (plan and debug already were);
+  `design-template.md`, Flutter RTL reference and `01-rtl-i18n` Flutter section translated.
+
+### Not done (on purpose)
+
+- The first real feature through `/sdlc` (ROADMAP prerequisite) still has to
+  run on a real project — that pilot, not `npm test`, would have caught #1–#3 above.
+- `sar-icon.svg` is a simplified geometric rendering; swap in the official
+  SAMA artwork if brand fidelity matters.
+
 ## 5.10.0 — Flutter, and deference to the project (2026-09-17)
 
 32 skills. Still 2 hooks, 5 agents. Written against a real Flutter codebase

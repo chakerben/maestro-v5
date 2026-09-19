@@ -21,10 +21,17 @@ A findings report grouped by severity: 🔴 contraband / 🟠 broken / 🟡 drif
      `eslint`, `pnpm test`, or `npm test`
    - Any reference to `claude-flow` or `ruv-swarm` in settings, `.mcp.json`,
      or `~/.claude.json`
-   - More than 2 total hooks across all active settings + plugin hooks
+   - Hooks, counted in three buckets across active settings + plugin hooks:
+     **Maestro hooks** (memory-sync, bash-guard) — more than 2 = 🔴;
+     **official plugin hooks** (`*@claude-plugins-official`: LSP,
+     security-guidance…) — allowed, list them, no severity;
+     **other hooks** (any other plugin, settings, or script) — 🔴 smuggled.
 2. **🟠 Broken scan.** `maestro_docs/` missing pieces; `<maestro_memory>`
    block absent or referencing missing files; expected Maestro plugins not
-   in `claude plugin list`; LSP plugin installed but its binary not on PATH.
+   in `claude plugin list`; LSP plugin installed but its binary not on PATH;
+   `permissions.deny` canonical entries missing from `.claude/settings.json`
+   (the list is in onboard `04-scaffold` step 4b — bash-guard is only the
+   accident guard, `permissions.deny` is the enforced layer).
 3. **🟡 Drift scan.** Memory files untouched > 60 days; tier-1 context over
    the 200-line budget (delegate detail to gardener 01-measure); official
    plugin recommendations for this stack not installed.

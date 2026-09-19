@@ -12,7 +12,7 @@ DEFAULT PATHS
 ALWAYS ON
 - lean-code ladder on every line: skip → reuse → stdlib → platform → installed dep → one-liner → build
 - library-specific code (Prisma, Clerk, Next, Expo, GSAP…) → context7 first, never memory of an older major
-- `ar` locale or Arabic mentioned → maestro-mobile:01-rtl-i18n rules apply (it has a Flutter section); Arabic PDF → 02-pdf-rtl
+- `ar` locale or Arabic mentioned → maestro-mobile:01-rtl-i18n rules apply (it has a Flutter section); Arabic PDF → 02-pdf-rtl · store submission → 03-store-release
 - Flutter project (pubspec.yaml, lib/**.dart) → maestro-mobile:04-flutter-standards loads by path
 - the project states its own commit format, branch naming or version rule (CLAUDE.md, .claude/rules/) → it wins over Maestro's defaults; say which one you followed
 - prose a human reads (README, PR, client message) → maestro-pm:04-writing; AR register per 04-writing

@@ -16,8 +16,9 @@ A PRD answers WHY and FOR WHOM before anyone discusses HOW.
    today and how do they cope; what changes for them if this ships; how do we
    know it worked (a measurable signal); what is explicitly OUT of v1;
    deadline/constraints.
-2. Draft from `assets/prd-template.md`. Every section filled or marked
-   `TBD (owner: <who>)` — no silent gaps.
+2. Draft from the template matching the user's language:
+   `assets/prd-template.md` (EN), `prd-template.fr.md`, `prd-template.ar.md`.
+   Every section filled or marked `TBD (owner: <who>)` — no silent gaps.
 3. **Shadow pass**: scan your own draft for blind spots per category —
    edge users, empty/first-run experience, failure paths, i18n/RTL market,
    legal/compliance (Saudi context: data residency, VAT on invoices),

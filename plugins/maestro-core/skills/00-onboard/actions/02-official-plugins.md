@@ -60,4 +60,4 @@ is either absorbed into Maestro skills or rejected — do not re-suggest it.
 - No plugin was installed without explicit approval in this session.
 - Every installed plugin appears in `claude plugin list`.
 - LSP binaries were verified or the user was clearly told what to install.
-- No third-party hook was installed (`claude plugin list` + `.claude/settings.json` show ≤ 2 Maestro hooks and nothing else).
+- No third-party hook was installed: `claude plugin list` + `.claude/settings.json` show ≤ 2 Maestro hooks, hooks from `@claude-plugins-official` plugins only (LSP, security-guidance — allowed), and nothing else.

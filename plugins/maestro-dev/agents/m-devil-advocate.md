@@ -7,6 +7,8 @@ role: reviewer
 tools: Read, Grep, Glob
 disallowedTools: Write, Edit, MultiEdit, NotebookEdit, Bash
 maxTurns: 15
+skills:
+  - maestro-dev:06-protocols
 ---
 
 # Role

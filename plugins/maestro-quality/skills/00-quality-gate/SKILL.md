@@ -2,7 +2,6 @@
 name: 00-quality-gate
 description: Configure or run the project quality gate levels (off, standard, high, paranoid). Use to set the gate level, check current config, or run the gate on demand outside a commit. The commit-time execution itself lives in maestro-vcs:00-commit.
 argument-hint: "status | set <level> | run"
-arguments: [action, level]
 allowed-tools: Bash   # turn-scoped: the !`…` injections above use shell builtins, pipes and $(…) that pattern grants do not cover
 ---
 
@@ -12,7 +11,7 @@ allowed-tools: Bash   # turn-scoped: the !`…` injections above use shell built
 
 !`cat maestro_docs/gates.json 2>/dev/null || echo '(no maestro_docs/gates.json → level standard by default)'`
 
-Requested: `$action` `$level`
+Requested: `$ARGUMENTS` (first word = action, second = level)
 
 Owns `maestro_docs/gates.json` and the on-demand gate run.
 
@@ -24,7 +23,11 @@ Owns `maestro_docs/gates.json` and the on-demand gate run.
   scan still always runs at commit".
 - `run` — execute the current level's checks on the working tree NOW (same
   logic as maestro-vcs:00-commit action 01, without committing). Useful
-  before a review or as a health pulse.
+  before a review or as a health pulse. The secrets scan lives in
+  maestro-vcs: when it is installed, invoke `maestro-vcs:00-commit` action
+  01 (`gate`) — its `!` injection runs `secret-scan.sh` before the skill is
+  read; when it is not installed, say plainly that the secrets scan did NOT
+  run (never report "clean" for a scan that never happened).
 
 ## Rules
 
@@ -36,6 +39,8 @@ Owns `maestro_docs/gates.json` and the on-demand gate run.
 
 - `set <level>` wrote `maestro_docs/gates.json` with exactly `{ "level": "<level>" }`
   and refused any value outside off|standard|high|paranoid.
-- `run` at level `off` still executed the secrets scan and printed its result.
+- `run` at level `off` still executed the secrets scan (via
+  maestro-vcs:00-commit) and printed its result — or stated that maestro-vcs
+  is not installed and the scan did not run.
 - `run` executed no check with `--silent`, and reported each command with its
   exit code and duration.

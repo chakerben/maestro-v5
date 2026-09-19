@@ -51,10 +51,28 @@ commiter par chemins. <port de dev à décaler / services partagés du projet>
 ```
 4. Run the memory-sync logic once so the `<maestro_memory>` block appears
    immediately (the hook will maintain it from now on).
+4b. Merge the canonical `permissions.deny` entries into the project's
+   `.claude/settings.json` (create the file with `{}` if absent; parse it,
+   never regex it; keep every other key and every existing deny entry; add
+   only the entries below that are missing; write back pretty-printed). The
+   `bash-guard` hook is the accident guard — this list is the enforced layer
+   the platform applies, and nothing else installs it:
+
+```
+Bash(rm -rf /)        Bash(rm -rf /*)       Bash(rm -rf ~)      Bash(rm -rf ~/*)
+Bash(rm -rf $HOME)    Bash(curl * | bash)   Bash(curl * | sh)
+Bash(wget * | bash)   Bash(wget * | sh)     Bash(git push --force*)  Bash(git push -f*)
+```
+
+   Show the diff before writing. If `.claude/settings.json` is malformed
+   JSON, stop and report — never overwrite a file you could not parse.
 5. Report created vs skipped files.
 
 ## Test
 
 - `maestro_docs/memory/project-brief.md` exists and contains real content.
 - `CLAUDE.md` contains a `<maestro_memory>` block referencing the memory files.
-- Re-running this action changes nothing (idempotent).
+- `.claude/settings.json` parses, its `permissions.deny` contains all 11
+  canonical entries, and every key/entry that was there before is still there.
+- Re-running this action changes nothing (idempotent) — including
+  `.claude/settings.json`, byte for byte.

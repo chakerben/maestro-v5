@@ -2,56 +2,56 @@
 status: exploring      # exploring | decided | dropped
 created: <yyyy-mm-dd>
 slug: <slug>
-posture: <expert posture adoptée>
+posture: <expert posture adopted>
 ---
 
-# Design — <titre>
+# Design — <title>
 
-## Problème
+## Problem
 
-<une phrase, avec les seuls mots de la demande>
+<one sentence, using only the words of the request>
 
-## Contexte lu
+## Context read
 
-- `<chemin>` — <ce qu'il apprend>
+- `<path>` — <what it teaches>
 
-## Inconnues
+## Unknowns
 
-1. <question, la plus structurante d'abord>
+1. <question, most shape-changing first>
 2. <question>
 
 ## Journal
 
-### Q1 — <la question, telle que posée>
-Réponse : <telle que donnée>
-Change : <ce que ça ferme, ouvre ou déplace>
+### Q1 — <the question, as asked>
+Answer: <as given>
+Changes: <what it closes, opens, or moves>
 
-## Inconnues laissées ouvertes
+## Open unknowns
 
-- <inconnue> — <pourquoi on la laisse ouverte>
+- <unknown> — <why it is left open>
 
-## Approches
+## Approaches
 
-### A — <nom>
-<deux lignes> · Coût : <effort, dépendances, ce que ça rend plus dur ensuite>
-Gagne si : <condition>
+### A — <name>
+<two lines> · Cost: <effort, dependencies, what it makes harder later>
+Wins if: <condition>
 
-### B — <nom>
-<deux lignes> · Coût : <...>
-Gagne si : <condition>
+### B — <name>
+<two lines> · Cost: <...>
+Wins if: <condition>
 
-### C — ne pas construire
-Gagne si : <condition>
+### C — do not build
+Wins if: <condition>
 
-## Décision
+## Decision
 
-**Choix** : <A | B | ne pas construire>
-**Rejeté** : <l'alternative> — <pourquoi elle perd>
-**Repose sur** : <la condition qui doit rester vraie>
+**Choice**: <A | B | do not build>
+**Rejected**: <the alternative> — <why it loses>
+**Rests on**: <the condition that must stay true>
 
-**Devil-advocate** : <verdict verbatim>
-- <risque 1> → <accepté par écrit | réponse>
+**Devil-advocate**: <verdict verbatim>
+- <risk 1> → <accepted in writing | answered>
 
-## Suite
+## Next
 
-<un seul destinataire> — `maestro_docs/tasks/<yyyy_mm_dd>_<slug>/`
+<one destination> — `maestro_docs/tasks/<yyyy_mm_dd>_<slug>/`

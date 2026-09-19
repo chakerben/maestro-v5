@@ -179,5 +179,54 @@ rm -rf "$T/p"; mkdir -p "$T/p/maestro_docs"; echo x > "$T/p/maestro_docs/memory"
 run
 chk "memory is a file: untouched" "$(cat "$T/p/CLAUDE.md")" "# foreign"
 
+# 18. A 4-backtick fence containing a 3-backtick fence: the inner one does not
+#     close the outer one, so a block quoted inside is still documentation.
+fixture <<'EOF'
+# P
+````md
+```
+<maestro_routing>
+quoted example
+</maestro_routing>
+```
+````
+EOF
+run
+chk "nested fence: example untouched" "$(grep -c '^quoted example' "$T/p/CLAUDE.md")" "1"
+chk "nested fence: real router appended once" "$(grep -c "maestro-routing $HASH" "$T/p/CLAUDE.md")" "1"
+
+# 19. A current hash line quoted inside a fence must not pass a stale real block off as current.
+fixture <<EOF
+# P
+\`\`\`
+<!-- maestro-routing $HASH — managed by maestro-core, edit references/routing.md instead -->
+\`\`\`
+<maestro_routing>
+stale
+</maestro_routing>
+EOF
+run
+chk "hash in fence: stale block refreshed" "$(grep -c '^stale$' "$T/p/CLAUDE.md")" "0"
+chk "hash in fence: exactly one real block" "$(grep -c '^<maestro_routing>' "$T/p/CLAUDE.md")" "1"
+
+# 20. A symlink in maestro_docs/memory is never listed (never follow a link out of the project).
+fixture <<'EOF'
+# P
+EOF
+echo "# outside" > "$T/outside.md"; ln -s "$T/outside.md" "$T/p/maestro_docs/memory/link.md"
+run
+chk "symlinked memory file: not referenced" "$(grep -c 'link.md' "$T/p/CLAUDE.md")" "0"
+chk "symlinked memory file: real file still referenced" "$(grep -c '@maestro_docs/memory/a.md' "$T/p/CLAUDE.md")" "1"
+
+# 21. The rewritten CLAUDE.md keeps the original file mode.
+fixture <<'EOF'
+# P
+EOF
+chmod 600 "$T/p/CLAUDE.md"
+run
+MODE=$(node -e 'console.log((require("fs").statSync(process.argv[1]).mode & 0o777).toString(8))' "$T/p/CLAUDE.md")
+chk "file mode preserved (600)" "$MODE" "600"
+chk "file mode: block was written" "$(grep -c '^<maestro_memory>' "$T/p/CLAUDE.md")" "1"
+
 echo "memory-sync: $PASS passed, $FAIL failed"
 [ "$FAIL" = "0" ] || exit 1

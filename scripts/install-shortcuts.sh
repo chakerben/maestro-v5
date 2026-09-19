@@ -31,7 +31,7 @@ mkdir -p "$DIR"
 mk() { # $1=nom  $2=skill cible  $3=description  $4=hint
 cat > "$DIR/$1.md" << EOF
 ---
-description: $3
+description: "$3"
 argument-hint: "$4"
 ---
 
@@ -44,7 +44,7 @@ echo "  ✅ /$1  →  $2"
 }
 
 echo "📦 Installation des raccourcis Maestro dans $DIR"
-mk menu    "maestro-core command /maestro (run it: /maestro $ARGUMENTS)" "Show the Maestro capability map grouped by intent" ""
+mk menu    "maestro-core command /maestro (run it: /maestro \$ARGUMENTS)" "Show the Maestro capability map grouped by intent" ""
 mk onboard "maestro-core:00-onboard"   "Onboard this project into Maestro 5 (stack detection, plugins, memory)" ""
 mk sdlc    "maestro-dev:00-sdlc"       "Full pipeline: spec → plan → implement → review → ship" "<feature>"
 mk auto    "maestro-dev:00-sdlc"       "Full pipeline UNATTENDED (auto mode, hard stops only)" "<feature>"

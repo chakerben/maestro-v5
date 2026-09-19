@@ -8,7 +8,7 @@ Turn the journal into a decision that survives contact with a reviewer.
 
 ## Output
 
-`## Approches` and `## Décision` filled, devil-advocate verdict quoted.
+`## Approaches` and `## Decision` filled, devil-advocate verdict quoted.
 
 ## Process
 
@@ -16,7 +16,7 @@ Turn the journal into a decision that survives contact with a reviewer.
    (effort, dependencies, what it makes harder later), and the condition under
    which it wins. Approaches that differ only in naming are one approach —
    find a genuinely different shape or say plainly that only one exists.
-   One legitimate approach is always on the table: **ne pas construire**. Write
+   One legitimate approach is always on the table: **do not build**. Write
    it when the journal supports it.
 2. **Name your recommendation and the condition it rests on.** "A, tant que le
    volume reste sous X" is a recommendation. "A me semble mieux" is a
@@ -28,7 +28,7 @@ Turn the journal into a decision that survives contact with a reviewer.
    about to send contains "ne signale pas", "ce n'est pas un défaut ici", "le
    contexte justifie" — rewrite it: you are pre-judging to spare yourself a
    round.
-4. **Quote the verdict verbatim** in `## Décision`, then answer it. On
+4. **Quote the verdict verbatim** in `## Decision`, then answer it. On
    `reconsider`, the recommendation changes or the reason it survives is
    written down. An unanswered objection is a decision made in the dark.
 5. **Record the decision**: the choice, the alternative that lost, and why it
@@ -41,7 +41,7 @@ Turn the journal into a decision that survives contact with a reviewer.
 ## Test
 
 - Every approach states a cost and the condition under which it wins.
-- `## Décision` names one rejected alternative and the reason it lost.
+- `## Decision` names one rejected alternative and the reason it lost.
 - The devil-advocate verdict is present verbatim, and each of its top risks is
   either accepted in writing or answered.
 - `status` is `decided` or `dropped`, never left at `exploring`.

@@ -1,8 +1,8 @@
 ---
 name: 03-brainstorm
 description: Use when the request names a problem but not a solution, when two or more approaches are plausible and the trade-off has not been made, when the ask contains "je pense à", "comment on ferait", "quelle est la meilleure façon", "est-ce qu'on devrait", or when a plan would be guesswork because the shape of the thing is still open. Not for a request that already states its objective and acceptance criteria, not for product framing with users and metrics, not for diagnosing behaviour that already exists.
-argument-hint: "<l'idée, en une phrase>"
 effort: high
+argument-hint: "<l'idée, en une phrase>"
 ---
 
 # Skill: brainstorm
@@ -52,9 +52,10 @@ solution, and write down the ones you are leaving open anyway.
 **The decision names the alternative that lost, and why.** A decision with no
 rejected alternative is a preference wearing a decision's clothes.
 
-**Adopt the domain's expert posture** (`../references/expert-postures.md`) and
-apply `../references/cognitive-protocols.md` rule 2 — state confidence, name the
-specific unknown rather than smoothing over it.
+**Adopt the domain's expert posture**
+(`${CLAUDE_PLUGIN_ROOT}/references/expert-postures.md`) and apply protocols
+rule 2 (`${CLAUDE_PLUGIN_ROOT}/skills/06-protocols/SKILL.md`) — state
+confidence, name the specific unknown rather than smoothing over it.
 
 **When the project has an `ar` locale**, the market questions are asked
 unprompted: numerals arab or latn, Hijri or Gregorian, who reads this in Arabic

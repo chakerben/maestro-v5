@@ -4,9 +4,12 @@ description: React Native / Expo standards — project structure, navigation, st
 user-invocable: false
 paths:
   - "app.json"
-  - "app.config.*"
+  - "app.config.{js,ts}"
   - "eas.json"
+  - "expo-env.d.ts"
   - "metro.config.*"
+  - "app/**/*.tsx"
+  - "app/_layout.tsx"
   - "android/**"
   - "ios/**"
   - "**/*.native.*"
@@ -19,8 +22,9 @@ violated rule when reviewing.
 
 ## Stack defaults
 
-- **Expo managed workflow** with expo-router (file-based). Bare only with a
-  written reason in tech-decisions.md.
+- **Expo with CNG/prebuild** (no committed `android/` `ios/` unless needed)
+  and expo-router (file-based). Bare only with a written reason in
+  tech-decisions.md.
 - TypeScript strict. Zod at every boundary (API responses, deep links, storage).
 - State: server state → TanStack Query; local UI state → component state;
   the rare true-global → Zustand. No Redux by default.
@@ -28,11 +32,13 @@ violated rule when reviewing.
 
 ## Non-negotiables
 
-- **Hermes enabled.** Check app.json/gradle before perf work.
+- **New Architecture is the only architecture on RN 0.82+ / SDK 54+**: every
+  native lib must support it (check before adding).
 - Every screen handles the 4 states: loading, empty, error (with retry), data.
 - Lists: FlatList/FlashList with stable `keyExtractor`; row components
   memoized; never `.map()` for long scrollables.
-- Animations on the UI thread (Reanimated) — no JS-thread `Animated` loops.
+- Animations: Reanimated worklets or `Animated` with `useNativeDriver: true`;
+  never JS-thread animation loops.
 - Images: expo-image (caching, placeholders), explicit dimensions.
 - Safe areas via react-native-safe-area-context — never hardcoded insets.
 - Touch targets >= 44pt. Test on a small device profile, not just the simulator default.

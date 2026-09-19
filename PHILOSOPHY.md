@@ -42,7 +42,8 @@ in the context, not in a promise.
 The skill index and the routing block are paid in every session; a
 preloaded skill is paid in every agent dispatch. `scripts/context-budget.js`
 holds the ceilings (index ≤ 11k chars, router ≤ 2k, agent dispatch ≤ 6k,
-hooks ≤ 100 ms) and fails `npm test` past them. Standards load for the
+hooks ≤ 100 ms, relaxed to 250 ms under `CI` where Node itself starts
+slowly) and fails `npm test` past them. Standards load for the
 stack at hand — a web phase never pays for mobile rules, a project without
 Arabic never pays for RTL rules.
 

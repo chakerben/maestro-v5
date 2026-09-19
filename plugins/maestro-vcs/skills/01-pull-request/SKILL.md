@@ -13,7 +13,7 @@ Branch and tree:
 !`echo "branch: $(git branch --show-current)"; git status --short | head -10; [ -z "$(git status --porcelain)" ] && echo "tree: clean" || echo "tree: DIRTY"`
 
 Commits on this branch vs the default branch:
-!`B=$(git rev-parse --verify -q origin/main >/dev/null && echo origin/main || echo main); git log --oneline "$B..HEAD" 2>/dev/null | head -30 || echo "(no base branch found)"`
+!`B=""; for b in origin/main main origin/master master; do git rev-parse --verify -q "$b" >/dev/null && { B="$b"; break; }; done; if [ -n "$B" ]; then echo "base: $B"; git log --oneline "$B..HEAD" | head -30; else echo "(no base branch found: origin/main, main, origin/master, master)"; fi`
 
 Secrets scan of the WHOLE branch diff (every commit, whatever created it):
 !`bash "${CLAUDE_PLUGIN_ROOT}/skills/00-commit/scripts/secret-scan.sh" branch`

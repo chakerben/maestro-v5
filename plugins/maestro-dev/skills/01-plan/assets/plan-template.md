@@ -3,6 +3,7 @@ status: pending        # pending | in-progress | implemented | reviewed | blocke
 created: <yyyy-mm-dd>
 slug: <slug>
 mode: interactive      # interactive | auto
+iterations: 0          # review loops so far; blocked at 3
 ---
 
 # Plan — <title>

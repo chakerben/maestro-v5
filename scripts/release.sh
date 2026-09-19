@@ -49,7 +49,7 @@ ask()  {
 
 cd "$(dirname "$0")/.."
 ROOT=$(pwd)
-CURRENT=$(node -p "require('$ROOT/package.json').version")
+CURRENT=$(node -e 'console.log(JSON.parse(require("fs").readFileSync(process.argv[1]+"/package.json","utf8")).version)' "$ROOT")
 [ -n "$VERSION" ] || VERSION="$CURRENT"
 TAG="v$VERSION"
 
@@ -77,34 +77,39 @@ else
   ok "pas de verrou git"
 fi
 
-# ── 0b. Identité GitHub ─────────────────────────────────────
-# Le dépôt vit sous le compte `chakerben`. Sur une machine avec plusieurs
-# comptes gh (arabiipte, client…), un push part avec le compte ACTIF de gh —
-# pas forcément le bon. On bascule explicitement, et on épingle le compte
-# dans la config LOCALE du dépôt pour que le credential helper le retienne.
-GIT_USER="${MAESTRO_GIT_USER:-chakerben}"
-step "0b/5 Identité GitHub ($GIT_USER)"
-if command -v gh >/dev/null 2>&1; then
-  ACTIVE=$(gh api user -q .login 2>/dev/null || echo "")
-  if [ "$ACTIVE" = "$GIT_USER" ]; then
-    ok "gh est déjà sur $GIT_USER"
-  else
-    act "gh auth switch --user $GIT_USER (actif : ${ACTIVE:-aucun})"
-    if [ "$DRY_RUN" = "0" ]; then
-      gh auth switch --user "$GIT_USER" >/dev/null 2>&1 \
-        || { err "gh ne connaît pas le compte $GIT_USER — lance : gh auth login --hostname github.com (choisir $GIT_USER)"; exit 1; }
-      ACTIVE=$(gh api user -q .login 2>/dev/null || echo "")
-      [ "$ACTIVE" = "$GIT_USER" ] && ok "gh basculé sur $GIT_USER" || { err "bascule ratée (actif : ${ACTIVE:-aucun})"; exit 1; }
+# ── 0b. Identité GitHub (opt-in) ────────────────────────────
+# Sur une machine avec plusieurs comptes gh, un push part avec le compte ACTIF
+# de gh — pas forcément le bon. Si MAESTRO_GIT_USER est défini, on bascule
+# explicitement et on épingle le compte dans la config LOCALE du dépôt pour
+# que le credential helper le retienne. Sinon on ne touche pas à gh.
+GIT_USER="${MAESTRO_GIT_USER:-}"
+if [ -n "$GIT_USER" ]; then
+  step "0b/5 Identité GitHub ($GIT_USER)"
+  if command -v gh >/dev/null 2>&1; then
+    ACTIVE=$(gh api user -q .login 2>/dev/null || echo "")
+    if [ "$ACTIVE" = "$GIT_USER" ]; then
+      ok "gh est déjà sur $GIT_USER"
+    else
+      act "gh auth switch --user $GIT_USER (actif : ${ACTIVE:-aucun})"
+      if [ "$DRY_RUN" = "0" ]; then
+        gh auth switch --user "$GIT_USER" >/dev/null 2>&1 \
+          || { err "gh ne connaît pas le compte $GIT_USER — lance : gh auth login --hostname github.com (choisir $GIT_USER)"; exit 1; }
+        ACTIVE=$(gh api user -q .login 2>/dev/null || echo "")
+        [ "$ACTIVE" = "$GIT_USER" ] && ok "gh basculé sur $GIT_USER" || { err "bascule ratée (actif : ${ACTIVE:-aucun})"; exit 1; }
+      fi
     fi
+    if ! git config --get credential.helper 2>/dev/null | grep -q gh; then
+      warn "git n'utilise pas gh comme credential helper — lance une fois : gh auth setup-git"
+    fi
+  else
+    warn "gh introuvable : impossible de garantir que le push part avec $GIT_USER"
   fi
-  if ! git config --get credential.helper 2>/dev/null | grep -q gh; then
-    warn "git n'utilise pas gh comme credential helper — lance une fois : gh auth setup-git"
-  fi
+  act "git config --local credential.username $GIT_USER"
+  [ "$DRY_RUN" = "0" ] && git config --local credential.username "$GIT_USER"
 else
-  warn "gh introuvable : impossible de garantir que le push part avec $GIT_USER"
+  step "0b/5 Identité GitHub"
+  ok "compte gh actif inchangé (MAESTRO_GIT_USER=<login> pour en imposer un)"
 fi
-act "git config --local credential.username $GIT_USER"
-[ "$DRY_RUN" = "0" ] && git config --local credential.username "$GIT_USER"
 if [ -z "$(git config --get user.name)" ] || [ -z "$(git config --get user.email)" ]; then
   err "user.name / user.email git non définis — git config user.name 'Chaker Ben Moussa' && git config user.email <ton email>"; exit 1
 fi
@@ -156,11 +161,25 @@ step "2/5 Commit"
 if [ -z "$(git status --porcelain)" ]; then
   ok "rien à committer"
 else
-  git status --short | sed 's/^/     /'
-  if ask "Committer tout ce qui précède ?"; then
+  # Seuls les fichiers de la release entrent dans le commit : les 9 manifestes
+  # bumpés + CHANGELOG.md. Tout autre changement en cours reste hors du commit.
+  RELEASE_FILES=(package.json .claude-plugin/marketplace.json CHANGELOG.md)
+  for f in plugins/*/.claude-plugin/plugin.json; do RELEASE_FILES+=("$f"); done
+  act "git add -- ${RELEASE_FILES[*]}"
+  if [ "$DRY_RUN" = "0" ]; then
+    git add -- "${RELEASE_FILES[@]}"
+    git diff --stat --cached | sed 's/^/     /'
+  else
+    git diff --stat HEAD -- "${RELEASE_FILES[@]}" | sed 's/^/     /'
+  fi
+  OTHER=$(git status --porcelain | grep -v '^[MARC] ' || true)
+  [ -z "$OTHER" ] || { warn "hors commit (non ajouté) :"; echo "$OTHER" | sed 's/^/     /'; }
+  if [ "$DRY_RUN" = "0" ] && [ -z "$(git diff --cached --name-only)" ]; then
+    warn "aucun fichier de release modifié — rien à committer"
+  elif ask "Committer les fichiers ci-dessus ?"; then
     read -r -p "  Message (vide = 'chore(release): $TAG') : " MSG || MSG=""
     [ -n "$MSG" ] || MSG="chore(release): $TAG"
-    git add -A && git commit -q -m "$MSG"
+    git commit -q -m "$MSG"
     ok "commit : $(git rev-parse --short HEAD)"
   elif [ "$DRY_RUN" = "1" ]; then
     warn "commit NON créé (dry-run)"

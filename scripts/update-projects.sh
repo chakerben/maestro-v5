@@ -22,7 +22,7 @@ set -uo pipefail
 PROJECTS_ROOT="${PROJECTS_ROOT:-$HOME/Documents/Projects}"
 MARKETPLACE="maestro"
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-EXPECTED=$(node -p "require('$REPO_ROOT/package.json').version" 2>/dev/null || echo "?")
+EXPECTED=$(node -e 'console.log(JSON.parse(require("fs").readFileSync(process.argv[1]+"/package.json","utf8")).version)' "$REPO_ROOT" 2>/dev/null || echo "?")
 DRY_RUN=0; ALL=0; LIST_ONLY=0
 PROJECTS=()
 

@@ -61,7 +61,7 @@ function listMd(dir) {
     .readdirSync(dir, { withFileTypes: true })
     .filter(
       (e) =>
-        (e.isFile() || e.isSymbolicLink()) &&
+        e.isFile() && // dirents are lstat-like: a symlink is not a file, never follow it
         SAFE_NAME.test(e.name) &&
         !EXCLUDED.has(e.name)
     )
@@ -115,11 +115,16 @@ function buildBlock(memoryPath) {
  */
 function maskFences(content) {
   const lines = content.split('\n');
-  let inFence = false;
+  let fence = null; // { ch, len } of the open fence; a closer needs same char, ≥ len (CommonMark)
   return lines
     .map((l) => {
-      if (/^\s*(```|~~~)/.test(l)) { inFence = !inFence; return '#'.repeat(l.length); }
-      return inFence ? '#'.repeat(l.length) : l;
+      const m = /^\s*(`{3,}|~{3,})/.exec(l);
+      if (m) {
+        const ch = m[1][0], len = m[1].length;
+        if (!fence) { fence = { ch, len }; return '#'.repeat(l.length); }
+        if (ch === fence.ch && len >= fence.len) { fence = null; return '#'.repeat(l.length); }
+      }
+      return fence ? '#'.repeat(l.length) : l;
     })
     .join('\n');
 }
@@ -172,9 +177,12 @@ function buildRoutingBlock() {
 
 /** Only the routing block: replace if present and stale, append if absent. */
 function applyRouting(content, newBlock) {
-  const matches = maskFences(content).match(ROUTING_RE) || [];
+  const masked = maskFences(content);
+  const matches = masked.match(ROUTING_RE) || [];
   const hashLine = newBlock.split('\n')[1];
-  if (matches.length === 1 && content.includes(hashLine)) return content; // up to date
+  // Look for the hash in the masked text: a hash quoted inside a code fence
+  // must not pass a stale real block off as current.
+  if (matches.length === 1 && masked.includes(hashLine)) return content; // up to date
   return applyBlock(content, newBlock, ROUTING_RE, ROUTING_OPEN, ROUTING_CLOSE);
 }
 
@@ -209,6 +217,14 @@ function acquireLock(lockPath) {
 function writeAtomic(target, content) {
   const tmp = `${target}.${process.pid}.tmp`;
   fs.writeFileSync(tmp, content, 'utf8');
+  try {
+    // rename() replaces the inode: carry the mode over (a 0644 file must not
+    // come back as umask-default). Best effort — a failure here is not a reason
+    // to skip the sync.
+    fs.chmodSync(tmp, fs.statSync(target).mode & 0o7777);
+  } catch {
+    /* fail open */
+  }
   try {
     fs.renameSync(tmp, target);
   } catch (e) {

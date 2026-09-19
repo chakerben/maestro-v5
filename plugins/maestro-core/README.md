@@ -28,5 +28,16 @@ a skill name.
 Exactly one (Philosophy rule #1):
 
 - `SessionStart` → `memory-sync.js` — keeps the `<maestro_memory>` block in
-  CLAUDE.md in sync with `maestro_docs/memory/`. Measured at ~30ms,
-  fail-open, no subprocesses.
+  CLAUDE.md in sync with `maestro_docs/memory/`, and the `<maestro_routing>`
+  block in sync with `references/routing.md`. Measured at ~40 ms, fail-open,
+  no subprocesses.
+
+What that means for your repo:
+
+- **CLAUDE.md is rewritten at session start** whenever the memory bank or the
+  router changes — in practice, after every Maestro release. Either keep
+  CLAUDE.md out of version control, or expect a `chore: sync CLAUDE.md`
+  commit in each project after a release. Never hand-edit the two blocks.
+- **Add to `.gitignore`**: `.claude-md.maestro.lock` (the write lock) and
+  `CLAUDE.md.*.tmp` (the atomic-write staging file). Both are transient and
+  only survive a crash mid-write.

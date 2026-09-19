@@ -22,9 +22,9 @@ restated and the unknowns listed. No question asked yet.
    is an assumption: it goes in the unknowns, not the restatement.
 3. **Read before claiming.** Open the memory bank (`project-brief.md`,
    `tech-decisions.md`, `patterns.md`) and the two or three files the request
-   most plausibly touches. Record what you read in `## Contexte lu`, with paths.
+   most plausibly touches. Record what you read in `## Context read`, with paths.
 4. **Detect the domain** and announce the expert posture you are adopting
-   (`../../references/expert-postures.md`). The posture decides which unknowns
+   (`${CLAUDE_PLUGIN_ROOT}/references/expert-postures.md`). The posture decides which unknowns
    are shape-changing: an auth feature makes "who can call this" a shape
    question, a UI feature makes "what does the empty state say" one.
 5. **List the unknowns**, each as a question you could actually ask a human,
@@ -32,12 +32,12 @@ restated and the unknowns listed. No question asked yet.
    ones the codebase already answers — those are not questions, those are reads.
 6. **Check the off-ramp.** Objective already one sentence, one reasonable
    approach, conventions already recorded → say so and hand off to
-   `maestro-dev:01-plan`. Set `status: dropped` with the reason "off-ramp:
-   pas de question ouverte".
+   `maestro-dev:01-plan`. Set `status: dropped` with the reason "off-ramp: no
+   open question".
 
 ## Test
 
 - The restatement contains no term absent from the request.
-- Every claim in `## Contexte lu` carries a path.
+- Every claim in `## Context read` carries a path.
 - The unknowns are ordered, and each is phrased as a question.
 - Unknowns the codebase already answers are marked as read, not asked.
