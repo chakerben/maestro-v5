@@ -14,7 +14,7 @@
 /plugin install maestro-core@maestro
 ```
 
-Then in any project:
+Then in any project (or on the whole fleet: `scripts/fleet-apply.sh --settings --doctor --all`):
 
 ```text
 /maestro-core:00-onboard

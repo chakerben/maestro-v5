@@ -30,6 +30,8 @@
     "scripts/gwt",
     "scripts/install-shortcuts.sh",
     "scripts/update-projects.sh",
+    "scripts/fleet-apply.sh",
+    "scripts/lib/",
     "scripts/prune-installed.sh",
     "PHILOSOPHY.md",
     "CHANGELOG.md",
@@ -37,7 +39,7 @@
   ],
   "scripts": {
     "validate": "node scripts/validate.js",
-    "test": "node scripts/check-versions.js && node scripts/validate.js && node scripts/context-budget.js && bash scripts/tests/bash-guard.test.sh && bash scripts/tests/memory-sync.test.sh && bash scripts/tests/secret-scan.test.sh && bash scripts/tests/install-shortcuts.test.sh && bash scripts/tests/validate.test.sh",
+    "test": "node scripts/check-versions.js && node scripts/validate.js && node scripts/context-budget.js && bash scripts/tests/bash-guard.test.sh && bash scripts/tests/memory-sync.test.sh && bash scripts/tests/secret-scan.test.sh && bash scripts/tests/install-shortcuts.test.sh && bash scripts/tests/validate.test.sh && bash scripts/tests/fleet-apply.test.sh",
     "test:platform": "for p in plugins/*; do claude plugin validate --strict \"$p\" || exit 1; done",
     "budget": "node scripts/context-budget.js"
   }

@@ -2,6 +2,19 @@
 
 ## 5.12.0 — model ladder (2026-09-19)
 
+### Added — fleet
+
+- **`scripts/fleet-apply.sh`** — applies Maestro to every project that uses it,
+  without opening 36 sessions: `--settings` (no LLM: merges the canonical
+  `permissions.deny` entries and `"model": "sonnet"` into each project's
+  `.claude/settings.json`, idempotent, never overwrites an existing value,
+  refuses malformed JSON), `--doctor` (`claude -p "/maestro-core:04-doctor check"`,
+  read-only), `--scaffold` (`claude -p "/maestro-core:00-onboard scaffold"`
+  with `acceptEdits`). `--list`, `--dry-run`, `--jobs N` (default 1 — the
+  fleet rule), `--model` (default sonnet: both actions are mechanical), logs
+  and a `summary.tsv` under `~/.maestro/fleet/<run>/`. Project discovery moved
+  to `scripts/lib/fleet.sh`, shared with `update-projects.sh`. 9 tests.
+
 33 skills, 6 agents, still 2 hooks. One rule, applied everywhere: **Sonnet
 executes, Fable thinks, Opus only when critical** — complexity picks the
 model, never length. Quality stays where it was (the workflow); the expert
