@@ -2,6 +2,7 @@
 name: 02-specs
 description: Write the technical spec for a story or feature — API contracts, data model changes, integration points, non-functional requirements. Use only when the change adds a new table/collection, a new external contract, or changes auth; otherwise maestro-dev:00-sdlc's inline spec suffices. Not for product framing (00-prd).
 argument-hint: "<story path or feature>"
+model: fable
 ---
 
 # Skill: specs

@@ -11,6 +11,9 @@
  *   - a reviewer agent (frontmatter `role: reviewer`) carrying a tool that
  *     can write
  *   - a skill with no `## Test` anywhere (Philosophy rule #4, two shapes)
+ *   - a model pin outside the ladder (maestro-core references/model-policy.md):
+ *     an agent without a model, an opus pin with no stated criticality, a
+ *     think-step not on fable
  */
 'use strict';
 const fs = require('fs');
@@ -265,7 +268,7 @@ for (const { name, dir } of pluginDirs) {
       const problems = [];
       if (!/^description:\s*\S+/m.test(fm)) problems.push('description');
       if (isAgent && !/^name:\s*\S+/m.test(fm)) problems.push('name');
-      if (isAgent && !/^model:\s*(sonnet|opus|haiku|inherit)\b/m.test(fm)) problems.push('model');
+      if (isAgent && !/^model:\s*(sonnet|fable|opus|inherit)\b/m.test(fm)) problems.push('model (sonnet | fable | opus | inherit)');
       const role = (fm.match(/^role:\s*(\S+)/m) || [])[1];
       const toolsLine = (fm.match(/^tools:\s*(.+)$/m) || [])[1] || '';
       const tools = toolsLine.split(/[,\s]+/).filter(Boolean);
@@ -294,6 +297,38 @@ for (const { name, dir } of pluginDirs) {
       else ok(tag);
     }
   }
+}
+
+// ── Model policy (maestro-core references/model-policy.md) ──────────
+// sonnet executes, fable thinks, opus only when critical. The ladder is
+// instructed everywhere else; here the pins that carry it are checked.
+console.log('▶ Model policy');
+{
+  const MODELS = new Set(['sonnet', 'fable', 'opus', 'inherit']);
+  const THINK = new Set(['maestro-dev:01-plan', 'maestro-dev:03-brainstorm', 'agent m-architect', 'agent m-analyst', 'agent checker']);
+  const pinned = []; // { tag, model, body }
+  for (const { name, dir } of pluginDirs) {
+    const sd = path.join(dir, 'skills');
+    if (fs.existsSync(sd)) for (const s of fs.readdirSync(sd)) {
+      const f = path.join(sd, s, 'SKILL.md');
+      if (fs.existsSync(f)) pinned.push({ tag: `${name}:${s}`, file: f, agent: false });
+    }
+    const ad = path.join(dir, 'agents');
+    if (fs.existsSync(ad)) for (const a of fs.readdirSync(ad)) {
+      if (a.endsWith('.md')) pinned.push({ tag: `agent ${a.slice(0, -3)}`, file: path.join(ad, a), agent: true });
+    }
+  }
+  let bad = 0;
+  for (const { tag, file, agent } of pinned) {
+    const txt = read(file);
+    const model = (frontmatter(txt).match(/^model:\s*(\S+)/m) || [])[1];
+    if (agent && !MODELS.has(model || '')) { fail(`${tag}: model "${model || '(none)'}" — every agent pins sonnet | fable | opus | inherit`); bad++; }
+    if (model === 'opus' && !/\b(critical|security)\b/i.test(txt)) { fail(`${tag}: pins opus without saying "critical" or "security" in its body — opus is for critical work only`); bad++; }
+    if (THINK.has(tag) && model !== 'fable') { fail(`${tag}: is a think-step, the ladder pins it to fable (got ${model || '(none)'})`); bad++; }
+  }
+  const missing = [...THINK].filter((t) => !pinned.some((p) => p.tag === t));
+  if (missing.length) { fail(`model policy names think-steps that do not exist: ${missing.join(', ')}`); bad++; }
+  if (!bad) ok(`${pinned.length} skills/agents on the ladder — opus pins justified, think-steps on fable`);
 }
 
 // ── Cross-references: every skill/agent the router names must exist ──

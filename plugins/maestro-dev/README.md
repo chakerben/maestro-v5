@@ -19,15 +19,21 @@ The development pipeline.
   executor, checker and architect
 - `06-protocols` — the 6 anti-complacency rules (evidence, confidence,
   falsifiable plan, disagree once, no silent scope change, completion
-  honesty); not user-invocable, preloaded in all 5 agents
+  honesty, model ladder); not user-invocable, preloaded in all 6 agents
 
 ## Agents
 
+Pinned per the model ladder (`maestro-core references/model-policy.md`):
+
 - `executor` (sonnet) — builds validated code, never judges its own work
-- `checker` (opus) — judges with evidence, never edits the work
-- `m-architect` (opus) — designs structure before code
-- `m-devil-advocate` (opus) — argues the strongest case against a plan
+- `checker` (fable; opus when the change is critical or the gate level is
+  high/paranoid) — judges with evidence, never edits the work
+- `m-architect` (fable) — designs structure before code
+- `m-devil-advocate` (fable) — argues the strongest case against a plan
   (replaces the human pause in auto mode)
+- `m-analyst` (fable; re-dispatched on opus when inconclusive or critical) —
+  fresh-context analysis of a bug or a choice the session is stuck on;
+  returns cause/approach + a falsifiable plan, never implements
 - `m-i18n-checker` (sonnet) — audits diffs for i18n/RTL correctness with
   evidence, never fixes
 

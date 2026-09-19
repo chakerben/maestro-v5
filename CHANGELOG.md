@@ -1,5 +1,48 @@
 # Changelog
 
+## 5.12.0 — model ladder (2026-09-19)
+
+33 skills, 6 agents, still 2 hooks. One rule, applied everywhere: **Sonnet
+executes, Fable thinks, Opus only when critical** — complexity picks the
+model, never length. Quality stays where it was (the workflow); the expert
+rate is paid only where reasoning changes the outcome.
+
+### Added
+
+- **`maestro-core/references/model-policy.md`** — the source of truth: ladder
+  (sonnet / fable / opus), escalation and de-escalation rules, effort table,
+  context discipline, fleet rule (one opus dispatch at a time across
+  projects, instruction not hook), and the table of what Maestro pins.
+  Human version in `docs/MODEL-POLICY.md`, linked from the READMEs.
+- **`m-analyst` agent** (fable, advisor, Read/Grep/Glob/Bash, never writes) —
+  fresh-context analysis of a bug or a choice the session is stuck on;
+  returns cause/approach + a falsifiable plan. `04-debug` action 03 spawns
+  it when the cause is not found after isolation, the bug spans layers, or a
+  fix failed; re-dispatched on opus only if inconclusive or critical.
+- **`routing.md` MODELS block** (routing block still ≤ 2000 chars — the other
+  lines were condensed, no rule lost) and **protocols rule 7** (model ladder).
+- **`validate.js` "Model policy"**: every agent pins `sonnet | fable | opus |
+  inherit`; an opus pin must say `critical` or `security` in its body;
+  `01-plan`, `03-brainstorm`, `m-architect`, `m-analyst`, `checker` must be
+  fable. Two negative cases in `validate.test.sh` (18 cases).
+- **Onboard `04-scaffold` step 4c** offers `"model": "sonnet"` in
+  `.claude/settings.json` (never overwrites an existing value); **doctor**
+  flags 🟡 a session default that is not sonnet.
+
+### Changed
+
+- **Pins**: `checker`, `m-architect`, `m-devil-advocate` opus → **fable**
+  (checker and architect state the opus escalation: critical change or gate
+  level high/paranoid, named in the verdict header); `01-plan`,
+  `03-brainstorm`, `maestro-pm:00-prd`, `02-specs` → `model: fable`;
+  `maestro-quality:02-perf-audit` → fable/high, opus only for concurrency or
+  inconclusive complex perf; `04-debug` effort high → medium (classic bugs
+  are sonnet work), `02-implement` effort medium. `01-security-audit` stays
+  opus. `00-sdlc/04-review` reads `gates.json` and picks the checker's model,
+  saying why in one line; `02-plan` names the devil-advocate's model.
+- Checker body trimmed to stay within the 6000-char dispatch budget with
+  the new rule (PHILOSOPHY rule 5 link → name only; no rule dropped).
+
 ## 5.11.0 — independent deep audit, 30 findings closed (2026-09-19)
 
 33 skills (+`maestro-dev:06-protocols`), 5 agents, still 2 hooks. An external

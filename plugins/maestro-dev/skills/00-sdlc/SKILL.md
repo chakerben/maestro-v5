@@ -36,6 +36,10 @@ its file in `actions/`.
 ## Transversal rules
 
 - Delegate every step; the orchestrator never writes or judges code itself.
+- Model ladder: plan/challenge = fable, implement = sonnet (executor), review
+  = fable (checker); opus only when the change is critical or
+  `maestro_docs/gates.json` level ≥ high — say why in one line. In auto mode
+  never run two opus reviews concurrently (across projects too).
 - Adopt the expert posture of the detected domain
   (`${CLAUDE_PLUGIN_ROOT}/references/expert-postures.md`) and pass it to
   every delegate.

@@ -1,7 +1,7 @@
 ---
 name: 04-debug
 description: Use when behaviour that already exists is wrong — a bug report, a crash, a stack trace, "ça marche pas", "it worked yesterday", a failing test nobody understands, wrong output for a known input. Drives reproduce → isolate → cause → fix + regression test, with resumable state. Not for building something new (00-sdlc / 01-plan), not for an open design question (03-brainstorm), not for a performance complaint without a defect (maestro-quality:02-perf-audit).
-effort: high
+effort: medium
 argument-hint: "<what is wrong, or a stack trace / failing test path>"
 allowed-tools: Bash   # turn-scoped: the !`…` injections below use shell builtins, pipes and $(…) that pattern grants do not cover
 ---
@@ -31,7 +31,7 @@ Open debug sessions:
 Run `01 → 04`. Before running an action, read its file in `actions/`.
 Adopt the **Root-cause analyst** posture
 (`${CLAUDE_PLUGIN_ROOT}/references/expert-postures.md`) and protocols rules
-1, 2, 5, 6 (`${CLAUDE_PLUGIN_ROOT}/skills/06-protocols/SKILL.md`).
+1, 2, 5, 6, 7 (`${CLAUDE_PLUGIN_ROOT}/skills/06-protocols/SKILL.md`).
 
 ## Binding rules
 
@@ -46,6 +46,10 @@ it crashes" is a symptom fix unless the null is legitimately possible there.
 **One bug, one folder, one fix** (protocols rule 5). Other defects met on
 the way go to `debug.md` under `## Seen on the way`, then to
 `maestro-pm:03-ticket` when installed — never fixed in passing.
+
+**Model ladder.** Classic bugs stay on the session model (sonnet). Stuck
+after isolation, multi-layer, or a failed fix → action 03 spawns `m-analyst`
+(fresh context, fable); opus only if critical or still inconclusive.
 
 **Resume.** `debug.md` carries `status: reproducing | isolating | cause-found
 | fixed | not-reproducible`. On entry, if the folder exists, continue from

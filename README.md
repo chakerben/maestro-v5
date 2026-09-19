@@ -2,9 +2,10 @@
 
 > Business-layer framework for web & mobile development, built on top of the
 > official Claude Code plugin ecosystem. RTL/Arabic-native. Workflow-enforced
-> quality. Zero runtime bloat.
+> quality. Zero runtime bloat. Sonnet executes, Fable thinks, Opus only when
+> critical.
 
-**7 plugins · 33 skills · 5 agents · 2 hooks total · FR/EN/AR**
+**7 plugins · 33 skills · 6 agents · 2 hooks total · FR/EN/AR**
 
 ## Install
 
@@ -29,7 +30,7 @@ project memory bank.
 | Plugin | Purpose | Hooks |
 |---|---|---|
 | `maestro-core` | Onboarding, memory bank, CLAUDE.md gardener, condense, doctor | 1 (SessionStart memory-sync) |
-| `maestro-dev` | brainstorm, sdlc, plan, implement, debug, lean-code, protocols + executor/checker/m-architect/m-devil-advocate/m-i18n-checker agents | 0 |
+| `maestro-dev` | brainstorm, sdlc, plan, implement, debug, lean-code, protocols + executor/checker/m-architect/m-devil-advocate/m-analyst/m-i18n-checker agents | 0 |
 | `maestro-quality` | Quality gates at commit/review time | 1 (PreToolUse bash-guard) |
 | `maestro-mobile` | RN/Expo + Flutter standards, RTL Arabic (web/RN/Flutter), RTL PDF (+ ZATCA), store release | 0 |
 | `maestro-web` | Next.js/Prisma/Clerk stack, UX, design review, motion (GSAP+Lenis, RTL-safe) | 0 |
@@ -45,6 +46,7 @@ runtime**, and **never rebuild what Anthropic maintains**.
 ## Docs
 
 - [Architecture](docs/ARCHITECTURE.md)
+- [Model policy](docs/MODEL-POLICY.md) — Sonnet executes, Fable thinks, Opus only when critical; the pins and how to override them
 - [Audit 5.10.0](docs/AUDIT-5.10.0.md) — independent deep pass, 30 findings, closed in 5.11.0
 - [Audit 5.9.1](docs/AUDIT-5.9.1.md) — independent adversarial pass on the day's six releases; 17 findings, all closed in 5.9.2
 - [Performance & token audit 5.9.0](docs/PERF-AUDIT-5.9.0.md) — what a session and a dispatch cost, and the budget guard

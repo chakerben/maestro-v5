@@ -1,6 +1,6 @@
 {
   "name": "@chakerben/maestro",
-  "version": "5.11.0",
+  "version": "5.12.0",
   "description": "Maestro 5 — Claude Code plugin marketplace. Business-layer framework for web & mobile development (RTL/Arabic-native). Install via: claude plugin marketplace add chakerben/maestro-v5",
   "keywords": [
     "claude-code",
@@ -23,6 +23,7 @@
     ".claude-plugin/",
     "plugins/",
     "docs/ARCHITECTURE.md",
+    "docs/MODEL-POLICY.md",
     "docs/ROADMAP.md",
     "docs/PERF-AUDIT-5.9.0.md",
     "docs/AUDIT-5.10.0.md",

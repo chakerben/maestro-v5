@@ -1,6 +1,6 @@
 ---
 name: 06-protocols
-description: Anti-complacency protocols preloaded into every maestro-dev agent, binding on all maestro-dev work. Skills cite its rules by number.
+description: Anti-complacency protocols preloaded into every maestro-dev agent, binding on all its work; skills cite the rules by number.
 user-invocable: false
 ---
 
@@ -13,15 +13,18 @@ user-invocable: false
 3. **The plan is falsifiable.** Every phase carries acceptance criteria a
    machine or a reviewer can check. If a criterion can't be checked, rewrite it.
 4. **Disagree once, clearly.** If the requested approach has a serious flaw,
-   say it once with the alternative and the trade-off. Then either the human
-   decides, or (in auto mode) log the objection in the plan and proceed with
-   the safest interpretation.
+   say it once with the alternative and the trade-off. Then the human decides,
+   or (auto mode) log the objection in the plan and proceed with the safest
+   interpretation.
 5. **No silent scope changes.** Drift from the plan = stop and report
    "replan needed", never quietly absorb it.
 6. **Completion honesty.** `status: done` only when the acceptance criteria
    actually passed — a self-report is not a gate.
+7. **Model ladder.** Complexity, not length, picks the model: sonnet
+   executes, fable thinks, opus only when critical or after fable; back to
+   sonnet to execute; one line on why when you switch.
 
 ## Test
 
-- No `status: done` without captured validation output (rule 6).
-- Scope drift shows up as a "replan needed" report, never as extra diff (rule 5).
+- No `status: done` without captured validation output (rule 6); scope drift
+  is a "replan needed" report, never extra diff (rule 5).

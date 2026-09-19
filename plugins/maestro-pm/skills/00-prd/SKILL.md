@@ -2,6 +2,7 @@
 name: 00-prd
 description: Write or refine a Product Requirements Document — problem, users, scope, success metrics, risks. Use at the start of a product or major feature, before any spec. Output in FR, EN, or AR per the user's language. Not for technical specs (02-specs) or stories (01-user-stories).
 argument-hint: "<product/feature idea>"
+model: fable
 ---
 
 # Skill: prd

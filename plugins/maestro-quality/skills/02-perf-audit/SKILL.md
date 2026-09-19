@@ -3,6 +3,8 @@ name: 02-perf-audit
 description: Performance audit of a scope — DB query patterns, N+1, bundle weight, render behavior, caching. Use when something is slow, before scaling, or as a periodic pulse. Measures before recommending. Not for micro-optimizing readable code.
 argument-hint: "[scope path]"
 allowed-tools: Read, Grep, Glob, Bash
+model: fable
+effort: high
 ---
 
 # Skill: perf-audit
@@ -28,6 +30,9 @@ labeled "hypothesis".
    (Reanimated), Hermes enabled?
 5. Report: finding → measurement or evidence → expected win → cost of fix.
    Rank by win/cost. Top 3 get concrete diffs proposed.
+6. Model ladder: this skill runs on fable. Re-run a finding on opus
+   (`/model opus`, then the finding alone) only for concurrency/race or
+   complex perf where fable's analysis is inconclusive — say so in the report.
 
 ## Test
 

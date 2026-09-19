@@ -66,6 +66,12 @@ Bash(wget * | bash)   Bash(wget * | sh)     Bash(git push --force*)  Bash(git pu
 
    Show the diff before writing. If `.claude/settings.json` is malformed
    JSON, stop and report — never overwrite a file you could not parse.
+4c. Session model. If `.claude/settings.json` has no top-level `"model"`
+   key, ask once: write `"model": "sonnet"`? — "Maestro's ladder assumes
+   sonnet as the session default; think-steps pin fable, critical steps
+   opus" (`${CLAUDE_PLUGIN_ROOT}/references/model-policy.md`). Yes → add
+   the key (same parse-merge-write as 4b). An existing value, whatever it
+   is, is never overwritten — report it and move on.
 5. Report created vs skipped files.
 
 ## Test
@@ -74,5 +80,7 @@ Bash(wget * | bash)   Bash(wget * | sh)     Bash(git push --force*)  Bash(git pu
 - `CLAUDE.md` contains a `<maestro_memory>` block referencing the memory files.
 - `.claude/settings.json` parses, its `permissions.deny` contains all 11
   canonical entries, and every key/entry that was there before is still there.
+- `.claude/settings.json` `model` is `sonnet` when the user accepted 4c, or
+  still its previous value when one existed — never replaced.
 - Re-running this action changes nothing (idempotent) — including
   `.claude/settings.json`, byte for byte.

@@ -63,7 +63,9 @@ A skill with no `## Test` anywhere is not a skill, it is a wish.
 
 ### 5. Agents with model pinning and strict separation
 - `executor` (sonnet): builds, never judges its own work.
-- `checker` (opus): judges with evidence, never edits the work.
+- `checker` (fable; opus when the change is critical or the gate level is
+  high/paranoid — `maestro-core/references/model-policy.md`): judges with
+  evidence, never edits the work.
 No agent both writes and approves the same change.
 **Enforced where the platform allows it**: reviewer agents carry a `tools:`
 allowlist without Edit/Write, so the platform prevents them from editing files.

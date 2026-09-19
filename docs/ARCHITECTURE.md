@@ -14,7 +14,7 @@ flowchart TB
 
   subgraph Maestro["Maestro 5 (business layer, this marketplace)"]
     CORE["maestro-core<br/>onboard · memory · gardener · condense · doctor"]
-    DEV["maestro-dev<br/>sdlc · plan · implement · review<br/>executor · checker · architect · devil-advocate"]
+    DEV["maestro-dev<br/>sdlc · plan · implement · review<br/>executor · checker · architect · devil-advocate · analyst"]
     QUAL["maestro-quality<br/>gates at commit/review"]
     MOB["maestro-mobile<br/>RN/Expo · RTL AR · PDF RTL"]
     WEB["maestro-web<br/>stack enforcement · UX · design review"]
@@ -36,7 +36,7 @@ flowchart TB
 | While Claude edits | LSP diagnostics (real-time), security-guidance diff review | **Official plugins** |
 | Between implement phases | Acceptance-criteria assertion | maestro-dev:02-implement (skill gate) |
 | Before commit | Secret detection + quality-gate level | maestro-vcs:00-commit (skill gate) |
-| Before ship | Independent review with evidence | checker agent (opus) |
+| Before ship | Independent review with evidence | checker agent (fable; opus when critical) |
 | Bash commands | Pure security guard (<20ms) | bash-guard hook |
 | Session start | Memory reference sync (<100ms) | memory-sync hook |
 
@@ -68,7 +68,7 @@ plugins/<name>/
 │   ├── assets/                  # templates (optional)
 │   ├── references/              # extended docs (optional)
 │   └── scripts/                 # executables a skill injects, e.g. 00-commit/scripts/secret-scan.sh
-├── references/                  # plugin-level; maestro-core/references/routing.md is READ BY THE HOOK
+├── references/                  # plugin-level; maestro-core/references/routing.md is READ BY THE HOOK, model-policy.md is the ladder
 ├── commands/<name>.md           # slash commands (maestro-core: /maestro)
 ├── agents/<name>.md             # model-pinned agents, role: reviewer|builder|advisor
 └── hooks/hooks.json             # only core & quality have one

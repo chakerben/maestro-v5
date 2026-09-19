@@ -8,6 +8,13 @@ The Maestro 5 foundation. Install this first.
 `<maestro_routing>` copy current in every project's CLAUDE.md, so nobody types
 a skill name.
 
+## Model policy
+
+`references/model-policy.md` is the ladder every skill and agent pins
+against: sonnet executes (session default), fable thinks (plan, brainstorm,
+architecture, review), opus only when critical. Human version:
+[docs/MODEL-POLICY.md](../../docs/MODEL-POLICY.md).
+
 ## Skills
 
 - `00-onboard` — full project setup: stack detection, official plugin

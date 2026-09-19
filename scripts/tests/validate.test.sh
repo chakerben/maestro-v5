@@ -66,5 +66,18 @@ OUT=$(node scripts/validate.js "$T/r" 2>&1); CODE=$?
 chk "unknown frontmatter key: still green" "$CODE" "0"
 chk "unknown frontmatter key: warned" "$(echo "$OUT" | grep -c 'bogus-key')" "1"
 
+# 6. An agent with no model pin (the ladder needs every agent to declare one).
+fresh
+sed -i '/^model: /d' "$T/r/plugins/maestro-dev/agents/executor.md"
+red "agent without model" "model"
+
+# 7. A skill pinned to opus with no "critical"/"security" in its body.
+fresh
+node -e '
+  const fs=require("fs"), f=process.argv[1];
+  fs.writeFileSync(f, fs.readFileSync(f,"utf8").replace(/^---\n/, "---\nmodel: opus\n"));
+' "$T/r/plugins/maestro-core/skills/01-memory/SKILL.md"
+red "opus pin without justification" "opus"
+
 echo "validate: $PASS passed, $FAIL failed"
 [ "$FAIL" = "0" ] || exit 1

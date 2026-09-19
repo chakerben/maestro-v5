@@ -34,7 +34,10 @@ A findings report grouped by severity: 🔴 contraband / 🟠 broken / 🟡 drif
    accident guard, `permissions.deny` is the enforced layer).
 3. **🟡 Drift scan.** Memory files untouched > 60 days; tier-1 context over
    the 200-line budget (delegate detail to gardener 01-measure); official
-   plugin recommendations for this stack not installed.
+   plugin recommendations for this stack not installed; session model is
+   not `sonnet` or unset (`.claude/settings.json` `"model"`) — the ladder
+   assumes sonnet; opus as session default pays the expert rate for CRUD
+   (`references/model-policy.md`; onboard `04-scaffold` step 4c sets it).
 4. **Runtime spot-check.** Suggest the user run
    `ps aux | grep -E "jest|tsc|claude-flow|ruv-swarm" | grep -v grep` and
    report phantom processes.
