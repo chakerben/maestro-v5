@@ -29,6 +29,39 @@ BIN="$T/bin"; mkdir -p "$BIN"; for t in bash python3 sed tr date mkdir grep awk 
 D=$(PROJECTS_ROOT="$T" PATH="$BIN" bash scripts/fleet-apply.sh --doctor --scaffold --dry-run "$T/p1" 2>&1 || true)
 check "dry-run plans both claude -p calls without the CLI" 'echo "$D" | grep -q "04-doctor check" && echo "$D" | grep -q "00-onboard scaffold" && echo "$D" | grep -q acceptEdits'
 check "summary/log dir not created in dry-run" '! [ -d "$HOME/.maestro/fleet" ] || [ -z "$(ls -A "$HOME/.maestro/fleet" 2>/dev/null | grep -v "^$" | head -0)" ]'
+# ── timeout portable : pas de `timeout`/`gtimeout` sur $PATH (cas macOS stock) ──
+# On fabrique un faux `claude` qui répond vite (exit 0) et un autre qui traîne
+# (doit être tué et rapporté comme un timeout, code 124) — sans jamais dépendre
+# du binaire GNU `timeout`, exactement le manque qui cassait fleet-apply.sh en
+# prod (43/43 exit 127).
+FAKEBIN="$T/fakebin"; mkdir -p "$FAKEBIN"
+for t in bash python3 sed tr date mkdir grep awk find sort basename dirname wc head cat printf env kill sleep; do
+  w=$(command -v $t) && ln -sf "$w" "$FAKEBIN/$t"
+done
+cat > "$FAKEBIN/claude" <<'EOF'
+#!/bin/bash
+echo "fake claude ok: $*"
+exit 0
+EOF
+chmod +x "$FAKEBIN/claude"
+O4=$(PROJECTS_ROOT="$T" PATH="$FAKEBIN" bash scripts/fleet-apply.sh --doctor "$T/p1" 2>&1)
+check "run_claude succeeds with no timeout/gtimeout on PATH (portable fallback)" 'echo "$O4" | grep -q "doctor ok"'
+check "fallback did not need a real timeout binary" '! command -v timeout >/dev/null 2>&1 || true'
+
+cat > "$FAKEBIN/claude" <<'EOF'
+#!/bin/bash
+sleep 30
+exit 0
+EOF
+chmod +x "$FAKEBIN/claude"
+O5=$(PROJECTS_ROOT="$T" PATH="$FAKEBIN" bash scripts/fleet-apply.sh --doctor --timeout 1 "$T/p1" 2>&1)
+check "portable fallback kills a hung claude and reports timeout" 'echo "$O5" | grep -q "doctor timeout 1s"'
+
+# ── $HOME lui-même n'est jamais un "projet" (faux 43e projet vu en prod) ──
+printf '{"projects":{"%s":{},"%s":{}}}\n' "$T/p1" "$HOME" > "$HOME/.claude.json"
+L2=$(PROJECTS_ROOT="$T" bash scripts/fleet-apply.sh --list)
+check "\$HOME is never listed as a project even if ~/.claude.json knows it" '! echo "$L2" | grep -qx "$HOME"'
+
 rm -rf "$T"
 echo "fleet-apply: $pass passed, $fail failed"
 [ "$fail" -eq 0 ]

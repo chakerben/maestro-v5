@@ -1,5 +1,29 @@
 # Changelog
 
+## 5.12.1 — fleet-apply portability fix (2026-09-19)
+
+### Fixed
+
+- **`scripts/fleet-apply.sh` — `doctor`/`scaffold` exited 127 on every project
+  on stock macOS.** `run_claude()` called the bare `timeout` binary, which is
+  GNU coreutils and does not ship with macOS (`command -v timeout` fails →
+  `timeout: command not found` → exit 127, reported as if `claude` itself had
+  failed). Fixed with `run_with_timeout()`: uses `timeout` if present, falls
+  back to `gtimeout` (`brew install coreutils`), and otherwise a portable
+  bash-only wrapper (background the command, `SIGTERM` then `SIGKILL` after
+  the deadline, reports 124 like GNU `timeout` does) — works on any POSIX
+  shell with no external dependency. New tests in `fleet-apply.test.sh` run
+  `run_claude` for real (not just `--dry-run`, which never reached the
+  `timeout` line and is why this shipped untested) with `timeout`/`gtimeout`
+  both absent from `PATH`, covering both a fast success and a hung process
+  that must be killed and reported as a timeout.
+- **`scripts/lib/fleet.sh` — `$HOME` itself could be discovered as a
+  "project."** `known_projects()` reads every path Claude Code has ever run a
+  session in from `~/.claude.json`, which includes the home directory once a
+  session has run there. `is_project()` now excludes `$HOME` explicitly
+  (this is what produced the phantom 43rd project — `/Users/…` tagged
+  `maestro-web` — in the first real fleet run). Test added.
+
 ## 5.12.0 — model ladder (2026-09-19)
 
 ### Added — fleet

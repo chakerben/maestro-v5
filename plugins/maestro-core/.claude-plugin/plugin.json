@@ -1,6 +1,6 @@
 {
   "name": "maestro-core",
-  "version": "5.12.0",
+  "version": "5.12.1",
   "description": "Maestro foundation: project onboarding with stack detection and official plugin installation, memory bank, CLAUDE.md gardener, condense mode, install doctor.",
   "author": {
     "name": "Ben Moussa Chaker"

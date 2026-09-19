@@ -1,6 +1,6 @@
 {
   "name": "maestro-dev",
-  "version": "5.12.0",
+  "version": "5.12.1",
   "description": "Maestro development pipeline: brainstorm (open questions -> recorded decision), sdlc orchestration, plan, implement (phased, resumable), debug (reproduce -> cause -> regression test). Hosts the executor, checker, m-architect, m-devil-advocate and m-i18n-checker agents.",
   "author": {
     "name": "Ben Moussa Chaker"

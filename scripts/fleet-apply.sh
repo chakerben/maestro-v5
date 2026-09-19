@@ -73,6 +73,44 @@ if [ "$DO_DOCTOR$DO_SCAFFOLD" != "00" ] && [ "$DRY_RUN" = "0" ]; then
   command -v claude >/dev/null || { err "claude CLI introuvable (requis pour --doctor/--scaffold)"; exit 1; }
 fi
 
+# ── Timeout portable ──────────────────────────────────────────────────────
+# macOS stock n'a pas `timeout` (GNU coreutils only). On utilise `timeout` si
+# présent, sinon `gtimeout` (brew install coreutils), sinon un wrapper bash
+# pur (lance en arrière-plan, tue au bout de N s) qui marche partout.
+if command -v timeout >/dev/null 2>&1; then
+  TIMEOUT_BIN="timeout"
+elif command -v gtimeout >/dev/null 2>&1; then
+  TIMEOUT_BIN="gtimeout"
+else
+  TIMEOUT_BIN=""
+fi
+
+run_with_timeout() {  # $1 seconds, rest... command
+  local secs="$1"; shift
+  if [ -n "$TIMEOUT_BIN" ]; then
+    "$TIMEOUT_BIN" "$secs" "$@"
+    return $?
+  fi
+  # Fallback portable : lance en arrière-plan, tue le groupe au bout de $secs.
+  "$@" &
+  local pid=$!
+  (
+    sleep "$secs"
+    kill -TERM "$pid" 2>/dev/null
+    sleep 2
+    kill -KILL "$pid" 2>/dev/null
+  ) &
+  local watcher=$!
+  local rc=0
+  wait "$pid" 2>/dev/null; rc=$?
+  kill "$watcher" 2>/dev/null
+  wait "$watcher" 2>/dev/null
+  # SIGTERM (143) ou tué -> on le reporte comme un timeout (124), même
+  # convention que GNU timeout, pour que le reste du script s'y retrouve.
+  if [ $rc -eq 143 ] || [ $rc -eq 137 ]; then rc=124; fi
+  return $rc
+}
+
 # ── Sélection des projets ────────────────────────────────────────────────
 if [ "$ALL" = "1" ] || [ "$LIST_ONLY" = "1" ]; then
   while IFS= read -r d; do
@@ -154,7 +192,7 @@ run_claude() {  # $1 project, $2 action (doctor|scaffold)
   act "cd $proj && claude -p \"$prompt\" --model $MODEL ${perm[*]}"
   [ "$DRY_RUN" = "1" ] && return 0
   t0=$(date +%s)
-  ( cd "$proj" && timeout "$TIMEOUT" claude -p "$prompt" --model "$MODEL" "${perm[@]}" ) >"$log" 2>&1
+  ( cd "$proj" && run_with_timeout "$TIMEOUT" claude -p "$prompt" --model "$MODEL" "${perm[@]}" ) >"$log" 2>&1
   rc=$?
   printf '%s\t%s\t%s\t%s\t%s\n' "$proj" "$action" "$rc" "$(( $(date +%s) - t0 ))" "$log" >> "$SUMMARY"
   if [ $rc -eq 0 ]; then ok "$action ok ($(( $(date +%s) - t0 ))s) → $log"

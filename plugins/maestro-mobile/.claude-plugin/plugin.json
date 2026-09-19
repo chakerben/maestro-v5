@@ -1,6 +1,6 @@
 {
   "name": "maestro-mobile",
-  "version": "5.12.0",
+  "version": "5.12.1",
   "description": "Mobile standards: React Native / Expo and Flutter, Arabic RTL i18n (web, RN, Flutter), RTL PDF generation, SAR currency handling, store release checklist.",
   "author": {
     "name": "Ben Moussa Chaker"

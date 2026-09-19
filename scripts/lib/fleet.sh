@@ -108,9 +108,12 @@ PYK
 # Découverte = installed_plugins.json (vérité) + scan de PROJECTS_ROOT (profondeur 3,
 # pour .worktrees/<repo>/<branche>) + projets connus de ~/.claude.json, dédoublonnés.
 # Un dossier de sauvegarde (.maestro-v4-backup-*, .maestro-doctor-backup-*) contient
-# un .claude/ copié : ce n'est pas un projet. Idem node_modules.
+# un .claude/ copié : ce n'est pas un projet. Idem node_modules. Le $HOME lui-même
+# n'est pas un projet : ~/.claude.json y ajoute une entrée dès qu'une session Claude
+# Code a tourné une fois dans le home (5.12 : provoquait un "43e projet" fantôme).
 is_project() {
   case "$1" in
+    "$HOME"|"$HOME"/) return 1 ;;
     */.maestro-*backup*|*/node_modules/*|*/.git/*) return 1 ;;
     *) return 0 ;;
   esac
