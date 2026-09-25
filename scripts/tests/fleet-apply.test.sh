@@ -62,6 +62,21 @@ printf '{"projects":{"%s":{},"%s":{}}}\n' "$T/p1" "$HOME" > "$HOME/.claude.json"
 L2=$(PROJECTS_ROOT="$T" bash scripts/fleet-apply.sh --list)
 check "\$HOME is never listed as a project even if ~/.claude.json knows it" '! echo "$L2" | grep -qx "$HOME"'
 
+# ── Un chemin explicite est vérifié avant toute écriture ──────────────────
+# En prod : `fleet-apply.sh …` (un placeholder collé tel quel) a créé
+# `…/.claude/settings.json` dans le répertoire courant et l'a rapporté vert.
+CWD_BEFORE=$(ls -A . | wc -l)
+O6=$(PROJECTS_ROOT="$T" bash scripts/fleet-apply.sh --settings "…" 2>&1); RC6=$?
+check "a non-existent path is refused" '[ "$RC6" = 2 ] && echo "$O6" | grep -q "chemin inexistant"'
+check "and nothing was created in the cwd" '[ ! -e "./…" ] && [ "$(ls -A . | wc -l)" = "$CWD_BEFORE" ]'
+O7=$(PROJECTS_ROOT="$T" bash scripts/fleet-apply.sh --settings "$T/p1/.claude/settings.json" 2>&1); RC7=$?
+check "a file instead of a directory is refused" '[ "$RC7" = 2 ] && echo "$O7" | grep -q "pas un dossier"'
+mkdir -p "$T/empty"
+O8=$(PROJECTS_ROOT="$T" bash scripts/fleet-apply.sh --settings "$T/empty" 2>&1); RC8=$?
+check "an empty directory is not mistaken for a project" '[ "$RC8" = 2 ] && echo "$O8" | grep -q "ne ressemble pas" && [ ! -d "$T/empty/.claude" ]'
+O9=$(PROJECTS_ROOT="$T" bash scripts/fleet-apply.sh --settings "$T/.maestro-v4-backup-x" 2>&1); RC9=$?
+check "a backup folder given by hand is refused too" '[ "$RC9" = 2 ] && echo "$O9" | grep -q "pas un projet"'
+
 rm -rf "$T"
 echo "fleet-apply: $pass passed, $fail failed"
 [ "$fail" -eq 0 ]
