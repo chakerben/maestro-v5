@@ -1,5 +1,94 @@
 # Changelog
 
+## 5.13.0 — the ladder becomes real (2026-09-26)
+
+The audit that triggered this release was one sentence from Chaker: "j'ai
+l'impression qu'on utilise plus sonnet que les autres modèles". He was right,
+and checking it turned up something worse than a cost preference — an
+escalation that could not happen.
+
+### Fixed
+
+- **Four files promised an opus escalation that frontmatter cannot perform.**
+  `checker.md`, `m-architect.md`, `00-sdlc/actions/04-review.md` and
+  `04-debug/actions/03-cause.md` said the orchestrator would dispatch the agent
+  "with `model: opus`" for a critical change. A frontmatter carries exactly one
+  `model:` and a dispatch cannot override it, so `checker` was **always** fable:
+  a payment, auth or concurrency change was reviewed on the same tier as a CRUD
+  change, and the sentence is precisely what stopped anyone checking
+  (PHILOSOPHY rule 5 — a rule described as guaranteed when it is only
+  requested). `02-perf-audit` had the same gap in a softer form (it asked the
+  user to type `/model opus`). All five now dispatch a real agent.
+
+### Added
+
+- **`checker-critical` (opus, high)** — the review agent for a critical change
+  (auth, payment, security, concurrency, data migration, cross-project
+  contract) or `gates.json` at `high`/`paranoid`. Criteria pass, then a
+  failure-mode pass the fable checker does not run: unauthenticated reach,
+  another tenant's id, the second/concurrent/retried call, the halfway state
+  and its rollback, attacker-controlled input, money and rounding. Read-only
+  tools, `maxTurns: 30`.
+- **`m-deep-analyst` (opus, high)** — the rung above `m-analyst`: dispatched
+  when the fable analysis came back inconclusive, or when the problem is
+  critical from the start (security, concurrency/race, data loss,
+  cross-project decision). Reads the previous analysis and attacks the
+  assumption it did not question; states the interleaving rather than "a race".
+  `04-debug`, `02-perf-audit` and `m-architect` all route their opus step here.
+
+### Changed — the ladder
+
+- **`executor`: sonnet → fable.** The step that writes the code was the
+  cheapest step in the framework, on the lowest effort. `01-plan` (fable)
+  protects a feature's global shape; it does not protect module boundaries,
+  abstractions, error propagation or what becomes a shared helper — those are
+  decided inside the executor, file by file, and a review can reject a
+  structure but never supply one. `effort` stays `medium` on purpose: it builds
+  against a plan already reasoned at `high`.
+- **Explicit pins where silence used to inherit the session**: `02-implement`
+  and `00-sdlc` → sonnet/medium (orchestration: dispatch, gate, commit — no
+  design decision), `00-quality-gate` → sonnet/low (reads config, runs
+  commands), `04-debug` → fable/medium (reproduce → isolate → cause is
+  reasoning, and the fix must be surgical), `02-design-review` → fable/high
+  (visual, UX and RTL judgement). Before this, 21 of 33 skills declared no
+  model at all: a session on opus silently ran them all on opus, and a session
+  on sonnet ran the design review on sonnet. Neither was a decision.
+- The session default stays **sonnet**, and `00-onboard` keeps offering to
+  write it: orchestration, commits and docs do not need more, and raising the
+  session raises everything. What moved up is the work, not the session.
+- Ladder headline: "Sonnet executes, Fable thinks, Opus only when critical"
+  → **"Sonnet orchestrates, Fable builds and judges, Opus decides on
+  critical."**
+
+### Added — enforcement (`scripts/validate.js`, in `npm test`)
+
+- The opus rung **must exist and be pinned to opus**: `checker-critical`,
+  `m-deep-analyst`, `01-security-audit`. Delete one or demote it and `npm test`
+  goes red.
+- `executor` must be fable or above — the code-writing step cannot be silently
+  moved back to the cheapest tier.
+- **Enforced-vs-instructed guard**: any text matching "dispatch/spawn … model:
+  opus" is refused, and any skill, agent, `routing.md` or `model-policy.md`
+  that mentions opus must name an agent genuinely pinned to it. A doc may quote
+  the forbidden phrasing in order to forbid it — the negation has to sit in the
+  same clause, deliberately narrow: a permissive first version of this check
+  was fooled by a "never delegate." three lines above the smuggled promise,
+  which is now regression case 8b.
+- 6 new cases in `scripts/tests/validate.test.sh` (29 total there): the
+  fiction, the quoted counter-example, opus promised with no opus agent named,
+  the executor demoted, the opus rung demoted, the opus rung deleted.
+- Portability: case 6 used `sed -i '…'`, which on stock macOS (BSD sed) reads
+  the expression as a backup suffix — the case stopped breaking its copy and
+  passed without testing anything. Rewritten with `node`.
+
+### Changed — docs
+
+`docs/MODEL-POLICY.md` rewritten (why it changed, what it costs, what enforces
+it), `references/model-policy.md` (the source of truth the skills read),
+`references/routing.md` MODELS block (re-trimmed to stay inside the 2 000-char
+session budget), `PHILOSOPHY.md` rule 5 (the ladder is now its worked example),
+`README.md` (8 agents), `plugins/maestro-dev/README.md`, `/maestro` menu.
+
 ## 5.12.1 — fleet-apply portability fix (2026-09-19)
 
 ### Fixed
