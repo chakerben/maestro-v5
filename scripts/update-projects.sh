@@ -123,6 +123,19 @@ PYL
 fi
 
 echo -e "${B}Mise à jour vers $EXPECTED — ${#PROJECTS[@]} projet(s), dry-run=$DRY_RUN${N}"
+
+# Le catalogue d'abord : `claude plugin update` installe ce que le CATALOGUE
+# annonce. Sans ce rafraîchissement il réinstalle la version précédente et le
+# rapporte en vert — c'est ce qui a laissé des copies 5.3.0 dans la flotte.
+act "claude plugin marketplace update $MARKETPLACE"
+if [ "$DRY_RUN" = "0" ]; then
+  if claude plugin marketplace update "$MARKETPLACE" >/dev/null 2>&1; then
+    ok "catalogue @$MARKETPLACE rafraîchi"
+  else
+    warn "rafraîchissement du catalogue impossible — les mises à jour peuvent réinstaller l'ancienne version"
+  fi
+fi
+
 DONE=0; FAILED=0
 for P in "${PROJECTS[@]}"; do
   [ -d "$P" ] || { [ -d "$PROJECTS_ROOT/$P" ] && P="$PROJECTS_ROOT/$P"; }
