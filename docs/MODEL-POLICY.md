@@ -1,73 +1,104 @@
-# Model policy — Sonnet executes, Fable thinks, Opus only when critical
+# Model policy — Sonnet orchestrates, Fable builds and judges, Opus decides
 
 Source of truth for the model: `plugins/maestro-core/references/model-policy.md`
-(what the skills and agents read). This page is the human version.
+(what the skills and agents read). This page is the human version, and it
+records why 5.13.0 changed the ladder.
 
-## Why
+## Why it changed
 
-Across a fleet of ~8 projects, the expensive model everywhere is the wrong
-default: most of a developer's day is CRUD, tests, classic bugs and local
-refactoring, and quality on those comes from the workflow — plan → implement
-→ tests → review — not from the reasoning tier. Paying the expert rate for
-execution buys nothing; skipping the expert on a hard design costs a rewrite.
-So Maestro pins the model per step, by **complexity, never by length**, and
-aims at the best final quality per token.
+5.12.1 read "Sonnet executes, Fable thinks, Opus only when critical", and the
+code matched that sentence: `executor` on sonnet, the session default written
+to sonnet by `00-onboard`, and 21 of 33 skills declaring no model at all — so
+running on the session, so sonnet. Fable planned and judged; opus appeared
+exactly once, in `01-security-audit`.
 
-## The ladder
+Two problems with that, found by auditing the pins against the doc:
 
-| Model | Job | Typical |
+1. **The step where code quality is decided was the cheapest step.** A
+   feature's global shape is protected by `01-plan` (fable). Its *local*
+   architecture is not: module boundaries, what becomes a shared helper, how
+   errors propagate, what the abstraction is — those are decided inside the
+   executor, file by file. A reviewer can reject a structure; it cannot add
+   one that was never written. The executor was also on `effort: medium`, so
+   the tier and the reasoning were both the lowest in the framework, at the
+   one place whose output is the deliverable.
+2. **Three escalations in this document could not happen.** It said `checker`
+   runs on opus for a critical change, `04-debug` re-dispatches `m-analyst`
+   on opus, `02-perf-audit` re-runs a finding on opus. Frontmatter carries
+   exactly one `model:`, and a dispatch cannot override it — so `checker` was
+   always fable, and the opus rung existed only as a sentence. A fourth
+   instance was in `m-architect`. That is precisely what PHILOSOPHY rule 5
+   forbids: a rule described as guaranteed when it is only requested, which
+   stops you checking.
+
+## The ladder (5.13.0)
+
+| Model | Job | Steps |
 |---|---|---|
-| **Sonnet** | execute — the session default | features, API, CRUD, integrations, tests, classic bugs, local refactoring, docs, normal review, simple migrations |
-| **Fable** | think — analyse, plan, judge | complex feature design, comparing architectures, multi-layer or hard-to-reproduce bugs, large refactoring, strategy before a big build, after a Sonnet failure |
-| **Opus** | decide — critical only | major architecture, system redesign, extremely complex bug, important security, concurrency/race, cross-project decision, Sonnet + Fable both failed, final review of a critical change |
+| **Sonnet** | orchestrate and run — session default | `00-sdlc`, `02-implement`, `00-quality-gate`, commits, releases, docs, prose, `m-i18n-checker` |
+| **Fable** | build and judge | **`executor`**, `01-plan`, `03-brainstorm`, `04-debug`, `checker`, `m-architect`, `m-devil-advocate`, `m-analyst`, `02-perf-audit`, `02-design-review`, `00-prd`, `02-specs` |
+| **Opus** | decide on critical | **`checker-critical`**, **`m-deep-analyst`**, `01-security-audit` |
 
-Escalate Sonnet → Fable when the task is complex, several approaches compete,
-Sonnet is stuck, or there is architecture risk. Fable → Opus when Fable is
-inconclusive, the change is critical, or maximum reasoning is required. After
-a Fable/Opus analysis, execution goes **back to Sonnet**.
+The session stays on sonnet on purpose: orchestration is dispatching, gating,
+writing state files and committing — it carries no design decision. What
+moved up is the work, not the session.
 
-Effort follows the same idea: trivial → `low`, normal → `medium`, complex or
-critical → `high`. No over-reasoning on a CRUD endpoint.
+Escalating means **dispatching a different agent**, never overriding a model:
 
-## What Maestro pins
+- `checker-critical` (opus) replaces `checker` when the change is critical
+  (auth, payment, security, concurrency, data migration, cross-project
+  contract) or `maestro_docs/gates.json` is at `high`/`paranoid`. It runs the
+  criteria pass, then a failure-mode pass: unauthenticated reach, another
+  tenant's id, the second or concurrent or retried call, the halfway state and
+  its rollback, attacker-controlled input, money and rounding.
+- `m-deep-analyst` (opus) is dispatched when `m-analyst` (fable) came back
+  inconclusive, or when the problem is critical from the start. It reads the
+  previous analysis and attacks the assumption that one did not question.
+  `04-debug` and `02-perf-audit` both route their opus step here, and
+  `m-architect` routes a critical architecture decision here.
 
-| Step | Model | Effort |
-|---|---|---|
-| session default (set by onboard in `.claude/settings.json`) | sonnet | — |
-| `executor`, `m-i18n-checker` | sonnet | medium |
-| `maestro-dev:01-plan`, `03-brainstorm` | fable | high |
-| `m-architect`, `m-devil-advocate`, `m-analyst` | fable | high |
-| `checker` | fable, **opus** when the change is critical or `gates.json` level ≥ high | high |
-| `maestro-dev:04-debug` | session (sonnet); `m-analyst` (fable) when stuck, opus if still inconclusive or critical | medium |
-| `maestro-dev:00-sdlc`, `02-implement` | session (sonnet) — the think-steps pin their own | medium |
-| `maestro-pm:00-prd`, `02-specs` | fable | — |
-| `maestro-quality:01-security-audit` | opus | high |
-| `maestro-quality:02-perf-audit` | fable; opus only for concurrency/race or inconclusive complex perf | high |
-| `maestro-web:02-design-review`, `maestro-pm:04-writing` | session (sonnet) | — / low |
+## What it costs
 
-`scripts/validate.js` checks the pins: every agent declares a model, an opus
-pin must state `critical` or `security` in its body, and the think-steps
-(`01-plan`, `03-brainstorm`, `m-architect`, `m-analyst`, `checker`) are on
-fable.
+The executor is dispatched 5 to 7 times per feature (one per phase, plus
+repair loops), so moving it from sonnet to fable is the real bill of this
+release — roughly the cost of the build phase, one tier up. The two opus
+agents are rare by construction: a critical change or a stuck analysis, one
+opus dispatch at a time across the fleet. Effort stayed at `medium` on the
+executor deliberately: it builds against a plan already reasoned at `high`,
+and `high` on a CRUD endpoint is waste, not safety.
+
+The trade is explicit: a repair loop costs an executor dispatch plus a review;
+a structure discovered to be wrong three weeks later costs a rewrite. This
+release buys the second one down and accepts a higher unit price on the first.
+
+## What enforces it
+
+`scripts/validate.js`, in `npm test`:
+
+- every agent declares a model from the ladder;
+- an opus pin must say `critical` or `security` in its body;
+- the think-steps (`01-plan`, `03-brainstorm`, `m-architect`, `m-analyst`,
+  `checker`) are on fable;
+- the opus rung — `checker-critical`, `m-deep-analyst`, `01-security-audit` —
+  **must exist and must be pinned to opus**;
+- `executor` must be fable or above;
+- **no text may promise an opus dispatch that cannot happen**: a body saying
+  "dispatch X with model: opus" is refused, and any file that mentions opus
+  must name an agent that is really pinned to it. A doc may quote the
+  forbidden phrasing in order to forbid it (the negation has to sit in the
+  same clause). Six regression cases in `scripts/tests/validate.test.sh`.
 
 ## How you work with it
 
-- **Set the session to Sonnet**: `/model sonnet`, or accept onboard's offer to
-  write `"model": "sonnet"` into `.claude/settings.json` (never overwrites an
-  existing value). `maestro-core:04-doctor` flags a session default that is
-  not sonnet.
-- **You never choose per step.** The skills and agents pin the model where
-  thinking is needed and say in one line why when they switch ("checker on
-  opus: gate level high").
-- **When Maestro goes up**: plan and brainstorm run on Fable; the checker
-  runs on Opus for auth, payment, security, concurrency, data migration,
-  cross-project changes, or when `maestro-quality:00-quality-gate` is at
-  `high`/`paranoid`; `04-debug` spawns `m-analyst` (Fable) when the cause is
-  not found after isolation, and re-dispatches it on Opus only if that is
-  inconclusive or the bug is critical.
-- **Forcing is always possible**: `/model opus` for the session stays yours.
-  The pins only raise the model for the steps that need it; they never lower
-  a model you set explicitly for an unpinned step.
-- **Fleet rule** (instruction, not a hook): one Opus dispatch at a time across
-  projects, heavy Fable analyses in sequence, Sonnet tasks in parallel as
-  you like. `00-sdlc auto` never runs two Opus reviews at once.
+- **Keep the session on sonnet**: `/model sonnet`, or accept onboard's offer
+  to write `"model": "sonnet"` into `.claude/settings.json`. The agents raise
+  the tier where it matters; raising the session raises it everywhere,
+  including commits and docs.
+- **You never choose per step.** The pins do it, and each step says in one
+  line which agent ran and why when it goes up.
+- **Forcing stays yours**: `/model opus` for the session. Pins only raise the
+  tier for the steps that need it; they never lower a model you set for an
+  unpinned step.
+- **Fleet rule** (instruction, not a hook): one opus dispatch at a time across
+  projects, heavy fable analyses in sequence, sonnet work in parallel as you
+  like. `00-sdlc auto` never runs two opus dispatches at once.

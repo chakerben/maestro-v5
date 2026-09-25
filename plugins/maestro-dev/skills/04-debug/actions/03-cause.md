@@ -16,8 +16,10 @@ Name the cause, with evidence, and separate it from the symptom.
    (client → API → DB → infra), or a fix attempt already failed: spawn
    `m-analyst` (fresh context, fable) with the `debug.md` so far; record its
    cause + falsifiable plan in `## Cause`, say in one line why you escalated.
-   If the bug is critical (security, concurrency, data loss) or the analysis
-   is still inconclusive, re-dispatch it with model opus.
+   If the bug is critical (security, concurrency, data loss, cross-project)
+   or `m-analyst` came back inconclusive, spawn `m-deep-analyst` (opus) with
+   `debug.md` and the previous analysis — a different agent, not a model
+   override; a critical bug goes to it directly, without `m-analyst`.
 4. If the cause is a design decision recorded in `tech-decisions.md`, do
    NOT reverse it here — stop with `status: cause-found` and a note that
    the fix needs a decision (route to `03-brainstorm` or the human).
@@ -28,5 +30,5 @@ Name the cause, with evidence, and separate it from the symptom.
 - `## Cause` names file:line for both symptom and cause, and they differ
   unless the note explains why they coincide.
 - Confidence is stated; anything below "high" names the missing experiment.
-- When `m-analyst` ran, `## Cause` carries its plan and the one-line reason
-  for the escalation (and `model: opus` when re-dispatched).
+- When an analyst ran, `## Cause` carries its plan, which agent produced it
+  (`m-analyst` / `m-deep-analyst`) and the one-line reason for the escalation.

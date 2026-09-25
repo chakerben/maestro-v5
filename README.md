@@ -2,10 +2,10 @@
 
 > Business-layer framework for web & mobile development, built on top of the
 > official Claude Code plugin ecosystem. RTL/Arabic-native. Workflow-enforced
-> quality. Zero runtime bloat. Sonnet executes, Fable thinks, Opus only when
-> critical.
+> quality. Zero runtime bloat. Sonnet orchestrates, Fable builds and judges,
+> Opus decides on critical.
 
-**7 plugins · 33 skills · 6 agents · 2 hooks total · FR/EN/AR**
+**7 plugins · 33 skills · 8 agents · 2 hooks total · FR/EN/AR**
 
 ## Why the constraints
 
@@ -77,7 +77,7 @@ runtime**, and **never rebuild what Anthropic maintains**.
 ## Docs
 
 - [Architecture](docs/ARCHITECTURE.md)
-- [Model policy](docs/MODEL-POLICY.md) — Sonnet executes, Fable thinks, Opus only when critical; the pins and how to override them
+- [Model policy](docs/MODEL-POLICY.md) — Sonnet orchestrates, Fable builds and judges, Opus decides on critical; the pins, what enforces them, and what it costs
 - [Audit 5.10.0](docs/AUDIT-5.10.0.md) — independent deep pass, 30 findings, closed in 5.11.0
 - [Audit 5.9.1](docs/AUDIT-5.9.1.md) — independent adversarial pass on the day's six releases; 17 findings, all closed in 5.9.2
 - [Performance & token audit 5.9.0](docs/PERF-AUDIT-5.9.0.md) — what a session and a dispatch cost, and the budget guard

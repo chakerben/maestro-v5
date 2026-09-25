@@ -20,9 +20,9 @@ user-invocable: false
    "replan needed", never quietly absorb it.
 6. **Completion honesty.** `status: done` only when the acceptance criteria
    actually passed — a self-report is not a gate.
-7. **Model ladder.** Complexity, not length, picks the model: sonnet
-   executes, fable thinks, opus only when critical or after fable; back to
-   sonnet to execute; one line on why when you switch.
+7. **Model ladder.** Complexity, not length, picks it, and a pin is never
+   overridden: opus means dispatching `checker-critical` or `m-deep-analyst`.
+   One line on why when you go up.
 
 ## Test
 

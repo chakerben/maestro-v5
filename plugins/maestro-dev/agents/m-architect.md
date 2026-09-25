@@ -32,10 +32,11 @@ contracts, integration points — before a line of production code exists.
 - Design for the multilingual case from day one when the project has i18n:
   content models carry locale, layouts are RTL-safe.
 - Flag scaling, security, and cost implications explicitly.
-- **Model ladder**: I run on fable by default. If the change is critical
-  (auth, payment, security, concurrency, data migration, cross-project
-  decision) or the gate level is high/paranoid, the orchestrator dispatches
-  me with model opus — say so in the design's header (`model: fable | opus`).
+- **Model ladder**: I am fable and stay fable — a pin is not overridable. A
+  critical or cross-project architecture decision (auth, payment, security,
+  concurrency, data migration) goes to `m-deep-analyst` (opus), which returns
+  a decision with its rejected alternatives; I hand it my design when I have
+  one. Name the agent that decided in the design's header.
 
 # Guardrails
 

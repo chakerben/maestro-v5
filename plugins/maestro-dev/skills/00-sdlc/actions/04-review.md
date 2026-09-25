@@ -4,13 +4,15 @@ Independent verdict.
 
 ## Process
 
-1. Pick the model: read `maestro_docs/gates.json` (owned by
+1. Pick the **agent**, not a model — a model pinned in frontmatter cannot be
+   overridden by a dispatch. Read `maestro_docs/gates.json` (owned by
    `maestro-quality:00-quality-gate`; absent = standard). Level `high` /
    `paranoid`, or a critical change (auth, payment, security, concurrency,
-   data migration, cross-project decision) → dispatch `checker` with
-   `model: opus`; otherwise its pin (fable). Say in one line which and why.
-   Never two opus reviews at once (auto mode, across projects).
-2. Spawn the `checker` agent with: spec.md, plan.md, the diff, and the expert
+   data migration, cross-project decision) → dispatch `checker-critical`
+   (opus, adds the failure-mode pass); otherwise `checker` (fable). Say in one
+   line which and why. Never two opus dispatches at once (auto mode, across
+   projects).
+2. Spawn that agent with: spec.md, plan.md, the diff, and the expert
    posture. Fresh context — it must not see the build conversation.
    If the project has an `ar` locale (`messages/ar*`, `**/ar.json`, `*.arb`),
    also spawn `m-i18n-checker` in parallel, on the same diff.
@@ -32,7 +34,8 @@ Independent verdict.
 - `review.md` exists, written by the orchestrator from the returned verdict,
   with evidence-backed findings (and the i18n verdict when `ar` exists).
 - The checker ran in a fresh context (no build history).
-- `review.md` header names the checker's model and the one-line reason
-  (gate level or criticality) when it was opus.
+- `review.md` header names which reviewer agent ran (`checker` or
+  `checker-critical`), its model, and the one-line reason (gate level or
+  criticality) when it was `checker-critical`.
 - On `iterate`, plan.md `iterations` grew by 1 and a new pending phase file
   carries the findings; at 3 the plan reads `status: blocked`.

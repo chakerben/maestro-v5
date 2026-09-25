@@ -68,7 +68,10 @@ chk "unknown frontmatter key: warned" "$(echo "$OUT" | grep -c 'bogus-key')" "1"
 
 # 6. An agent with no model pin (the ladder needs every agent to declare one).
 fresh
-sed -i '/^model: /d' "$T/r/plugins/maestro-dev/agents/executor.md"
+node -e '
+  const fs=require("fs"), f=process.argv[1];
+  fs.writeFileSync(f, fs.readFileSync(f,"utf8").replace(/^model: .*\n/m, ""));
+' "$T/r/plugins/maestro-dev/agents/executor.md"
 red "agent without model" "model"
 
 # 7. A skill pinned to opus with no "critical"/"security" in its body.
@@ -78,6 +81,47 @@ node -e '
   fs.writeFileSync(f, fs.readFileSync(f,"utf8").replace(/^---\n/, "---\nmodel: opus\n"));
 ' "$T/r/plugins/maestro-core/skills/01-memory/SKILL.md"
 red "opus pin without justification" "opus"
+
+# 8. The 5.12.1 fiction: a body promising that a dispatch overrides a pin.
+#    Frontmatter carries one model; "dispatch X with model: opus" can never
+#    happen, and three such escalations shipped believed-real (rule 5).
+fresh
+printf -- '\n- The orchestrator dispatches me with model: opus when the change is critical.\n' >> "$T/r/plugins/maestro-dev/agents/checker.md"
+red "dispatch overriding a pinned model" "cannot override"
+
+# 8b. The quoted counter-example stays legal (model-policy.md forbids the
+#     phrasing by quoting it) — the negation must be adjacent, not anywhere.
+fresh
+printf -- '\nGoing up means dispatching another agent, never "dispatching it with model: opus".\n' >> "$T/r/plugins/maestro-dev/agents/checker.md"
+node scripts/validate.js "$T/r" >/dev/null 2>&1
+chk "quoted counter-example: still green" "$?" "0"
+
+# 9. Promising opus without naming an agent that is pinned to opus.
+fresh
+printf -- '\nEscalate to opus when the analysis is unsure.\n' >> "$T/r/plugins/maestro-core/skills/01-memory/SKILL.md"
+red "opus promised, no opus agent named" "without naming an opus-pinned agent"
+
+# 10. The executor back on the cheapest tier: the code-writing step is where
+#     local architecture is decided (5.13.0).
+fresh
+node -e '
+  const fs=require("fs"), f=process.argv[1];
+  fs.writeFileSync(f, fs.readFileSync(f,"utf8").replace(/^model: fable$/m, "model: sonnet"));
+' "$T/r/plugins/maestro-dev/agents/executor.md"
+red "executor demoted to sonnet" "fable or above"
+
+# 11. The opus rung demoted: the escalations would become fiction again.
+fresh
+node -e '
+  const fs=require("fs"), f=process.argv[1];
+  fs.writeFileSync(f, fs.readFileSync(f,"utf8").replace(/^model: opus$/m, "model: fable"));
+' "$T/r/plugins/maestro-dev/agents/checker-critical.md"
+red "checker-critical demoted" "opus rung"
+
+# 12. The opus rung deleted entirely.
+fresh
+rm "$T/r/plugins/maestro-dev/agents/m-deep-analyst.md"
+red "m-deep-analyst removed" "does not exist"
 
 echo "validate: $PASS passed, $FAIL failed"
 [ "$FAIL" = "0" ] || exit 1

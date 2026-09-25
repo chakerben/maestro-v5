@@ -328,7 +328,58 @@ console.log('▶ Model policy');
   }
   const missing = [...THINK].filter((t) => !pinned.some((p) => p.tag === t));
   if (missing.length) { fail(`model policy names think-steps that do not exist: ${missing.join(', ')}`); bad++; }
-  if (!bad) ok(`${pinned.length} skills/agents on the ladder — opus pins justified, think-steps on fable`);
+
+  // The DECIDE rung must exist as real files. An escalation "to opus" is only
+  // real if some agent is pinned to opus — see the honesty check below.
+  const DECIDE = new Set(['agent checker-critical', 'agent m-deep-analyst', 'maestro-quality:01-security-audit']);
+  for (const t of DECIDE) {
+    const e = pinned.find((p) => p.tag === t);
+    if (!e) { fail(`model policy names an opus step that does not exist: ${t}`); bad++; continue; }
+    const m = (frontmatter(read(e.file)).match(/^model:\s*(\S+)/m) || [])[1];
+    if (m !== 'opus') { fail(`${t}: is the opus rung of the ladder, pinned "${m || '(none)'}"`); bad++; }
+  }
+  // The step that writes the code is never on the cheapest tier: quality of
+  // the architecture is decided there, not in the review (5.13.0).
+  {
+    const e = pinned.find((p) => p.tag === 'agent executor');
+    const m = e && (frontmatter(read(e.file)).match(/^model:\s*(\S+)/m) || [])[1];
+    if (m !== 'fable' && m !== 'opus') { fail(`agent executor: writes the code — the ladder pins it to fable or above (got ${m || '(none)'})`); bad++; }
+  }
+
+  // ── Enforced vs instructed (PHILOSOPHY rule 5), applied to the ladder ──
+  // A frontmatter carries exactly ONE model and a dispatch cannot override
+  // it. So "dispatch X with model: opus" is fiction: 5.12.1 shipped three
+  // such escalations that could never happen. Any text that promises opus
+  // must name an agent that is really pinned to opus.
+  const opusAgents = pinned
+    .filter((p) => p.agent && /^model:\s*opus\b/m.test(frontmatter(read(p.file))))
+    .map((p) => p.tag.replace(/^agent /, ''));
+  const EXTRA = ['plugins/maestro-core/references/model-policy.md', 'plugins/maestro-core/references/routing.md']
+    .filter((f) => fs.existsSync(path.join(ROOT, f)))
+    .map((f) => ({ tag: f, file: path.join(ROOT, f), agent: false }));
+  for (const { tag, file } of [...pinned, ...EXTRA]) {
+    const txt = read(file);
+    // Every promise of an opus dispatch is examined. A doc may QUOTE the
+    // forbidden phrasing in order to forbid it, so a match is excused when a
+    // negation appears in the same clause BEFORE the "model: opus" token —
+    // clause, not file: a "never delegate." three lines above is how a
+    // smuggled line first slipped past this check while it was being written.
+    for (const re of [/(dispatch\w*|spawn\w*)[^.\n]{0,90}model:?\s*`?opus/gi, /model:?\s*`?opus`?[^.\n]{0,50}\b(dispatch\w*|spawn\w*)/gi]) {
+      for (const m of txt.matchAll(re)) {
+        const mi = m.index + Math.max(0, m[0].search(/model/i));
+        const clause = txt.slice(Math.max(0, mi - 160), mi).split(/[.;]\s/).pop();
+        if (/\b(never|not|cannot|can't|refuses?|forbids?|fiction)\b/i.test(clause)) continue;
+        fail(`${tag}: "${m[0].replace(/\s+/g, ' ').slice(0, 70)}…" — a dispatch cannot override a pinned model; dispatch an opus-pinned agent instead (rule 5)`);
+        bad++;
+      }
+    }
+    const selfOpus = /^model:\s*opus\b/m.test(frontmatter(txt));
+    if (!selfOpus && /\bopus\b/i.test(txt) && !opusAgents.some((a) => txt.includes(a))) {
+      fail(`${tag}: promises opus without naming an opus-pinned agent (${opusAgents.join(', ') || 'none exist'}) — instructed, not enforced (rule 5)`); bad++;
+    }
+  }
+
+  if (!bad) ok(`${pinned.length} skills/agents on the ladder — opus rung exists and is reachable by dispatch, executor above sonnet, think-steps on fable`);
 }
 
 // ── Cross-references: every skill/agent the router names must exist ──

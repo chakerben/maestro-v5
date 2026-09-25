@@ -3,6 +3,8 @@ name: 00-quality-gate
 description: Configure or run the project quality gate levels (off, standard, high, paranoid). Use to set the gate level, check current config, or run the gate on demand outside a commit. The commit-time execution itself lives in maestro-vcs:00-commit.
 argument-hint: "status | set <level> | run"
 allowed-tools: Bash   # turn-scoped: the !`…` injections above use shell builtins, pipes and $(…) that pattern grants do not cover
+model: sonnet
+effort: low
 ---
 
 # Skill: quality-gate

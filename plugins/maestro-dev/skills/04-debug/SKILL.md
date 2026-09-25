@@ -4,6 +4,7 @@ description: Use when behaviour that already exists is wrong — a bug report, a
 effort: medium
 argument-hint: "<what is wrong, or a stack trace / failing test path>"
 allowed-tools: Bash   # turn-scoped: the !`…` injections below use shell builtins, pipes and $(…) that pattern grants do not cover
+model: fable
 ---
 
 # Skill: debug
@@ -47,9 +48,12 @@ it crashes" is a symptom fix unless the null is legitimately possible there.
 the way go to `debug.md` under `## Seen on the way`, then to
 `maestro-pm:03-ticket` when installed — never fixed in passing.
 
-**Model ladder.** Classic bugs stay on the session model (sonnet). Stuck
-after isolation, multi-layer, or a failed fix → action 03 spawns `m-analyst`
-(fresh context, fable); opus only if critical or still inconclusive.
+**Model ladder.** This skill runs on fable: reproducing and isolating is
+reasoning, and a surgical fix is worth more than a fast one. Stuck after
+isolation, multi-layer, or a failed fix → action 03 spawns `m-analyst`
+(fresh context, fable). Still inconclusive, or critical from the start
+(security, concurrency, data loss, cross-project) → `m-deep-analyst` (opus).
+Opus is a different agent, never a model override.
 
 **Resume.** `debug.md` carries `status: reproducing | isolating | cause-found
 | fixed | not-reproducible`. On entry, if the folder exists, continue from

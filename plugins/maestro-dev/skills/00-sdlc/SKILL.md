@@ -2,6 +2,8 @@
 name: 00-sdlc
 description: Orchestrate the full development flow — a request becomes specced, planned, implemented, reviewed, shipped code, every step delegated. Use to take a feature end to end. Interactive by default, pausing for approval at each step; say "auto" for unattended execution to completion. Not for a single step (use plan or implement directly).
 argument-hint: "<request> [auto]"
+model: sonnet
+effort: medium
 ---
 
 # Skill: sdlc
@@ -36,10 +38,13 @@ its file in `actions/`.
 ## Transversal rules
 
 - Delegate every step; the orchestrator never writes or judges code itself.
-- Model ladder: plan/challenge = fable, implement = sonnet (executor), review
-  = fable (checker); opus only when the change is critical or
-  `maestro_docs/gates.json` level ≥ high — say why in one line. In auto mode
-  never run two opus reviews concurrently (across projects too).
+- Model ladder: orchestration = sonnet (this skill), plan/challenge = fable,
+  implement = fable (`executor`), review = fable (`checker`). Opus is reached
+  by dispatching a **different agent**, never by overriding a model:
+  `checker-critical` for a critical change or `gates.json` level ≥ high,
+  `m-deep-analyst` for an analysis fable could not settle. Say why in one
+  line. In auto mode never run two opus dispatches concurrently (across
+  projects too).
 - Adopt the expert posture of the detected domain
   (`${CLAUDE_PLUGIN_ROOT}/references/expert-postures.md`) and pass it to
   every delegate.

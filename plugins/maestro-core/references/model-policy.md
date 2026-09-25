@@ -1,36 +1,53 @@
 # Model policy — the ladder
 
-Goal: maximise final quality per token spent. Quality comes from the
-workflow (plan → implement → tests → review), not from the most expensive
-model everywhere. Never sacrifice quality to save; never pay for reasoning
-a task does not need. **Complexity picks the model, never length.**
+Goal: the best final quality per token, in that order. Quality comes from the
+workflow (plan → implement → tests → review) **and** from the tier that runs
+the step where the work is actually decided. Never pay for reasoning a step
+does not need; never save on the step that decides the architecture.
+**Complexity picks the tier, never length.**
+
+A pin is not overridable. Frontmatter carries exactly one `model:`, and a
+dispatch cannot change it — so going up the ladder means dispatching a
+**different agent**, never "dispatching X with model: opus". `validate.js`
+refuses any text that promises otherwise (PHILOSOPHY rule 5).
 
 ## Ladder
 
-| Model | Role | When |
+| Model | Role | Steps |
 |---|---|---|
-| `sonnet` | **Execute** — session default | normal features (front/back, API, CRUD, integrations), tests, classic bugs, local refactoring, docs, normal code review, simple migrations, perf without redesign |
-| `fable` | **Think** — analyse, plan, judge | complex feature design, comparing architecture approaches, hard-to-reproduce or multi-layer bugs, large refactoring, strategy before a big implementation, a prior sonnet failure |
-| `opus` | **Decide** — critical only | major architecture / system redesign, extremely complex bug, important security, concurrency / race / complex perf, a decision spanning several projects, sonnet + fable both failed, final review of a critical or regression-prone change |
+| `sonnet` | **Orchestrate and run** — session default | driving a skill (`00-sdlc`, `02-implement`), commits, releases, docs and prose, gate runs, rule-driven audits (`m-i18n-checker`) |
+| `fable` | **Build and judge** | writing code (`executor`), planning, architecture, brainstorm, debugging, review (`checker`), specs, perf, design review |
+| `opus` | **Decide on critical** | `checker-critical` (review of a critical change), `m-deep-analyst` (analysis fable could not settle), `01-security-audit` |
 
-Pattern: fable plans → sonnet implements → tests → fable/opus review only
-when the change warrants it.
+Why the code-writing step is on fable and not sonnet: a feature's local
+architecture — module boundaries, abstractions, error handling, what becomes
+a shared helper — is decided inside the executor, one file at a time. `01-plan`
+on fable protects the shape of the feature; it does not protect those
+decisions. A review cannot add architecture that was never there: it can only
+send the phase back. Paying one tier more where the code is born is cheaper
+than a repair loop, and much cheaper than a rewrite three weeks later.
+
+Why the session stays sonnet: orchestration is dispatching, gating, writing
+state files and committing. It carries no design decision — the think-steps
+and the agents pin their own tier.
 
 ## Escalation
 
-- sonnet → fable when: the task is complex, several approaches compete, the
-  reasoning is hard, sonnet is stuck, or the change carries architecture risk.
-- fable → opus when: fable's analysis is inconclusive, the change is critical
-  (see ladder), or maximum reasoning is required.
-- Never escalate because a task is long, big, or repetitive — only because it
-  is complex. Never ask the user which model to use: decide, and say in one
-  line why when you switch.
+- fable → opus by **dispatching**: `checker-critical` when the change is
+  critical (auth, payment, security, concurrency, data migration,
+  cross-project contract) or `maestro_docs/gates.json` level ≥ `high`;
+  `m-deep-analyst` when `m-analyst` came back inconclusive, or when the
+  problem is critical from the start.
+- Never escalate because a task is long, big or repetitive — only because it
+  is complex or expensive to get wrong. Never ask the user which model to
+  use: decide, and say in one line why.
+- `01-security-audit` is opus by definition; security is never the cheap path.
 
 ## De-escalation
 
-After a fable/opus analysis or plan, come back to sonnet for execution
-whenever that does not reduce quality — which is almost always: the thinking
-is done, the plan is falsifiable, the executor validates each step.
+After an opus decision, execution goes back to the `executor` (fable): the
+thinking is done and the plan is falsifiable. After a fable analysis,
+mechanical follow-up (commit, docs, ticket) runs on the session (sonnet).
 
 ## Effort
 
@@ -39,9 +56,11 @@ is done, the plan is falsifiable, the executor validates each step.
 | trivial (rename, doc line, config value) | `low` |
 | normal (feature, test, classic bug) | `medium` |
 | complex (design, hard debug, large refactor) | `high` |
-| critical | `high` + fable/opus |
+| critical | `high` + opus agent |
 
-No over-reasoning: `high` on a CRUD endpoint is waste, not safety.
+No over-reasoning: `high` on a CRUD endpoint is waste, not safety. The
+`executor` stays on `medium` on purpose — it builds against a plan that was
+already reasoned at `high`.
 
 ## Context discipline
 
@@ -54,7 +73,7 @@ carries the phase, the objective, the memory references — never the session.
 
 - sonnet tasks run in parallel freely.
 - One opus dispatch at a time across all projects; heavy fable analyses run
-  sequentially. `maestro-dev:00-sdlc auto` never runs two opus reviews
+  sequentially. `maestro-dev:00-sdlc auto` never runs two opus dispatches
   concurrently.
 - No complex reasoning in parallel just because it is possible.
 - Instruction, not a hook (PHILOSOPHY rule #1): the model reads this and
@@ -64,18 +83,22 @@ carries the phase, the objective, the memory references — never the session.
 
 | Skill / agent | Model | Effort | Why |
 |---|---|---|---|
-| session default (`.claude/settings.json`) | sonnet | — | execution is the common case |
-| `executor` | sonnet | medium | builds against a falsifiable plan |
+| session default (`.claude/settings.json`) | sonnet | — | the session orchestrates |
+| `00-sdlc`, `02-implement` | sonnet | medium | dispatch, gate, commit — no design decision |
+| `maestro-quality:00-quality-gate` | sonnet | low | reads config, runs commands |
 | `m-i18n-checker` | sonnet | medium | rule-driven audit |
+| `maestro-pm:04-writing` | session | low | prose |
+| **`executor`** | **fable** | medium | writes the code and its local architecture |
 | `01-plan`, `03-brainstorm` | fable | high | thinking before building |
 | `m-architect`, `m-devil-advocate`, `m-analyst` | fable | high | design, challenge, fresh-context analysis |
-| `checker` | fable | high | judges with evidence; **opus** when the change is critical or `gates.json` level ≥ high |
-| `04-debug` | session (sonnet) | medium | classic bugs; escalates to `m-analyst` (fable), then opus, only when stuck |
-| `00-sdlc`, `02-implement` | session (sonnet) | medium | orchestration; think-steps pin their own model |
+| `checker` | fable | high | judges with evidence |
+| `04-debug` | fable | medium | reproduce → isolate → cause is reasoning; the fix must be surgical |
+| `maestro-quality:02-perf-audit` | fable | high | measurement + judgement |
+| `maestro-web:02-design-review` | fable | high | visual, UX and RTL judgement |
 | `maestro-pm:00-prd`, `02-specs` | fable | — | conception |
+| **`checker-critical`** | **opus** | high | critical change: criteria **and** failure modes |
+| **`m-deep-analyst`** | **opus** | high | what fable could not settle; critical by nature |
 | `maestro-quality:01-security-audit` | opus | high | security is critical by definition |
-| `maestro-quality:02-perf-audit` | fable | high | opus only for concurrency/race or inconclusive complex perf |
-| `maestro-web:02-design-review`, `maestro-pm:04-writing` | session (sonnet) | —/low | normal review, prose |
 
-Force at any time with `/model opus` — the pins above only raise the model
-for the steps that need it.
+Force at any time with `/model opus` — the pins above only raise the tier for
+the steps that need it, and never lower a model you set for an unpinned step.

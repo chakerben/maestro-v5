@@ -3,6 +3,8 @@ name: 02-design-review
 description: Review a screen or component against Maestro UX standards, RTL readiness, and visual quality — from code, a screenshot, or a live URL. Use before shipping UI or when a screen feels off. Produces a scored findings report. Not for building UI (that's implement + frontend-design).
 argument-hint: "<path, screenshot, or URL>"
 allowed-tools: Read, Grep, Glob, Bash
+model: fable
+effort: high
 ---
 
 # Skill: design-review

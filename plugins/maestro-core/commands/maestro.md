@@ -18,9 +18,12 @@ Present it grouped by INTENT (what the user wants to do), not by plugin:
 - Implement an existing plan → `maestro-dev:02-implement`
 - Something that exists is broken → `maestro-dev:04-debug`
 - Independent review before ship → agent `checker`
+- Review of a critical change (auth, payment, security, concurrency, data
+  migration) or gate high/paranoid → agent `checker-critical` (opus)
 - Challenge a decision → agent `m-devil-advocate`
 - Design architecture / DB schema → agent `m-architect`
-- Stuck on a bug or a choice, fresh eyes → agent `m-analyst` (fable; opus only if inconclusive or critical)
+- Stuck on a bug or a choice, fresh eyes → agent `m-analyst` (fable)
+- `m-analyst` inconclusive, or a critical problem (security, concurrency, data loss) → agent `m-deep-analyst` (opus)
 - "Simplifie" / too complex / debt audit → `maestro-dev:05-lean-code` (always on while building)
 
 **Context & memory**

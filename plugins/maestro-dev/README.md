@@ -19,21 +19,33 @@ The development pipeline.
   executor, checker and architect
 - `06-protocols` — the 6 anti-complacency rules (evidence, confidence,
   falsifiable plan, disagree once, no silent scope change, completion
-  honesty, model ladder); not user-invocable, preloaded in all 6 agents
+  honesty, model ladder); not user-invocable, preloaded in all 8 agents
 
 ## Agents
 
 Pinned per the model ladder (`maestro-core references/model-policy.md`):
 
-- `executor` (sonnet) — builds validated code, never judges its own work
-- `checker` (fable; opus when the change is critical or the gate level is
-  high/paranoid) — judges with evidence, never edits the work
+- `executor` (**fable**) — builds validated code, never judges its own work.
+  Fable and not sonnet since 5.13.0: a feature's local architecture (module
+  boundaries, abstractions, error handling) is decided here, and a review
+  cannot add a structure that was never written
+- `checker` (fable) — judges with evidence, never edits the work
+- `checker-critical` (**opus**) — the same, for a critical change (auth,
+  payment, security, concurrency, data migration, cross-project) or gate level
+  high/paranoid: adds a failure-mode pass (unauthenticated reach, cross-tenant
+  id, concurrent or retried call, halfway state and its rollback, attacker-
+  controlled input, money and rounding). A separate agent, because a pinned
+  model cannot be overridden by a dispatch
 - `m-architect` (fable) — designs structure before code
 - `m-devil-advocate` (fable) — argues the strongest case against a plan
   (replaces the human pause in auto mode)
-- `m-analyst` (fable; re-dispatched on opus when inconclusive or critical) —
-  fresh-context analysis of a bug or a choice the session is stuck on;
-  returns cause/approach + a falsifiable plan, never implements
+- `m-analyst` (fable) — fresh-context analysis of a bug or a choice the
+  session is stuck on; returns cause/approach + a falsifiable plan, never
+  implements. Says so explicitly when inconclusive
+- `m-deep-analyst` (**opus**) — the rung above: dispatched when `m-analyst`
+  came back inconclusive, or when the problem is critical from the start
+  (security, concurrency/race, data loss, cross-project decision). States the
+  interleaving, not "a race"; returns cause or decision + falsifiable plan
 - `m-i18n-checker` (sonnet) — audits diffs for i18n/RTL correctness with
   evidence, never fixes
 

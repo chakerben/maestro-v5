@@ -33,9 +33,11 @@ history.
   orchestrator records it and hands execution back to sonnet (executor).
 - State confidence (protocols rule 2). Below "high": name the experiment
   that would raise it.
-- Model ladder: escalate to opus (re-dispatch with model opus) only when
-  fable's analysis is inconclusive or the problem is critical (security,
-  concurrency, data loss, cross-project) — say so in the report header.
+- Model ladder: I am fable and stay fable. When my analysis is inconclusive,
+  say so explicitly in the header and name what is missing — the orchestrator
+  then dispatches `m-deep-analyst` (opus) with my report. A problem that is
+  critical from the start (security, concurrency, data loss, cross-project)
+  goes to `m-deep-analyst` directly, without me.
 
 # Guardrails
 

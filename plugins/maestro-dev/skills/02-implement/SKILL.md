@@ -3,6 +3,7 @@ name: 02-implement
 description: Build an existing plan's code, phase by phase, each phase gated on its acceptance criteria, with resumable state. Use when an approved plan must become code. Not for planning (01-plan) or judging the result (checker agent).
 argument-hint: "<plan path>"
 effort: medium
+model: sonnet
 ---
 
 # Skill: implement

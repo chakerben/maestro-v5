@@ -62,10 +62,13 @@ Two shapes, and `validate.js` enforces both:
 A skill with no `## Test` anywhere is not a skill, it is a wish.
 
 ### 5. Agents with model pinning and strict separation
-- `executor` (sonnet): builds, never judges its own work.
-- `checker` (fable; opus when the change is critical or the gate level is
-  high/paranoid — `maestro-core/references/model-policy.md`): judges with
-  evidence, never edits the work.
+- `executor` (fable): builds, never judges its own work. Fable and not the
+  cheapest tier because a feature's local architecture is decided while the
+  code is written, and a review can only reject a structure, not supply one.
+- `checker` (fable): judges with evidence, never edits the work.
+- `checker-critical` (opus): the same for a critical change or gate level
+  high/paranoid — a **separate agent**, not the same one "dispatched on opus"
+  (`maestro-core/references/model-policy.md`).
 No agent both writes and approves the same change.
 **Enforced where the platform allows it**: reviewer agents carry a `tools:`
 allowlist without Edit/Write, so the platform prevents them from editing files.
@@ -86,6 +89,16 @@ skills use `disable-model-invocation`; hooks carry a platform `timeout`.
 
 Say what is enforced and what is instructed. A rule described as guaranteed
 when it is only requested is worse than no rule: it stops you checking.
+
+The model ladder was the costly example. Until 5.13.0 four files said the
+orchestrator would "dispatch this agent with `model: opus`" for a critical
+change. Frontmatter carries exactly one `model:` and a dispatch cannot
+override it, so the opus rung existed only as a sentence — every review of a
+payment or auth change ran on the same tier as a CRUD review, and the
+sentence is what stopped anyone checking. The fix was not better wording: it
+was two agents genuinely pinned to opus (`checker-critical`,
+`m-deep-analyst`), and a validator that refuses any text promising an
+escalation no file can perform.
 
 ### 6. Persistent state, resumable sessions
 Every feature lives in `maestro_docs/tasks/<yyyy_mm_dd>_<slug>/` with
