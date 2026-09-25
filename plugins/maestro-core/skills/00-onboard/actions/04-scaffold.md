@@ -67,9 +67,10 @@ Bash(wget * | bash)   Bash(wget * | sh)     Bash(git push --force*)  Bash(git pu
    Show the diff before writing. If `.claude/settings.json` is malformed
    JSON, stop and report — never overwrite a file you could not parse.
 4c. Session model. If `.claude/settings.json` has no top-level `"model"`
-   key, ask once: write `"model": "sonnet"`? — "Maestro's ladder assumes
-   sonnet as the session default; think-steps pin fable, critical steps
-   opus" (`${CLAUDE_PLUGIN_ROOT}/references/model-policy.md`). Yes → add
+   key, ask once: write `"model": "sonnet"`? — "Maestro's ladder keeps the
+   session on sonnet (it orchestrates: dispatch, gates, commits, docs); the
+   agents pin their own tier — fable to build and judge, opus for the
+   critical ones. Raising the session raises everything, including commits" (`${CLAUDE_PLUGIN_ROOT}/references/model-policy.md`). Yes → add
    the key (same parse-merge-write as 4b). An existing value, whatever it
    is, is never overwritten — report it and move on.
 5. Report created vs skipped files.

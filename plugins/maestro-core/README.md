@@ -11,8 +11,11 @@ a skill name.
 ## Model policy
 
 `references/model-policy.md` is the ladder every skill and agent pins
-against: sonnet executes (session default), fable thinks (plan, brainstorm,
-architecture, review), opus only when critical. Human version:
+against: sonnet orchestrates (session default: dispatch, gates, commits,
+docs), fable builds (`executor`) and judges (plan, brainstorm, architecture,
+debug, review), opus decides on critical (`checker-critical`,
+`m-deep-analyst`, `01-security-audit`) — reached by dispatching those agents,
+never by overriding a pinned model. Human version:
 [docs/MODEL-POLICY.md](../../docs/MODEL-POLICY.md).
 
 ## Skills
