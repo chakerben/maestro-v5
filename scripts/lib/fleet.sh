@@ -119,6 +119,24 @@ is_project() {
   esac
 }
 
+# Un chemin donné à la main ne passe pas par discover() : il faut lui appliquer
+# les mêmes règles, sinon un placeholder collé tel quel devient un "projet"
+# (`fleet-apply.sh …` a créé `…/.claude/settings.json` dans le cwd et l'a
+# rapporté vert). Écrit le chemin absolu sur stdout, ou la raison sur stderr
+# et retourne 1 — appeler avec `abs=$(resolve_project_path "$p" 2>&1)`.
+resolve_project_path() {
+  local p="$1" abs
+  [ -e "$p" ] || { echo "chemin inexistant : $p" >&2; return 1; }
+  [ -d "$p" ] || { echo "pas un dossier : $p" >&2; return 1; }
+  abs=$(cd "$p" 2>/dev/null && pwd -P) || { echo "dossier illisible : $p" >&2; return 1; }
+  is_project "$abs" || { echo "pas un projet (sauvegarde, node_modules ou \$HOME) : $abs" >&2; return 1; }
+  if [ ! -e "$abs/.git" ] && [ ! -e "$abs/package.json" ] && [ ! -e "$abs/pubspec.yaml" ] && [ ! -d "$abs/.claude" ]; then
+    echo "ne ressemble pas à un projet (ni .git, ni package.json, ni pubspec.yaml, ni .claude/) : $abs" >&2
+    return 1
+  fi
+  printf '%s\n' "$abs"
+}
+
 discover() {
   { installed_projects
     [ -d "$PROJECTS_ROOT" ] && find "$PROJECTS_ROOT" -maxdepth 3 -mindepth 1 -type d -name '.claude' -exec dirname {} \; 2>/dev/null

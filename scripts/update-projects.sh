@@ -54,6 +54,12 @@ if [ "$ALL" = "1" ] || [ "$LIST_ONLY" = "1" ]; then
   done < <(discover)
 fi
 
+BAD=0
+for i in "${!PROJECTS[@]}"; do
+  if abs=$(resolve_project_path "${PROJECTS[$i]}" 2>&1); then PROJECTS[$i]="$abs"; else err "$abs"; BAD=1; fi
+done
+[ "$BAD" = "0" ] || { err "rien n'a été mis à jour."; exit 2; }
+
 if [ "${#PROJECTS[@]}" -eq 0 ]; then
   if [ "$ALL" = "1" ] || [ "$LIST_ONLY" = "1" ]; then
     err "aucun projet ne déclare de plugin @$MARKETPLACE"

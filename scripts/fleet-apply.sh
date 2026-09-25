@@ -125,15 +125,7 @@ fi
 # $HOME — mêmes règles que la découverte, qui les appliquait déjà.
 BAD=0
 for i in "${!PROJECTS[@]}"; do
-  p="${PROJECTS[$i]}"
-  if [ ! -e "$p" ]; then err "chemin inexistant : $p"; BAD=1; continue; fi
-  if [ ! -d "$p" ]; then err "pas un dossier : $p"; BAD=1; continue; fi
-  abs=$(cd "$p" 2>/dev/null && pwd -P) || { err "dossier illisible : $p"; BAD=1; continue; }
-  if ! is_project "$abs"; then err "pas un projet (sauvegarde, node_modules ou \$HOME) : $abs"; BAD=1; continue; fi
-  if [ ! -e "$abs/.git" ] && [ ! -e "$abs/package.json" ] && [ ! -e "$abs/pubspec.yaml" ] && [ ! -d "$abs/.claude" ]; then
-    err "ne ressemble pas à un projet (ni .git, ni package.json, ni pubspec.yaml, ni .claude/) : $abs"; BAD=1; continue
-  fi
-  PROJECTS[$i]="$abs"
+  if abs=$(resolve_project_path "${PROJECTS[$i]}" 2>&1); then PROJECTS[$i]="$abs"; else err "$abs"; BAD=1; fi
 done
 [ "$BAD" = "0" ] || { err "rien n'a été exécuté."; exit 2; }
 
