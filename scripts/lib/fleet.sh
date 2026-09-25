@@ -9,7 +9,7 @@ PROJECTS_ROOT="${PROJECTS_ROOT:-$HOME/Documents/Projects}"
 MARKETPLACE="${MARKETPLACE:-maestro}"
 
 # Quels plugins maestro ce projet déclare-t-il ? (settings.json ET settings.local.json —
-# 5.9.4 : uma-place ne déclarait les siens que dans le .local et était invisible)
+# 5.9.4 : un projet ne déclarait les siens que dans le .local et était invisible)
 plugins_of() {
   { python3 - "$1" <<'PY' 2>/dev/null
 import json, sys, os

@@ -9,7 +9,7 @@
     "TRELLO_BOARD": {
       "type": "string",
       "title": "Trello board",
-      "description": "Name of the Trello board that receives tickets (e.g. umaplace-dev)",
+      "description": "Name of the Trello board that receives tickets (e.g. myproject-dev)",
       "required": false
     },
     "TRELLO_LIST": {

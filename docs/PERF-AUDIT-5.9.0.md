@@ -93,4 +93,4 @@ Il imprime la facture même quand tout passe, pour qu'on la voie à chaque test.
 
 ## 8. Ce qu'il reste à mesurer sur ta machine
 
-Trois nombres que seul un vrai projet donne : la taille réelle du tier-1 mémoire d'uma-place (`/maestro-core:02-gardener measure`), le temps réel des hooks sur macOS (`time node plugins/maestro-core/hooks/memory-sync.js` dans un projet), et le coût observé d'un `/sdlc` complet (`/cost` en fin de session). Si le troisième dépasse ~150k tokens pour une feature de 5 phases, le suspect est le contenu des phases, pas le framework — et `01-plan` a une règle pour ça (≤ 5 fichiers par phase).
+Trois nombres que seul un vrai projet donne : la taille réelle du tier-1 mémoire d'un projet réel (`/maestro-core:02-gardener measure`), le temps réel des hooks sur macOS (`time node plugins/maestro-core/hooks/memory-sync.js` dans un projet), et le coût observé d'un `/sdlc` complet (`/cost` en fin de session). Si le troisième dépasse ~150k tokens pour une feature de 5 phases, le suspect est le contenu des phases, pas le framework — et `01-plan` a une règle pour ça (≤ 5 fichiers par phase).

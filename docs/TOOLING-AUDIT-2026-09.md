@@ -4,6 +4,23 @@
 > Grille : `plugins/maestro-core/references/third-party-vetting.md` (hooks ? outillage runtime ? orchestrateur ? déjà officiel ? coût d'erreur ?).
 > Résultat : **10 absorbés** (l'idée devient du Maestro, rien d'installé), **4 recommandés** tels quels, **9 rejetés**, **2 à tester plus tard**. Ce document existe pour qu'on ne rejuge pas la même liste au prochain reel.
 
+## Avertissement au lecteur (ce document est public)
+
+Les verdicts ci-dessous — **ABSORBÉ, RECOMMANDÉ, REJETÉ** — sont prononcés
+**contre les contraintes de Maestro**, pas contre la qualité des projets cités.
+Maestro s'interdit plus de deux hooks, interdit tout outillage lourd déclenché
+par un événement d'outil, et n'admet qu'un seul framework à la fois (règles #1,
+#2, #7 de `PHILOSOPHY.md`). Un outil « rejeté » ici peut être excellent
+ailleurs : `claude-mem` est rejeté parce qu'il pose six hooks et un démon, ce
+qui est rédhibitoire *dans ce cadre* et parfaitement défendable dans un autre.
+
+Les mécanismes décrits (nombre de hooks, présence d'un démon, d'un appel LLM)
+ont été lus dans les dépôts le 2026-09-17 et sont vérifiables ; ils peuvent
+avoir changé depuis. Les étoiles, prix et quotas datent du même jour et bougent
+vite. Aucune intention de nuire à un auteur : si tu maintiens l'un de ces
+projets et qu'une description est fausse ou périmée, ouvre une issue et elle
+sera corrigée.
+
 ## Le principe
 
 L'objectif de Chaker : taper une phrase simple, et que Maestro choisisse le meilleur outil sans qu'il nomme une skill, un MCP ou un plugin. Ça ne s'obtient pas en installant plus ; ça s'obtient avec **un routeur à jour dans chaque projet** (`<maestro_routing>`, maintenu par le hook SessionStart depuis 5.9.0) et des skills dont la description dit *quand*, pas *quoi*. Chaque outil ci-dessous a été jugé à cette aune : est-ce qu'il rend le routage meilleur, ou est-ce qu'il ajoute une chose de plus à nommer ?

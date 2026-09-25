@@ -7,6 +7,20 @@
 
 **7 plugins · 33 skills · 6 agents · 2 hooks total · FR/EN/AR**
 
+## Why the constraints
+
+The version before this one shipped 14 lifecycle hooks that ran typecheck, tests
+and formatting after every single edit, stacked with third-party orchestrators.
+On 13 July 2026 that produced 33 GB of Node RAM on a 24 GB laptop, Jetsam kills
+and full system freezes. Maestro 5 was rebuilt around one sentence:
+
+> **Quality belongs in the workflow, not in the runtime.**
+
+Hence two hooks in the entire framework, both cheap and fail-open; hence nothing
+runs automatically after an edit. Each of the eight rules in
+[PHILOSOPHY.md](PHILOSOPHY.md) is the scar of a specific failure, and `npm test`
+— nine checks, 219 cases — refuses a change that breaks one.
+
 ## Install
 
 ```text
@@ -37,6 +51,23 @@ project memory bank.
 | `maestro-pm` | PRD, user stories, specs (FR/EN/AR), tickets → Trello, writing rules (anti-slop, AR register) | 0 |
 | `maestro-vcs` | Commits with gates (executable secrets scan), PRs, releases, one-worktree-per-branch | 0 |
 
+## What this is, honestly
+
+A **business layer**, not a platform competitor: rule #8 says never rebuild what
+Anthropic maintains, and `00-onboard` recommends the official plugin whenever one
+exists.
+
+**Opinionated**: Next.js App Router, Prisma/PostgreSQL, Clerk, Zod and Tailwind on
+the web; Expo or Flutter on mobile. Deviating is allowed and gets recorded in
+`tech-decisions.md`.
+
+**Built for the Arabic market**, Saudi first. RTL correctness, the six Arabic
+plural categories, Hijri dates, SAR rendering, Arabic PDF and ZATCA are not an
+afterthought here — they are why the framework exists.
+
+**Not** a general-purpose agent harness, not an orchestrator, and it does not want
+to own your session.
+
 ## Philosophy
 
 Read [PHILOSOPHY.md](PHILOSOPHY.md) — the 8 rules every change is reviewed
@@ -54,6 +85,17 @@ runtime**, and **never rebuild what Anthropic maintains**.
 - [Audit 5.5.0](docs/AUDIT-5.5.0.md) — what was found, what was fixed in 5.6.0
 - [Migration from Maestro v4](docs/archive/MIGRATION-FROM-V4.md) (archived — done in July 2026)
 
+## Contributing
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request: it states
+the gate (`npm test`), the two shapes a skill may take, the agent rules, and what
+will be refused — a third hook, runtime tooling on a tool event, a `dependencies`
+field, or a second framework layered on top.
+
+## Requirements
+
+Claude Code CLI · Node 20+ · macOS or Linux (the scripts are bash 3.2 compatible).
+
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).

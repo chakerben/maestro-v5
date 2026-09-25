@@ -240,7 +240,7 @@ those paths exist and were simply never visited.
 
 Cause: `--all` kept only the directories that *declare* a plugin in
 `.claude/settings.json` / `settings.local.json`. A `gwt` worktree (and
-`uma-place`) has an installed copy recorded in `installed_plugins.json` but no
+one project) has an installed copy recorded in `installed_plugins.json` but no
 such declaration, so it was filtered out of the list before the update loop —
 and stayed at its install-time version forever.
 
@@ -258,7 +258,7 @@ and stayed at its install-time version forever.
   from `installed_plugins.json` (every `--scope project` copy whose path still
   exists), then `PROJECTS_ROOT` at depth 3 (`.worktrees/<repo>/<branch>`),
   then `~/.claude.json`. `plugins_of` reads `settings.local.json` as well as
-  `settings.json` — uma-place declared its five plugins only in the local
+  `settings.json` — one project declared its five plugins only in the local
   file and was invisible.
 - **`scripts/prune-installed.sh`** — removes `scope: project` entries whose
   path no longer exists (≈ 45 dead `/private/tmp/…` worktrees from past

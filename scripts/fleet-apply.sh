@@ -20,7 +20,7 @@
 #   ./scripts/fleet-apply.sh --list                    # qui est concerné
 #   ./scripts/fleet-apply.sh --dry-run --all           # montre, n'exécute rien
 #   ./scripts/fleet-apply.sh --settings --all          # gratuit, sans LLM
-#   ./scripts/fleet-apply.sh --doctor ~/Documents/Projects/kheir
+#   ./scripts/fleet-apply.sh --doctor ~/Documents/Projects/myproject
 #   ./scripts/fleet-apply.sh --scaffold --doctor --all --jobs 2
 #
 # Options : --jobs N (défaut 1 : un projet à la fois — la politique de
