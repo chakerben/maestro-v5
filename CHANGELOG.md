@@ -1,5 +1,38 @@
 # Changelog
 
+## 5.14.0 — the ي keeps its dots (2026-10-15)
+
+Nemah's client reported «الياء ناقصة» on `حسابي` / `نعمي` / `الشخصي`: the
+final ي looked dotless on the phone while the web prototype was fine. Chaker
+had met the same report on several apps. The first answer ("that is how the
+font draws it") was wrong: a 3× crop of the device screenshot shows both dots,
+cut in half. IBM Plex Sans Arabic declares a descent of 415/1000 em and its
+ي with dots reaches 455, ص / ض 521; CoreText sizes the line box from the
+declared metrics and React Native clips every `<Text>` to it. Chrome never
+clips glyph overflow, so the prototype can never prove a font safe on mobile.
+
+### Added
+
+- **`01-rtl-i18n/assets/font-metrics.py`** — fontTools script. `check` reports,
+  per font file, the declared ascent/descent against the deepest and highest
+  Arabic glyph (standard alphabet + tashkeel + digits by default, `--all` for
+  every Arabic block) and exits 1 on `CLIP`. `fix … --out assets/fonts` writes
+  copies whose hhea / OS-2 typo metrics cover the glyphs (usWin values when
+  they already do), ascent untouched unless a glyph exceeds it, outlines and
+  family names untouched — the app keeps its `fontFamily` keys.
+- **`01-rtl-i18n/references/arabic-font-metrics.md`** — cause, symptoms, the
+  RN/Expo procedure (check → fix → load local files under the same names →
+  record → verify on device at 3×), the Flutter and web notes, and the
+  definition of done.
+
+### Changed
+
+- `01-rtl-i18n` Fonts section: the metrics check is **mandatory** on RN/Expo
+  and Flutter before the first device build and after every font bump; the
+  skill's `## Test` refuses a shipped Arabic font that reports `CLIP`.
+- `rtl-checklist.md` typography and `flutter-rtl.md` fonts carry the check;
+  `00-mobile-standards` release trigger lists it next to the RTL verification.
+
 ## 5.13.0 — the ladder becomes real (2026-09-26)
 
 The audit that triggered this release was one sentence from Chaker: "j'ai
