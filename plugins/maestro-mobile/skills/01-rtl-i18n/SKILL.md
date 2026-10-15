@@ -71,6 +71,15 @@ covers the other 80%.
 - Line-height: Arabic needs ~1.6–1.8 (taller than Latin defaults) — check
   clipping of diacritics and descenders.
 - letter-spacing MUST be 0 for Arabic — tracking breaks cursive joining.
+- **Mobile metrics check (mandatory, RN/Expo and Flutter)**: before the first
+  device build and after every font bump, run
+  `python3 assets/font-metrics.py check <font files>` on each shipped Arabic
+  weight. A `CLIP` verdict means the font's declared descent/ascent is smaller
+  than its ي dots / ص tail and React Native cuts them on the device
+  («الياء ناقصة» tickets) while the web prototype looks fine. Fix with
+  `font-metrics.py fix … --out assets/fonts` and load the local copies under
+  the same family names — never by changing the font or padding every text.
+  Full procedure: `references/arabic-font-metrics.md`.
 
 ## Flutter
 
@@ -97,3 +106,6 @@ locale. Each finding: file, evidence, fix. See `references/rtl-checklist.md`.
 - `audit` output lists each finding as file:line + quoted evidence + fix, and
   the arab-vs-latn digits choice is either read from tech-decisions.md or
   flagged as "decision needed" — never assumed.
+- A mobile project with an `ar` locale ships no Arabic font file for which
+  `assets/font-metrics.py check` reports `CLIP`; the check (or the fixed copy
+  in `assets/fonts`) is recorded in the release log.

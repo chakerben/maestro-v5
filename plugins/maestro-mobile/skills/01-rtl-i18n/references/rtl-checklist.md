@@ -26,6 +26,7 @@ checkout/summary.
 ## Typography
 - [ ] Arabic font loaded with Latin subset fallback
 - [ ] line-height >= 1.6 on Arabic body text, no diacritic clipping
+- [ ] Mobile: `assets/font-metrics.py check` passes on every shipped Arabic font (no `CLIP`: ي dots / ص tail whole on the device — references/arabic-font-metrics.md)
 - [ ] letter-spacing: 0 on Arabic
 - [ ] Bold weights exist in the font (fake bold breaks joining)
 

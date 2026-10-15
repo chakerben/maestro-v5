@@ -26,6 +26,10 @@
 - **Line height**: `TextStyle(height: 1.6…1.8)` for Arabic, otherwise
   diacritics and descenders are clipped. `letterSpacing` stays at 0 — it
   breaks cursive joining.
+- **Font metrics**: run `assets/font-metrics.py check` on every shipped Arabic
+  font; a `CLIP` verdict (declared descent smaller than the ي dots / ص tail)
+  is fixed by shipping the re-exported copy from `assets/fonts`, not by
+  padding widgets (`references/arabic-font-metrics.md`).
 - **Icons and gestures**: Material's directional icons (`Icons.arrow_back`,
   `arrow_forward`, `chevron_*`, `list`, `format_indent_*`…) carry
   `matchTextDirection` and flip on their own under an RTL `Directionality` —
