@@ -47,6 +47,14 @@ covers the other 80%.
   carousel order, stepper flow.
 - **Never flip**: logos, clocks, media playback controls (play stays ▶),
   phone numbers, code blocks, maps, checkmarks.
+- **Phone input = an LTR object, even on an RTL screen** (owner rule,
+  2026-10-16: «المفتاح يسار يكون»). The country-code box (🇸🇦 +966) sits on
+  the **LEFT** of the field and the digits run to its right, left-aligned,
+  exactly like a dialer. In RN lay the row out physically
+  (`flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row'`, physical
+  `borderRight*` on the prefix with an `// rtl-ok` note); on the web wrap the
+  whole field in `dir="ltr"`. The label above the field stays RTL. A +966 box
+  on the right of an Arabic form is a review finding.
 
 ## Text, plurals, numbers, dates
 

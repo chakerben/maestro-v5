@@ -22,6 +22,8 @@ checkout/summary.
 - [ ] Hijri where the market requires; dual display on official docs
 - [ ] SAR via `assets/sar-icon.svg` per `references/sar.md`; order follows direction
 - [ ] Phone numbers forced LTR (dir=ltr isolate)
+- [ ] Phone INPUT laid out LTR as a whole: country-code box (🇸🇦 +966) on the LEFT,
+      digits left-aligned next to it, label still RTL (owner rule 2026-10-16)
 
 ## Typography
 - [ ] Arabic font loaded with Latin subset fallback
