@@ -9,7 +9,11 @@ effort: high
 
 # Skill: security-audit
 
-Adopt the AppSec engineer posture (maestro-dev references/expert-postures.md).
+Adopt the AppSec engineer posture — `maestro-dev`'s
+`references/expert-postures.md` when that plugin is installed; else, in five
+lines: assume every input is attacker-controlled, every tenant id is
+forgeable, every secret leaks once in a bundle, every retry doubles a payment,
+and a finding without the line that proves it is a hypothesis.
 
 ## Process
 
@@ -22,8 +26,11 @@ Adopt the AppSec engineer posture (maestro-dev references/expert-postures.md).
 3. **Injection pass.** Raw SQL (`$queryRaw` with interpolation), `eval`/
    `Function`, `dangerouslySetInnerHTML`, unvalidated redirects, command
    concatenation.
-4. **Secrets & config pass.** Hardcoded credentials (reuse
-   maestro-vcs secret patterns), `.env` committed, secrets in client bundles
+4. **Secrets & config pass.** Hardcoded credentials — when maestro-vcs is
+   installed, run its `secret-scan.sh branch` and read the result; else grep
+   for the generic shape `(api[_-]?key|secret|password|token)\w*\s*[:=]\s*['"]?[A-Za-z0-9+/=_.-]{16,}`
+   and the common provider prefixes (`sk_live_`, `AKIA`, `ghp_`, `AIza`,
+   `eyJ…`) — `.env` committed, secrets in client bundles
    (`NEXT_PUBLIC_` misuse), webhook signature verification present?
 5. **Deps pass.** Run the ecosystem audit (`pnpm audit` etc.) and read the
    criticals — versions pinned? lockfile committed?

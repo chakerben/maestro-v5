@@ -25,7 +25,8 @@
 #
 # Options : --jobs N (défaut 1 : un projet à la fois — la politique de
 # flotte dit "sonnet en parallèle OK, pas de raisonnement lourd en
-# parallèle" ; 2 est raisonnable, au-delà tu paies pour rien),
+# parallèle" ; 2 est raisonnable, au-delà tu paies pour rien ; sur bash 3.2
+# sans `wait -n`, N projets partent puis on attend la fin des N),
 # --model sonnet|fable|opus (défaut sonnet : doctor et scaffold sont
 # mécaniques), --timeout SEC (défaut 600 par projet).
 #
@@ -199,7 +200,9 @@ run_claude() {  # $1 project, $2 action (doctor|scaffold)
     scaffold) prompt='/maestro-core:00-onboard scaffold — non-interactive: answer yes to writing permissions.deny and "model": "sonnet"; never overwrite an existing value; report created vs skipped.'
               perm=(--permission-mode acceptEdits --allowedTools "Read,Glob,Grep,Bash,Write,Edit") ;;
   esac
-  log="$RUN_DIR/$(basename "$proj").$action.log"
+  # Deux projets peuvent partager un basename (chaque worktree `main`) : le log
+  # porte le dossier parent aussi, sinon le second écrase le premier.
+  log="$RUN_DIR/$(basename "$(dirname "$proj")")--$(basename "$proj").$action.log"
   act "cd $proj && claude -p \"$prompt\" --model $MODEL ${perm[*]}"
   [ "$DRY_RUN" = "1" ] && return 0
   t0=$(date +%s)

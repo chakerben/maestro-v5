@@ -36,9 +36,9 @@ status report (installed / already present / skipped).
 | Signal | Tool | How | Why it passed vetting |
 |---|---|---|---|
 | Frontend with visual ambition (ask) | Impeccable (`npx impeccable install`) | skill + commands only; **decline its PostToolUse design hook** | Best generic design-taste skill; no RTL knowledge — `maestro-mobile:01-rtl-i18n` and `maestro-web:02-design-review` layer Arabic on top |
-| Looking for a niche skill | skills.sh CLI (`npx skills find <kw>`) | discovery only | Run `references/third-party-vetting.md` on anything before `add` |
+| Looking for a niche skill | skills.sh CLI (`npx skills find <kw>`) | discovery only | Run `${CLAUDE_PLUGIN_ROOT}/references/third-party-vetting.md` on anything before `add` |
 
-Everything else from the 2026-09 tooling audit (`docs/TOOLING-AUDIT-2026-09.md`)
+Everything else from the 2026-09 tooling audit (`docs/TOOLING-AUDIT-2026-09.md` in the marketplace repo, not shipped in the plugin)
 is either absorbed into Maestro skills or rejected — do not re-suggest it.
 
 ## Process
@@ -60,4 +60,4 @@ is either absorbed into Maestro skills or rejected — do not re-suggest it.
 - No plugin was installed without explicit approval in this session.
 - Every installed plugin appears in `claude plugin list`.
 - LSP binaries were verified or the user was clearly told what to install.
-- No third-party hook was installed: `claude plugin list` + `.claude/settings.json` show ≤ 2 Maestro hooks, hooks from `@claude-plugins-official` plugins only (LSP, security-guidance — allowed), and nothing else.
+- No third-party hook was installed: `claude plugin details maestro-core@maestro` and `maestro-quality@maestro` list one hook each (Maestro's two live in the plugins' `hooks/hooks.json`, never in settings), `.claude/settings.json` declares none, and any other plugin with hooks is `@claude-plugins-official` (LSP, security-guidance — allowed).

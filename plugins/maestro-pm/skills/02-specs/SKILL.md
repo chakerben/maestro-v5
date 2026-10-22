@@ -30,7 +30,7 @@ stays in sdlc's inline `spec.md`.
 3. Devil-advocate pass on the riskiest decision before presenting.
 4. Save to `maestro_docs/specs/spec-<slug>.md`. When invoked from sdlc, that
    path is referenced from `maestro_docs/tasks/<date>_<slug>/spec.md` under
-   `## Technical spec`; hand off to `maestro-dev:01-plan`.
+   `## Technical spec`; hand off to `maestro-dev:01-plan` when installed (else return the path).
 
 ## Test
 

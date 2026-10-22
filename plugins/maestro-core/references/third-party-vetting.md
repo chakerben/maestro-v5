@@ -23,4 +23,4 @@ Passed all five → install **skill-level only**, `--scope project`, and note
 it in `tech-decisions.md` with the date and the reason. `04-doctor` will
 flag any hook that appears afterwards.
 
-Applied to the 2026-09 TikTok list: `docs/TOOLING-AUDIT-2026-09.md`.
+Applied to the 2026-09 TikTok list: `docs/TOOLING-AUDIT-2026-09.md` in the marketplace repository (not shipped in the plugin).

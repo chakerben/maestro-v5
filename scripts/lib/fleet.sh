@@ -105,8 +105,9 @@ for path in (d.get("projects") or {}):
 PYK
 }
 
-# Découverte = installed_plugins.json (vérité) + scan de PROJECTS_ROOT (profondeur 3,
-# pour .worktrees/<repo>/<branche>) + projets connus de ~/.claude.json, dédoublonnés.
+# Découverte = installed_plugins.json (vérité) + scan de PROJECTS_ROOT (profondeur 4 :
+# le .claude/ d'un worktree gwt est à .worktrees/<repo>/<branche>/.claude, soit 4 niveaux —
+# à 3 on ne voyait jamais un worktree, audit 5.14.0 2.1) + projets connus de ~/.claude.json.
 # Un dossier de sauvegarde (.maestro-v4-backup-*, .maestro-doctor-backup-*) contient
 # un .claude/ copié : ce n'est pas un projet. Idem node_modules. Le $HOME lui-même
 # n'est pas un projet : ~/.claude.json y ajoute une entrée dès qu'une session Claude
@@ -139,7 +140,7 @@ resolve_project_path() {
 
 discover() {
   { installed_projects
-    [ -d "$PROJECTS_ROOT" ] && find "$PROJECTS_ROOT" -maxdepth 3 -mindepth 1 -type d -name '.claude' -exec dirname {} \; 2>/dev/null
+    [ -d "$PROJECTS_ROOT" ] && find "$PROJECTS_ROOT" -maxdepth 4 -mindepth 1 -type d -name '.claude' -exec dirname {} \; 2>/dev/null
     known_projects
   } | sort -u | while IFS= read -r d; do is_project "$d" && echo "$d"; done
 }

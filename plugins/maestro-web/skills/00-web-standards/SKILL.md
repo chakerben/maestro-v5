@@ -49,7 +49,7 @@ tech-decisions.md.
 - Forms: server-validated even when client-validated; optimistic UI only
   with rollback.
 - Every user-facing string through the i18n layer if the project is
-  multilingual (delegates depth to maestro-mobile:01-rtl-i18n — it covers web too).
+  multilingual (depth in maestro-mobile:01-rtl-i18n when installed — it covers web too).
 
 ## Test
 

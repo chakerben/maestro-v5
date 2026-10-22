@@ -3,7 +3,8 @@ name: 01-ux-standards
 description: Product-grade UX rules — mobile-first, accessibility, the four UI states, form ergonomics. Auto-applies when building screens or components. Visual/aesthetic direction is the official frontend-design plugin's job; this skill covers behavior and inclusivity.
 user-invocable: false
 paths:
-  - "app/**/*.tsx"
+  - "app/**/{page,layout,loading,error,not-found,template}.tsx"
+  - "src/app/**/{page,layout,loading,error,not-found,template}.tsx"
   - "src/**/*.tsx"
   - "components/**/*.tsx"
 ---
@@ -11,8 +12,10 @@ paths:
 # Skill: ux-standards
 
 frontend-design (official) makes it look distinctive; this skill makes it
-WORK for everyone. Applies to UI components, not to `*.test.tsx` or
-`*.stories.tsx`.
+WORK for everyone. Applies to web UI components, not to `*.test.tsx` or
+`*.stories.tsx`, and not to React Native screens: when `react-native` is in
+`package.json`, `<label>`, tab order and the DOM rules below do not exist —
+defer to `maestro-mobile:00-mobile-standards` (when installed).
 
 ## The four states — every data surface
 

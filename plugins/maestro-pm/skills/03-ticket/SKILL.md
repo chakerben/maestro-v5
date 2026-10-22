@@ -30,7 +30,7 @@ Source: `$ARGUMENTS`
    (`review.md`, `debug.md` `## Seen on the way`, an audit report), or from
    the conversation. One finding = one card. Merge duplicates; split
    compound findings.
-2. **Draft every card** with `assets/card-template.md` — all of them before
+2. **Draft every card** with `${CLAUDE_PLUGIN_ROOT}/skills/03-ticket/assets/card-template.md` — all of them before
    creating any; priority and labels from its tables. Repro steps must be
    runnable by someone who was not in this session; "see above" is not a
    step.
@@ -59,5 +59,5 @@ Source: `$ARGUMENTS`
 - Each created card: title starts with one of 🔴🟠🟡⚪, body has the four
   sections of `assets/card-template.md` in the board's language (FR/EN/AR),
   at least one label, and the `Trouvé :` / `Found:` / `رُصد في:` line.
-- No source file changed (`git status` unchanged by this skill).
+- No file outside `maestro_docs/` changed (`git status` shows only `maestro_docs/` paths, if any).
 - The user approved the batch before the first card was created.

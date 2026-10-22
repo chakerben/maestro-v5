@@ -31,9 +31,11 @@ labeled "hypothesis".
 5. Report: finding → measurement or evidence → expected win → cost of fix.
    Rank by win/cost. Top 3 get concrete diffs proposed.
 6. Model ladder: this skill runs on fable. A concurrency/race finding, or one
-   where fable's analysis is inconclusive, goes to `m-deep-analyst` (opus) —
-   dispatch that agent with the finding and its measurements, record what it
-   returns, and say so in the report. Never ask the user to switch model.
+   where fable's analysis is inconclusive, goes to `m-deep-analyst` (opus,
+   maestro-dev) when that plugin is installed — dispatch that agent with the
+   finding and its measurements, record what it returns, and say so in the
+   report. Not installed: label the finding "unsettled — needs maestro-dev
+   m-deep-analyst" in the report. Never ask the user to switch model.
 
 ## Test
 

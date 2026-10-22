@@ -13,11 +13,14 @@ Corrections applied with per-item approval; a backup of everything touched.
 ## Process
 
 1. **Backup first.** Copy every file about to change into
-   `.maestro-doctor-backup-<timestamp>/`.
+   `~/.maestro/doctor-backup/<project>-<timestamp>/` — outside the project,
+   so nothing lands untracked in the repo.
 2. **🔴 Contraband, in order:**
    - Move `scripts/hooks/` v4 scripts into the backup (out of the project).
-   - Rewrite the offending settings hooks blocks to `"hooks": {}` — show diff,
-     approve, apply.
+   - Remove only the offending handlers from the settings `hooks` (the ones
+     01-check flagged: tooling commands, v4 scripts, orchestrators) and keep
+     every other entry the user wrote (Notification, Stop sounds…) — show
+     diff, approve, apply. Never reset the whole key to `{}`.
    - Remove claude-flow / ruv-swarm entries from `.mcp.json` / settings —
      diff, approve, apply. Suggest `claude mcp remove <name>` for CLI-managed ones.
 3. **🟠 Broken:** re-scaffold missing `maestro_docs/` pieces (delegate to
