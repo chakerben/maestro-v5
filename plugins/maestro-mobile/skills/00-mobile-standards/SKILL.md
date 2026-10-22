@@ -9,9 +9,8 @@ paths:
   - "expo-env.d.ts"
   - "metro.config.*"
   - "app/**/*.tsx"
-  - "app/_layout.tsx"
-  - "android/**"
-  - "ios/**"
+  - "android/app/src/main/AndroidManifest.xml"
+  - "ios/Podfile"
   - "**/*.native.*"
 ---
 
@@ -51,8 +50,9 @@ violated rule when reviewing.
 
 Before any store submission talk: versionCode/buildNumber bumped, permissions
 justified in the manifest, RTL verified if `ar` supported (01-rtl-i18n) —
-including the Arabic font metrics check (`01-rtl-i18n/assets/font-metrics.py
-check`, no `CLIP`) — crash reporting wired (Sentry), privacy manifest fields
+including the Arabic font metrics check (`python3
+${CLAUDE_PLUGIN_ROOT}/skills/01-rtl-i18n/assets/font-metrics.py check`, no
+`CLIP`) — crash reporting wired (Sentry), privacy manifest fields
 current.
 
 ## Test

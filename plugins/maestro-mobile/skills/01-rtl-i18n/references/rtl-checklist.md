@@ -20,15 +20,21 @@ checkout/summary.
 ## Formats
 - [ ] Numerals decision recorded (arab vs latn) and consistent
 - [ ] Hijri where the market requires; dual display on official docs
-- [ ] SAR via `assets/sar-icon.svg` per `references/sar.md`; order follows direction
+- [ ] SAR via `assets/sar-icon.svg` per `references/sar.md`; symbol before the number, with a space (SAMA)
 - [ ] Phone numbers forced LTR (dir=ltr isolate)
 - [ ] Phone INPUT laid out LTR as a whole: country-code box (🇸🇦 +966) on the LEFT,
-      digits left-aligned next to it, label still RTL (owner rule 2026-10-16)
+      digits left-aligned next to it, label still RTL (owner rule 2026-10-16).
+      Recipe — web: wrap the field (prefix + input, not the label) in
+      `<div dir="ltr">`. RN: wrap the row in `<View style={{ direction: 'ltr' }}>`
+      with `flexDirection: 'row'` and `borderEndWidth` on the prefix. Never
+      `row-reverse` + physical `borderRight*`: RN swaps `left/right` props to
+      `start/end` under RTL by default (`I18nManager.doLeftAndRightSwapInRTL`),
+      so a "physical" border lands on the wrong edge.
 
 ## Typography
 - [ ] Arabic font loaded with Latin subset fallback
 - [ ] line-height >= 1.6 on Arabic body text, no diacritic clipping
-- [ ] Mobile: `assets/font-metrics.py check` passes on every shipped Arabic font (no `CLIP`: ي dots / ص tail whole on the device — references/arabic-font-metrics.md)
+- [ ] Mobile: `font-metrics.py check` passes on every shipped Arabic font (no `CLIP`, no `NO-ARABIC`: the ي dots stay whole on the device — references/arabic-font-metrics.md)
 - [ ] letter-spacing: 0 on Arabic
 - [ ] Bold weights exist in the font (fake bold breaks joining)
 

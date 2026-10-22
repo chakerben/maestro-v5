@@ -26,17 +26,17 @@
 - **Line height**: `TextStyle(height: 1.6…1.8)` for Arabic, otherwise
   diacritics and descenders are clipped. `letterSpacing` stays at 0 — it
   breaks cursive joining.
-- **Font metrics**: run `assets/font-metrics.py check` on every shipped Arabic
-  font; a `CLIP` verdict (declared descent smaller than the ي dots / ص tail)
+- **Font metrics**: run `python3 ${CLAUDE_PLUGIN_ROOT}/skills/01-rtl-i18n/assets/font-metrics.py check` on every shipped Arabic
+  font; a `CLIP` verdict (declared descent smaller than the ي dots)
   is fixed by shipping the re-exported copy from `assets/fonts`, not by
   padding widgets (`references/arabic-font-metrics.md`).
 - **Icons and gestures**: Material's directional icons (`Icons.arrow_back`,
   `arrow_forward`, `chevron_*`, `list`, `format_indent_*`…) carry
   `matchTextDirection` and flip on their own under an RTL `Directionality` —
   do NOT wrap them in `Transform.flip` (double flip). `Transform.flip` or
-  `matchTextDirection: true` only for custom SVGs/assets. Trap:
-  `Icons.arrow_back_ios` does not flip — use `arrow_back_ios_new`. `Slider`,
-  `PageView` and navigation swipes mirror too.
+  `matchTextDirection: true` only for custom SVGs/assets (`arrow_back_ios`
+  and `arrow_back_ios_new` both flip — they differ by optical offset only).
+  `Slider`, `PageView` and navigation swipes mirror too.
 - **Numbers and dates**: `NumberFormat`/`DateFormat` with the locale (`ar`
   → Arabic-Indic digits per the project decision). Never `toString()` on a
   displayed number. `DateFormat` from `intl` is **Gregorian only** — it does

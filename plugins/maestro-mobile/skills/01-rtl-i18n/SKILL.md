@@ -1,14 +1,15 @@
 ---
 name: 01-rtl-i18n
-description: Arabic and RTL correctness for web and mobile — layout mirroring, Arabic typography and plurals, Hijri dates, numerals, currency. Auto-applies when the project has an ar locale or the task mentions Arabic/RTL. Use also to audit RTL readiness. The deepest Maestro expertise — read references/rtl-checklist.md before large RTL work.
+description: Arabic and RTL correctness for web and mobile — layout mirroring, Arabic typography and plurals, Hijri dates, numerals, currency, font metrics. Auto-applies when the project has an ar locale or the task mentions Arabic/RTL; say audit to audit RTL readiness.
 argument-hint: "[audit]"
 paths:
   - "**/ar.json"
-  - "**/ar/**"
-  - "**/*.arb"
+  - "**/ar-*.json"
+  - "**/app_ar*.arb"
+  - "**/intl_ar*.arb"
   - "messages/ar*"
   - "locales/ar*"
-  - "lib/l10n/**"
+  - "locales/ar/**"
 ---
 
 # Skill: rtl-i18n
@@ -34,9 +35,10 @@ covers the other 80%.
 - `I18nManager.allowRTL(true)` + `forceRTL` per locale — **requires an app
   restart** to apply; design the language switcher accordingly (Expo:
   `expo-updates` reload).
-- Native flags: `android:supportsRtl="true"` in AndroidManifest; Expo: the
-  `expo-localization` config plugin (RTL on by default; `supportsRTL` /
-  `forcesRTL` options) plus `extra.supportsRTL: true` for Expo Go.
+- Native flags: `android:supportsRtl="true"`; Expo: the `expo-localization`
+  plugin (`supportsRTL` / `forcesRTL`). Trap: below 58.0.5 the plugin resets
+  `forceRTL` from the device locale at every cold start — upgrade, or do not
+  pass those options when the app has a language switcher. Not in Expo Go.
 - Use `start`/`end` style props (`marginStart`, `paddingEnd`) — RN maps them
   per direction. `writingDirection` for text alignment edge cases.
 - `flexDirection: 'row'` auto-mirrors under RTL. Never hand-reverse.
@@ -47,14 +49,9 @@ covers the other 80%.
   carousel order, stepper flow.
 - **Never flip**: logos, clocks, media playback controls (play stays ▶),
   phone numbers, code blocks, maps, checkmarks.
-- **Phone input = an LTR object, even on an RTL screen** (owner rule,
-  2026-10-16: «المفتاح يسار يكون»). The country-code box (🇸🇦 +966) sits on
-  the **LEFT** of the field and the digits run to its right, left-aligned,
-  exactly like a dialer. In RN lay the row out physically
-  (`flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row'`, physical
-  `borderRight*` on the prefix with an `// rtl-ok` note); on the web wrap the
-  whole field in `dir="ltr"`. The label above the field stays RTL. A +966 box
-  on the right of an Arabic form is a review finding.
+- **Phone input is an LTR object** even on an RTL screen: country-code box on
+  the LEFT, digits left-aligned, label RTL — recipe (web `dir="ltr"`, RN
+  `direction: 'ltr'`) in `references/rtl-checklist.md`.
 
 ## Text, plurals, numbers, dates
 
@@ -69,8 +66,10 @@ covers the other 80%.
   (Hijri + Gregorian) for legal/official documents.
 - Currency: format with `Intl.NumberFormat(…, { currencyDisplay: 'code' })`
   and replace the `SAR` token by `assets/sar-icon.svg` (see
-  `references/sar.md`). U+20C1 SAUDI RIYAL SIGN (Unicode 17, Sept 2025) as
-  text only when every font in the render path has the glyph; never ﷼.
+  `references/sar.md`) placed **before** the number with a space (SAMA rule,
+  all languages). U+20C1 SAUDI RIYAL SIGN (Unicode 17, Sept 2025) as text only
+  when every font in the render path has the glyph; never ﷼ (U+FDFC is the
+  Iranian rial sign).
 
 ## Fonts
 
@@ -79,22 +78,17 @@ covers the other 80%.
 - Line-height: Arabic needs ~1.6–1.8 (taller than Latin defaults) — check
   clipping of diacritics and descenders.
 - letter-spacing MUST be 0 for Arabic — tracking breaks cursive joining.
-- **Mobile metrics check (mandatory, RN/Expo and Flutter)**: before the first
-  device build and after every font bump, run
-  `python3 assets/font-metrics.py check <font files>` on each shipped Arabic
-  weight. A `CLIP` verdict means the font's declared descent/ascent is smaller
-  than its ي dots / ص tail and React Native cuts them on the device
-  («الياء ناقصة» tickets) while the web prototype looks fine. Fix with
-  `font-metrics.py fix … --out assets/fonts` and load the local copies under
-  the same family names — never by changing the font or padding every text.
-  Full procedure: `references/arabic-font-metrics.md`.
+- **Mobile metrics check (mandatory, RN/Expo and Flutter)**: `pip install
+  fonttools`, then `python3 ${CLAUDE_PLUGIN_ROOT}/skills/01-rtl-i18n/assets/font-metrics.py check <fonts>`
+  before the first device build and after every font bump. `CLIP` = the
+  declared descent is smaller than the ي dots and the device cuts them; fix
+  with `… fix <fonts> --out assets/fonts` (same family names). Procedure:
+  `references/arabic-font-metrics.md`.
 
 ## Flutter
 
-The rules above are web/RN. Flutter has its own directional APIs, its own
-string system (ARB) and a specific font trap: read
-`references/flutter-rtl.md` **before** any Flutter UI in a project with an
-`ar` locale. In one line: `EdgeInsetsDirectional`, never
+Read `references/flutter-rtl.md` **before** any Flutter UI in a project with
+an `ar` locale. In one line: `EdgeInsetsDirectional`, never
 `EdgeInsets.only(left:)`; ARB + `gen_l10n`, never an `isArabic` ternary; a
 Latin font has no Arabic glyphs.
 
@@ -115,5 +109,5 @@ locale. Each finding: file, evidence, fix. See `references/rtl-checklist.md`.
   the arab-vs-latn digits choice is either read from tech-decisions.md or
   flagged as "decision needed" — never assumed.
 - A mobile project with an `ar` locale ships no Arabic font file for which
-  `assets/font-metrics.py check` reports `CLIP`; the check (or the fixed copy
-  in `assets/fonts`) is recorded in the release log.
+  `font-metrics.py check` reports `CLIP` or `NO-ARABIC`; the check (or the
+  fixed copy in `assets/fonts`) is recorded in the release log.

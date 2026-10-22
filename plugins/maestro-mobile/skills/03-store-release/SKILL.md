@@ -14,7 +14,7 @@ submission is right the first time.
 ## Live state (computed at invocation)
 
 Version and identifiers (first source that answers wins):
-!`if [ -f app.json ]; then node -e 'const a=require(process.cwd()+"/app.json");const e=a.expo||a;console.log("app.json | name:",e.name,"| version:",e.version,"| ios build:",(e.ios||{}).buildNumber,"| android versionCode:",(e.android||{}).versionCode,"| bundle:",(e.ios||{}).bundleIdentifier,"| package:",(e.android||{}).package)'; elif ls app.config.js app.config.ts >/dev/null 2>&1; then npx --no-install expo config --json --type public 2>/dev/null | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{const e=JSON.parse(d);console.log("app.config | name:",e.name,"| version:",e.version,"| ios build:",(e.ios||{}).buildNumber,"| android versionCode:",(e.android||{}).versionCode)}catch{console.log("(app.config.* present but expo config failed: run npx expo config --json --type public)")}})'; elif [ -f pubspec.yaml ]; then echo "pubspec.yaml | $(grep -m1 '^version:' pubspec.yaml)"; elif [ -f android/app/build.gradle ]; then echo "build.gradle | $(grep -m1 versionCode android/app/build.gradle | tr -s ' ') $(grep -m1 versionName android/app/build.gradle | tr -s ' ')"; else echo "(no app.json / app.config.* / pubspec.yaml / build.gradle found)"; fi; [ -f eas.json ] && node -e 'const s=((require(process.cwd()+"/eas.json").cli||{}).appVersionSource);console.log("eas.json appVersionSource:",s||"(unset = local)",s==="remote"?"→ EAS manages buildNumber/versionCode; do not bump them locally":"")'; true`
+!`if [ -f app.json ]; then node -e 'const a=require(process.cwd()+"/app.json");const e=a.expo||a;console.log("app.json | name:",e.name,"| version:",e.version,"| ios build:",(e.ios||{}).buildNumber,"| android versionCode:",(e.android||{}).versionCode,"| bundle:",(e.ios||{}).bundleIdentifier,"| package:",(e.android||{}).package)'; elif [ -f app.config.js ] || [ -f app.config.ts ]; then npx --no-install expo config --json --type public 2>/dev/null | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{const e=JSON.parse(d);console.log("app.config | name:",e.name,"| version:",e.version,"| ios build:",(e.ios||{}).buildNumber,"| android versionCode:",(e.android||{}).versionCode)}catch{console.log("(app.config.* present but expo config failed: run npx expo config --json --type public)")}})'; elif [ -f pubspec.yaml ]; then echo "pubspec.yaml | $(grep -m1 '^version:' pubspec.yaml)"; elif [ -f android/app/build.gradle ]; then echo "build.gradle | $(grep -m1 versionCode android/app/build.gradle | tr -s ' ') $(grep -m1 versionName android/app/build.gradle | tr -s ' ')"; else echo "(no app.json / app.config.* / pubspec.yaml / build.gradle found)"; fi; [ -f eas.json ] && node -e 'const s=((require(process.cwd()+"/eas.json").cli||{}).appVersionSource);console.log("eas.json appVersionSource:",s||"(unset = local)",s==="remote"?"→ EAS manages buildNumber/versionCode; do not bump them locally":"")'; true`
 
 Locales shipped:
 !`{ ls messages locales src/locales i18n assets/locales 2>/dev/null; ls lib/l10n/*.arb 2>/dev/null; } | tr '\n' ' '; echo`
@@ -26,7 +26,7 @@ Arguments: `$ARGUMENTS` (platform, then optional rejection text)
 
 ## Process
 
-1. Copy `assets/checklist.md` into
+1. Copy `${CLAUDE_PLUGIN_ROOT}/skills/03-store-release/assets/checklist.md` into
    `maestro_docs/releases/<version>_<platform>.md` (create the folder). Every
    item gets one of: ✅ + evidence (file, screenshot name, command output),
    ❌ + what is missing, ➖ + why it does not apply. No item stays blank.

@@ -9,8 +9,8 @@ web prototype. It is **not** the font's design and **not** a reason to change th
 - A font declares vertical metrics (`hhea` ascent/descent, `OS/2` typo and win values). CoreText (iOS) and
   Minikin (Android) build the line box from them; React Native then **clips every `<Text>` to its line box**.
 - Many Arabic families declare a descent that is smaller than their deepest Arabic glyphs. IBM Plex Sans Arabic:
-  descent 415/1000 em, but the final ي with its two dots reaches 455 and ص / ض 521. Everything under 415 is cut:
-  the dots show half-height, the ص tail is flat.
+  descent 415/1000 em, but the final ي with its two dots reaches 440 (Regular) / 455 (Bold). Everything under
+  415 is cut: the dots show half-height. (ص / ض stay inside the descent at 240.)
 - Chrome and Figma never clip glyph overflow, so the prototype looks right and the bug only appears on the device.
 - A bigger `lineHeight` does not fix it on iOS (RN adds the extra space above the baseline), and padding on every
   `<Text>` changes the layout. The metrics are the bug; fix the metrics.
@@ -20,13 +20,14 @@ web prototype. It is **not** the font's design and **not** a reason to change th
 1. Check every Arabic font the app loads, in every weight:
    ```bash
    pip install fonttools   # once
-   python3 "$MAESTRO_MOBILE/skills/01-rtl-i18n/assets/font-metrics.py" check node_modules/@expo-google-fonts/<family>/*.ttf
+   python3 ${CLAUDE_PLUGIN_ROOT}/skills/01-rtl-i18n/assets/font-metrics.py check node_modules/@expo-google-fonts/<family>/*/*.ttf
    ```
    `CLIP` = the deepest/highest Arabic glyph exceeds the declared descent/ascent.
 2. Re-export the fonts with metrics that cover the glyphs (ascent unchanged unless a glyph exceeds it, so text
-   keeps its vertical position; only a `<Text>` without an explicit `lineHeight` grows a little):
+   keeps its vertical position; a `<Text>` without an explicit `lineHeight` grows by the descent delta — IBM Plex
+   goes 415 → 601 because the `usWin` values are reused when they cover the glyphs):
    ```bash
-   python3 "$MAESTRO_MOBILE/skills/01-rtl-i18n/assets/font-metrics.py" fix node_modules/@expo-google-fonts/<family>/*.ttf --out assets/fonts
+   python3 ${CLAUDE_PLUGIN_ROOT}/skills/01-rtl-i18n/assets/font-metrics.py fix node_modules/@expo-google-fonts/<family>/*/*.ttf --out assets/fonts
    ```
    Commit the script call in the project (`scripts/fonts/patch-metrics.*`) so a font bump re-runs it.
 3. Load the local files under the **same family names** the theme tokens use — nothing else changes:

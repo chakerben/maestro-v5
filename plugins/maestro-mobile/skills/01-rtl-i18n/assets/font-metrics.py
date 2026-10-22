@@ -4,12 +4,12 @@ Arabic font metrics check — do the font's vertical metrics cover its Arabic gl
 
 Why: React Native (iOS and Android) clips a <Text> to the line box CoreText / Minikin derive from the font's hhea
 (or OS/2 typo) ascent and descent. Many Arabic families ship a descent smaller than their deepest Arabic glyphs
-(IBM Plex Sans Arabic: descent 415/1000 em, final ي with dots 455, ص / ض 521). On the device the dots of «حسابي» and
-the tail of «الشخصي» are cut; in Chrome (where the design prototype lives) nothing is clipped, so the bug only shows
+(IBM Plex Sans Arabic: descent 415/1000 em, final ي with dots 440 Regular / 455 Bold). On the device the dots of
+«حسابي» and «الشخصي» are cut; in Chrome (where the design prototype lives) nothing is clipped, so the bug only shows
 on the phone and reads like "the ي is missing". Changing the font is the wrong fix — the metrics are.
 
 Usage:
-  python3 font-metrics.py check  fonts/*.ttf                 # report, exit 1 when a font would clip
+  python3 font-metrics.py check  fonts/*.ttf                 # report, exit 1 when a font would clip or has no Arabic glyph
   python3 font-metrics.py fix    fonts/*.ttf --out assets/fonts   # write copies whose metrics cover the Arabic glyphs
   add --all to measure every Arabic block (extended letters) instead of the standard alphabet + tashkeel + digits
 
@@ -77,7 +77,12 @@ def report(path: Path, every_block: bool):
     (low, low_n), (high, high_n) = bounds(f, arabic_glyph_names(f, every_block))
     descent, ascent = -hhea.descent, hhea.ascent
     clip_below, clip_above = -low - descent, high - ascent
-    verdict = 'CLIP' if clip_below > 0 or clip_above > 0 else 'OK'
+    if low_n is None and high_n is None:
+        # A Latin-only font "passes" every metric: it has nothing to clip and nothing to render. Shipping it as the
+        # Arabic face is the bug flutter-rtl.md warns about, so it is a verdict of its own, never OK.
+        verdict = 'NO-ARABIC'
+    else:
+        verdict = 'CLIP' if clip_below > 0 or clip_above > 0 else 'OK'
     print(f"{path.name}: {verdict}  hhea ascent {ascent} descent {descent} (upm {upm}) · typo {os2.sTypoAscender}/{os2.sTypoDescender} · win {os2.usWinAscent}/{os2.usWinDescent}")
     print(f"  deepest Arabic glyph {low:.0f} ({low_n}) → {'exceeds descent by ' + format(clip_below, '.0f') if clip_below > 0 else 'covered'}")
     print(f"  highest Arabic glyph {high:.0f} ({high_n}) → {'exceeds ascent by ' + format(clip_above, '.0f') if clip_above > 0 else 'covered'}")
@@ -86,16 +91,31 @@ def report(path: Path, every_block: bool):
 
 def fix(path: Path, out_dir: Path, every_block: bool):
     f, verdict, low, high = report(path, every_block)
+    if verdict == 'NO-ARABIC':
+        print(f"  → not written: {path.name} has no Arabic glyph, there is nothing to fix")
+        return False
     hhea, os2 = f['hhea'], f['OS/2']
     descent = max(-hhea.descent, os2.usWinDescent, int(-low) + 1)
     ascent = max(hhea.ascent, int(high) + 1)
     hhea.descent, hhea.ascent = -descent, ascent
     os2.sTypoDescender, os2.sTypoAscender = -descent, ascent
     os2.usWinDescent, os2.usWinAscent = max(os2.usWinDescent, descent), max(os2.usWinAscent, ascent)
+    if os2.version < 4:
+        # USE_TYPO_METRICS (bit 7) is defined from OS/2 v4; on an older table the bit means nothing and fontTools
+        # warns. Upgrading the version is what makes the typo values authoritative on every renderer. v2+ adds
+        # five fields a v1 table does not carry: fill them with the spec's "unknown" values (0).
+        for field in ('sxHeight', 'sCapHeight', 'usDefaultChar', 'usBreakChar', 'usMaxContext'):
+            if not hasattr(os2, field):
+                setattr(os2, field, 0)
+        for field in ('ulCodePageRange1', 'ulCodePageRange2'):
+            if not hasattr(os2, field):
+                setattr(os2, field, 0)
+        os2.version = 4
     os2.fsSelection |= USE_TYPO_METRICS
     out_dir.mkdir(parents=True, exist_ok=True)
     f.save(out_dir / path.name)
     print(f"  → {out_dir / path.name}: ascent {ascent} descent {descent} ({'was clipping' if verdict == 'CLIP' else 'already covered, metrics normalised'})")
+    return True
 
 
 def main():
@@ -105,14 +125,19 @@ def main():
     ap.add_argument('--out', type=Path, default=Path('assets/fonts'), help='fix: output directory (default assets/fonts)')
     ap.add_argument('--all', action='store_true', help='measure every Arabic block, not only the standard alphabet')
     a = ap.parse_args()
-    bad = 0
+    bad = no_arabic = 0
     for p in a.fonts:
         if a.mode == 'check':
-            bad += report(p, a.all)[1] == 'CLIP'
+            v = report(p, a.all)[1]
+            bad += v == 'CLIP'
+            no_arabic += v == 'NO-ARABIC'
         else:
-            fix(p, a.out, a.all)
-    if a.mode == 'check' and bad:
+            no_arabic += not fix(p, a.out, a.all)
+    if bad:
         print(f"\n{bad} font(s) would clip Arabic glyphs on React Native: run `font-metrics.py fix` (see references/arabic-font-metrics.md)")
+    if no_arabic:
+        print(f"\n{no_arabic} font(s) contain no Arabic glyph at all — a Latin face cannot be the Arabic font (flutter-rtl.md / rtl-checklist.md)")
+    if bad or no_arabic:
         sys.exit(1)
 
 
