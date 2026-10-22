@@ -1,5 +1,72 @@
 # Changelog
 
+## 5.15.0 — unreleased (audit 5.14.0 fixes)
+
+An independent deep pass (`docs/AUDIT-5.14.0.md`, 70 findings, every H
+reproduced twice) read the platform documentation against the claims the
+framework rests on, ran the secrets gate on the code the framework mandates,
+and found `main` red. This section lists what this branch closes; the audit
+keeps the full table and the suggested order for what it does not.
+
+### Fixed
+
+- **`main` was red** since 2026-10-16: `01-rtl-i18n/SKILL.md` over the
+  5 500-char budget. The phone-input recipe and the metrics procedure moved
+  to their references; the skill lands at ≈5.4k chars.
+- **The model ladder was instructed, not enforced.** Claude Code resolves a
+  dispatch's `model` parameter *before* an agent's frontmatter, so "a pin is
+  not overridable" (5.13.0) was false in both directions. `Agent(model:*)`
+  joins the canonical `permissions.deny` list (`04-scaffold` 4b,
+  `fleet-apply.sh --settings`, reported by `04-doctor`, required by
+  `validate.js`); PHILOSOPHY rule 5, both model-policy documents, routing and
+  the agents say what enforces what.
+- **The secrets gate** reported its own fixture `sk_live_xxx…` clean (the
+  `xxx` placeholder rule) and went RED on `const apiKey = process.env.X` —
+  the `env.ts` pattern `00-web-standards` mandates. References are dropped,
+  the fixture is a realistic key, provider prefixes are case-sensitive
+  (`task123…` was a "Twilio key"); 11 cases join `secret-scan.test.sh`.
+  `Gate-Allow:` trailers reach the commit body (they were lost between the
+  gate and the compose action).
+- **`02-implement`** marked a phase `done` before the commit gate ran and
+  never passed the caller's mode, so `00-sdlc auto` paused at every phase
+  commit; a half-done or `blocked` phase had no resume rule. Order is
+  validate → stage → gate → done; `attempts:` lives in the phase frontmatter;
+  `blocked` stops entry. `05-ship` goes through `01-pull-request` (branch-wide
+  scan) instead of opening the PR itself.
+- **maestro-mobile**: the metrics script was unreachable as written
+  (`$MAESTRO_MOBILE`, relative paths, a glob matching no file); the RN
+  phone-input recipe used `borderRight*`, which RN swaps to `end` under RTL
+  (now `direction: 'ltr'`); `forceRTL` is reset at cold start by
+  expo-localization < 58.0.5 (stated); `font-metrics.py` reports `NO-ARABIC`
+  for a Latin-only face instead of `OK` and bumps OS/2 to v4 before setting
+  `USE_TYPO_METRICS`; the ص/ض claim was wrong (240, inside the descent);
+  `arrow_back_ios` does flip; the riyal symbol goes *before* the number
+  (SAMA), not where `formatToParts` puts it; `﷼` is the Iranian rial sign;
+  `03-store-release` lost its version line whenever only one of
+  `app.config.{js,ts}` existed.
+- `03-ticket` read `CLAUDE_PLUGIN_OPTION_*` from a Bash injection — exported
+  to hook processes only — so the board was always "not set"; it reads
+  `${user_config.TRELLO_BOARD}`.
+- Reviewer agents told to "invoke" a skill had no `Skill` tool in their
+  allowlist; `checker-critical` cited the lean-code rung without preloading it.
+- `04-doctor` could not compute its three hook buckets (it read one settings
+  file); `fix` wiped the whole `hooks` key; backups landed untracked in the
+  repo. `04-scaffold` hand-wrote a routing block the hook could refuse
+  forever and never touched `.gitignore`.
+- `fleet.sh` never discovered a `gwt` worktree (`-maxdepth 3`, the `.claude`
+  is at depth 4); two projects sharing a basename overwrote each other's
+  fleet log; two `fleet-apply` test checks could not fail.
+- Plugin-cache paths (`assets/…` from `actions/`, `docs/…` from a skill) and
+  unguarded cross-plugin references in quality, web, pm and brainstorm.
+
+### Changed
+
+- `01-plan` resolves the feature folder itself and requires a validation
+  *command* per phase; `04-debug` gains `needs-decision`; brainstorm's
+  off-ramp no longer writes `dropped`; `ux-standards` no longer fires on Expo
+  Router screens; `02-release` refuses to run on a marketplace repo;
+  `release.sh` logs to `mktemp`.
+
 ## 5.14.0 — the ي keeps its dots (2026-10-15)
 
 Nemah's client reported «الياء ناقصة» on `حسابي` / `نعمي` / `الشخصي`: the

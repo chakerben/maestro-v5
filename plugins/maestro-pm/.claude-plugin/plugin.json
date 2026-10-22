@@ -1,7 +1,7 @@
 {
   "name": "maestro-pm",
   "version": "5.14.0",
-  "description": "Product management: PRD, user stories, technical specs, and tickets (EN/FR/AR PRD and card templates) (findings → Trello cards, never fixes).",
+  "description": "Product management: PRD, user stories, technical specs (EN/FR/AR templates), writing rules, and tickets — a finding becomes a Trello card, never a silent fix.",
   "author": {
     "name": "Ben Moussa Chaker"
   },

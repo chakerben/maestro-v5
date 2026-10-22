@@ -105,6 +105,8 @@ carries the phase, the objective, the memory references — never the session.
 | **`checker-critical`** | **opus** | high | critical change: criteria **and** failure modes |
 | **`m-deep-analyst`** | **opus** | high | what fable could not settle; critical by nature |
 | `maestro-quality:01-security-audit` | opus | high | security is critical by definition |
+| `maestro-core:03-condense` | session | low | output shaping, no decision |
+| `maestro-web:03-motion` | session | medium | implementation against a recorded brief |
 
 Force at any time with `/model opus` — the pins above only raise the tier for
 the steps that need it, and never lower a model you set for an unpinned step.

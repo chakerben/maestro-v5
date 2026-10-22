@@ -8,8 +8,10 @@ Mobile + Arabic — the Maestro differentiator.
   Architecture only, 4 states, FlashList, Reanimated, safe areas, OTA policy
 - `01-rtl-i18n` — the deep one: logical properties, what flips/what doesn't,
   6 Arabic plural categories, Hijri dates, arab/latn numerals, SAR icon
-  (`references/sar.md`), Arabic typography (line-height, letter-spacing:0).
-  Ships `references/rtl-checklist.md` and `references/flutter-rtl.md`.
+  (`references/sar.md`), Arabic typography (line-height, letter-spacing:0),
+  font metrics (`assets/font-metrics.py`, `references/arabic-font-metrics.md`).
+  Ships `references/rtl-checklist.md`, `references/flutter-rtl.md`,
+  `references/sar.md` and `assets/sar-icon.svg`.
 - `02-pdf-rtl` — the reliable Arabic PDF route (browser print engine),
   embedded fonts, bidi-safe invoice templates, shaping smoke tests, ZATCA
   QR/phases (`references/zatca.md`)

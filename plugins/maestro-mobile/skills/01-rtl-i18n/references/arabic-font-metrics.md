@@ -1,6 +1,6 @@
 # Arabic fonts on mobile: metrics clipping (the "missing ي dots" bug)
 
-Seen on several apps (Nemah 2026-10-15, WhatsApp tickets W15–W17; earlier on others). The client reports
+Seen on several apps (first diagnosed in October 2026; the project's own `maestro_docs` carries its tickets). The client reports
 «الياء ناقصة» / "the last letter looks wrong" on `حسابي`, `نعمي`, `الشخصي`, while the same text is fine in the
 web prototype. It is **not** the font's design and **not** a reason to change the font.
 

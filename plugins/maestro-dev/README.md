@@ -17,7 +17,7 @@ The development pipeline.
 - `05-lean-code` — the ladder (skip → reuse → stdlib → platform → installed dep
   → one-liner → build), surgical changes, `debt:` markers; preloaded in the
   executor, checker and architect
-- `06-protocols` — the 6 anti-complacency rules (evidence, confidence,
+- `06-protocols` — the 7 anti-complacency rules (evidence, confidence,
   falsifiable plan, disagree once, no silent scope change, completion
   honesty, model ladder); not user-invocable, preloaded in all 8 agents
 

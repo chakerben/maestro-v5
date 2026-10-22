@@ -19,7 +19,7 @@ and full system freezes. Maestro 5 was rebuilt around one sentence:
 Hence two hooks in the entire framework, both cheap and fail-open; hence nothing
 runs automatically after an edit. Each of the eight rules in
 [PHILOSOPHY.md](PHILOSOPHY.md) is the scar of a specific failure, and `npm test`
-— nine checks, 219 cases — refuses a change that breaks one.
+— three node checks and six bash suites, 250+ cases — refuses a change that breaks one.
 
 ## Install
 

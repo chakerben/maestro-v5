@@ -16,8 +16,10 @@ journal included, and file what broke as the next release's changelog.
   One question at a time, journal with a falsifiable stop condition, devil-advocate
   pass, routed handoff. See docs/BRAINSTORM-SUPERPOWERS.md for what was absorbed
   from Superpowers and what was deliberately refused.
-- **maestro-vcs worktree support** — parallel feature work via git worktrees
-  (v4 had worktree-parallel; reintroduce only if a real need appears).
+- ~~maestro-vcs worktree support~~ — **shipped in 5.8.0** as
+  `maestro-vcs:03-worktree` + `scripts/gwt`. Still open: ship `gwt` in the
+  plugin's `bin/` (on the Bash PATH while enabled) instead of a symlink into
+  the clone `install-shortcuts.sh` ran from (audit 5.14.0 2.7).
 - **skill-eval harness** — automated test cases validating that skill
   descriptions trigger on the right prompts (pattern from AIDD).
 

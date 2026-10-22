@@ -25,7 +25,13 @@ Top of CHANGELOG.md:
 2. Derive the bump from conventional types (feat → minor, fix → patch,
    BREAKING CHANGE / ! → major) unless the argument overrides. Show the
    reasoning.
-3. Bump the app version file for the stack (listed in "Live state"):
+3. If `.claude-plugin/marketplace.json` exists at the root, this repo is a
+   Claude Code marketplace: stop and point to its own release script
+   (`scripts/release.sh <version>` for Maestro — nine manifests, tests, tag);
+   this skill bumps one file and would leave the manifests drifting. A
+   project's own version rule (`CLAUDE.md`, `.claude/rules/`) wins over the
+   list below — say which.
+   Bump the app version file for the stack (listed in "Live state"):
    `package.json` (`npm version <x.y.z> --no-git-tag-version`), `pubspec.yaml`
    `version:` (keep the `+build` suffix, bump it too), `app.json` /
    `app.config.*` `version` (Expo), `Cargo.toml` `version`, `pyproject.toml`

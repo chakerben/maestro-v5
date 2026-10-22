@@ -149,8 +149,9 @@ fi
 step "1b/5 Tests"
 act "npm test"
 if [ "$DRY_RUN" = "0" ]; then
-  npm test >/tmp/maestro-release-test.log 2>&1 \
-    || { err "npm test ROUGE — /tmp/maestro-release-test.log"; tail -20 /tmp/maestro-release-test.log; exit 1; }
+  TEST_LOG=$(mktemp "${TMPDIR:-/tmp}/maestro-release-test.XXXXXX")
+  npm test >"$TEST_LOG" 2>&1 \
+    || { err "npm test ROUGE — $TEST_LOG"; tail -20 "$TEST_LOG"; exit 1; }
   ok "tests verts"
 else
   warn "tests NON exécutés (dry-run)"
