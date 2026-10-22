@@ -30,6 +30,6 @@ For each phase in order (skipping `done`):
 - Every completed phase = exactly one commit containing its code and its
   `status: done` together.
 - Every phase commit went through the secrets gate: a phase diff containing
-  `sk_live_xxxxxxxxxxxxxxxxxxxxxxxx` produced no commit.
+  `sk_live_4eC39HqLyjWDarjtT1zdp7dc` produced no commit.
 - No phase was marked done without its validation passing (see the Log).
 - A blocked stop names the failing command and its output.

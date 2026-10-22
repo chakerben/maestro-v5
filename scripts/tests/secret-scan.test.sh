@@ -54,6 +54,18 @@ chk "placeholder values: clean" "$(bash "$S" cached | head -1 | cut -d' ' -f1-3)
 printf 'ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcd\n' > .env && git add -f .env
 chk "GitHub token: RED" "$(bash "$S" cached | grep -c 'GitHub token')" "1"
 git rm -q --cached .env; rm -f .env
+# 5.14.0 audit 3.1–3.3 — the gate's own fixture, the mandated env.ts pattern, case-sensitive prefixes
+FP=$(printf 'diff --git a/env.ts b/env.ts\n--- a/env.ts\n+++ b/env.ts\n@@ -0,0 +1,7 @@\n+const apiKey = process.env.OPENAI_API_KEY;\n+const passwordMinLength = DEFAULT_PASSWORD_LENGTH;\n+const cfg = { apiKey: env.STRIPE_SECRET_KEY, secret: import.meta.env.VITE_SECRET };\n+const t = "task1234567890abcdef1234567890abcdef12";\n+const k = "sk_live_xxxxxxxxxxxxxxxxxxxxxxxx";\n+token = os.environ["API_TOKEN"]\n+const secretSantaAssignments = buildAssignments(users);\n')
+OUT=$(printf '%s\n' "$FP" | bash "$S" stdin)
+chk "env references are not secrets (process.env / env. / import.meta.env / os.environ / bare identifier)" "$(echo "$OUT" | head -1 | cut -d' ' -f1-3)" "SECRET SCAN: clean"
+chk "provider prefixes are case-sensitive (task123… is not a Twilio key)" "$(echo "$OUT" | grep -c Twilio)" "0"
+chk "an xxx fixture is a placeholder, not a hit" "$(echo "$OUT" | grep -c Stripe)" "0"
+TP=$(printf 'diff --git a/env.ts b/env.ts\n--- a/env.ts\n+++ b/env.ts\n@@ -0,0 +1,4 @@\n+const k = "sk_live_4eC39HqLyjWDarjtT1zdp7dc";\n+const secret = "h7Gq92kLm3PzXw81vRt6";\n+DB_PASSWORD=hunter2hunter2hunter2\n+const twilio = "SK0123456789abcdef0123456789abcdef";\n')
+OUT=$(printf '%s\n' "$TP" | bash "$S" stdin)
+chk "canonical fixture sk_live_4eC39… is RED" "$(echo "$OUT" | grep -c 'env.ts:1  Stripe key')" "1"
+chk "quoted literal secret still RED" "$(echo "$OUT" | grep -c 'env.ts:2  Generic')" "1"
+chk "unquoted value with digits still RED" "$(echo "$OUT" | grep -c 'env.ts:3  Generic')" "1"
+chk "real Twilio key still RED" "$(echo "$OUT" | grep -c 'env.ts:4  Twilio')" "1"
 for i in $(seq 1 3000); do echo "const value_$i = compute($i) + 'an ordinary string literal';"; done > big.js && git add big.js
 T0=$(date +%s); OUT=$(bash "$S" cached); T1=$(date +%s)
 chk "perf: 3000 clean lines scanned" "$(echo "$OUT" | head -1 | cut -d' ' -f1-6)" "SECRET SCAN: clean — 3000 added"

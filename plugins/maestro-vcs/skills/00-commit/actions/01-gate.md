@@ -25,7 +25,7 @@ Run the quality gate on the diff.
    checks with the lockfile-detected runner:
    - typecheck: the project's `typecheck` script if present (skip with a note
      if absent — LSP already covered real-time)
-   - lint: the `lint` script if present
+   - lint: `high` and above → the `lint` script if present
    - tests: `high` → tests touching changed paths; `paranoid` → full suite
 4. Log each check: command, exit code, duration. Any red → print the failing
    output tail (20 lines max), stop with "gate RED — fix or 'bypass gate: <reason>'".
@@ -33,7 +33,7 @@ Run the quality gate on the diff.
 
 ## Test
 
-- A diff containing `sk_live_xxxxxxxxxxxxxxxxxxxxxxxx` is blocked even at level `off`.
+- A diff containing `sk_live_4eC39HqLyjWDarjtT1zdp7dc` is blocked even at level `off`.
 - With another session's staged rename in the tree, the commit carries only the
   paths this session touched.
 - No check ran with `--silent`.

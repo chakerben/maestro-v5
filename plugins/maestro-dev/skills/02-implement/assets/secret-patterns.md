@@ -36,10 +36,17 @@ the table below is markdown escaping for `|` — use a plain `|` in the command.
 | `whsec_[A-Za-z0-9]{20,}` | Stripe webhook secret |
 | `(api[_-]?key\|secret\|password\|passwd\|token)[A-Za-z0-9_]*[[:space:]]*[:=][[:space:]]*['"]?[A-Za-z0-9+/=_.-]{16,}` | Generic hardcoded credential |
 
-The generic pattern is case-insensitive (`-i`) and accepts unquoted values
+The generic pattern is the only case-insensitive one (`-i`); the provider
+prefixes above are literals and are matched case-sensitively. It accepts unquoted values
 (`DB_PASSWORD=…` in a `.env`). Placeholder values are not hits: the script drops a match whose text contains
 `example`, `changeme`, `placeholder`, `xxx…`, `your_`/`your-`, `<…>` or `${`
 (so `API_KEY=changeme_placeholder_value` is clean, `DB_PASSWORD=hunter2hunter2hunter2` is RED).
+A **reference** is not a secret either: a generic match whose value is
+`process.env.X`, `env.X`, `import.meta.env.X`, `os.environ…`, `getenv(…)`, or
+a bare unquoted identifier with no digit (`DEFAULT_PASSWORD_LENGTH`) is
+dropped — the mandated `env.ts` pattern must stay green. A fixture for a
+test must therefore be a realistic value, never `xxx…`:
+`sk_live_4eC39HqLyjWDarjtT1zdp7dc`.
 
 False-positive escape: a line ending in a `gate:allow <reason>` comment
 (`// gate:allow r`, `# gate:allow r`, `-- gate:allow r`, `/* gate:allow r */`,

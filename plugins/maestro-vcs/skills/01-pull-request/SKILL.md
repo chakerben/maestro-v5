@@ -51,5 +51,5 @@ first line carries the point, no filler, no praise of the change.
 
 - The PR body contains objective + test instructions.
 - The branch diff against the default branch was scanned; a branch carrying
-  `sk_live_xxxxxxxxxxxxxxxxxxxxxxxx` in any commit was not pushed.
+  `sk_live_4eC39HqLyjWDarjtT1zdp7dc` in any commit was not pushed.
 - No merge occurred.

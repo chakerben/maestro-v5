@@ -78,6 +78,25 @@ done < "$PATTERNS_MD"
 # Placeholder values are not secrets (applied to the MATCHED text, never to
 # the whole line, so a comment cannot hide a real key).
 PLACEHOLDER='example|changeme|placeholder|xxx+|your[_-]?|<.*>|\$\{'
+# The generic row ("apiKey = <value>") is the only case-insensitive one — a
+# provider prefix like AKIA or SK is a literal, and `-i` on it made
+# "task1234…" a Twilio key (5.14.0 audit 3.3). It is also the only row whose
+# value can be a REFERENCE rather than a secret: `process.env.X`, `env.X`,
+# `import.meta.env.X`, `os.environ[...]`, `getenv(...)`, or a bare identifier
+# with no quote and no digit (`DEFAULT_PASSWORD_LENGTH`). Those are what the
+# mandated env.ts pattern looks like, and they must stay green (3.2).
+GENERIC_NAME='Generic hardcoded credential'
+ENV_REF='^(process\.env\.|env\.|import\.meta\.env\.|os\.environ|getenv\(|System\.getenv|Deno\.env|dotenv|config\.|settings\.|secrets\.)'
+generic_value() { # the value part of a generic match: after the first : or =, quotes stripped
+  local v="${1#*[:=]}"; v="${v#"${v%%[![:space:]]*}"}"; v="${v#[\"\']}"; printf '%s' "$v"
+}
+is_reference() { # $1 = generic match text → 0 when it is a reference, not a secret
+  local v; v="$(generic_value "$1")"
+  printf '%s\n' "$v" | grep -Eq "$ENV_REF" && return 0
+  case "$1" in *\"*|*\'*) return 1 ;; esac          # quoted → a literal, keep
+  printf '%s\n' "$v" | grep -q '[0-9]' && return 1  # unquoted with a digit → keep
+  return 0                                           # bare identifier → reference
+}
 # gate:allow marker, anchored at end of line, in any common comment syntax.
 ALLOW_RE='(//|#|--|/\*|<!--)[[:space:]]*gate:allow([[:space:]].*)?$'
 
@@ -127,8 +146,14 @@ for n in $CANDIDATES; do
     allow="$(mask_secrets "$reason")"
   fi
   for i in "${!PATS[@]}"; do
-    m="$(printf '%s\n' "$added" | grep -Eio -e "${PATS[$i]}" | head -1)" || true
-    [ -n "$m" ] || continue
+    if [ "${NAMES[$i]}" = "$GENERIC_NAME" ]; then
+      m="$(printf '%s\n' "$added" | grep -Eio -e "${PATS[$i]}" | head -1)" || true
+      [ -n "$m" ] || continue
+      if is_reference "$m"; then continue; fi
+    else
+      m="$(printf '%s\n' "$added" | grep -Eo -e "${PATS[$i]}" | head -1)" || true
+      [ -n "$m" ] || continue
+    fi
     if printf '%s\n' "$m" | grep -Eiq "$PLACEHOLDER"; then continue; fi
     masked="${m:0:8}…"
     if [ -n "$allow" ]; then
