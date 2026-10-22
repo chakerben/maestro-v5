@@ -82,12 +82,21 @@ node -e '
 ' "$T/r/plugins/maestro-core/skills/01-memory/SKILL.md"
 red "opus pin without justification" "opus"
 
-# 8. The 5.12.1 fiction: a body promising that a dispatch overrides a pin.
-#    Frontmatter carries one model; "dispatch X with model: opus" can never
-#    happen, and three such escalations shipped believed-real (rule 5).
+# 8. A body promising that a dispatch overrides a pin. The platform resolves a
+#    dispatch's model parameter first, so such a sentence is either refused at
+#    runtime (Agent(model:*) in deny) or unchecked (no rule) — never a pin.
 fresh
 printf -- '\n- The orchestrator dispatches me with model: opus when the change is critical.\n' >> "$T/r/plugins/maestro-dev/agents/checker.md"
-red "dispatch overriding a pinned model" "cannot override"
+red "dispatch overriding a pinned model" "refused by Agent"
+
+# 8a. The canonical deny list must carry Agent(model:*) — it is the only thing
+#     that makes a frontmatter model a pin (5.14.0 audit 1.1).
+fresh
+sed -i.bak 's/^Agent(model:\*)$//' "$T/r/plugins/maestro-core/skills/00-onboard/actions/04-scaffold.md"
+red "scaffold deny list without Agent(model:*)" "lacks Agent(model"
+fresh
+sed -i.bak 's/, "Agent(model:\*)"//' "$T/r/scripts/fleet-apply.sh"
+red "fleet-apply deny list without Agent(model:*)" "lacks Agent(model"
 
 # 8b. The quoted counter-example stays legal (model-policy.md forbids the
 #     phrasing by quoting it) — the negation must be adjacent, not anywhere.

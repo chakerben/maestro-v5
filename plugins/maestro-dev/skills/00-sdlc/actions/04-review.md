@@ -4,8 +4,9 @@ Independent verdict.
 
 ## Process
 
-1. Pick the **agent**, not a model — a model pinned in frontmatter cannot be
-   overridden by a dispatch. Read `maestro_docs/gates.json` (owned by
+1. Pick the **agent**, not a model — the project's `Agent(model:*)` deny
+   rule refuses a dispatch that names one, and the criteria live in the
+   agent anyway. Read `maestro_docs/gates.json` (owned by
    `maestro-quality:00-quality-gate`; absent = standard). Level `high` /
    `paranoid`, or a critical change (auth, payment, security, concurrency,
    data migration, cross-project decision) → dispatch `checker-critical`

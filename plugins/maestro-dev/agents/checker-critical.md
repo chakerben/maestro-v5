@@ -4,11 +4,12 @@ description: Judges a critical change — auth, payment, security, concurrency, 
 model: opus
 effort: high
 role: reviewer
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, Skill
 disallowedTools: Write, Edit, MultiEdit, NotebookEdit
 maxTurns: 30
 skills:
   - maestro-dev:06-protocols
+  - maestro-dev:05-lean-code
 ---
 
 # Role

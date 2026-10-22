@@ -6,10 +6,16 @@ the step where the work is actually decided. Never pay for reasoning a step
 does not need; never save on the step that decides the architecture.
 **Complexity picks the tier, never length.**
 
-A pin is not overridable. Frontmatter carries exactly one `model:`, and a
-dispatch cannot change it — so going up the ladder means dispatching a
-**different agent**, never "dispatching X with model: opus". `validate.js`
-refuses any text that promises otherwise (PHILOSOPHY rule 5).
+A frontmatter `model:` is a **default**, not a lock: Claude Code resolves a
+subagent's model from the dispatch's `model` parameter first, then the
+frontmatter. What locks it is the project's `permissions.deny` entry
+`Agent(model:*)` (written by `00-onboard` scaffold 4b and `fleet-apply.sh
+--settings`, checked by `04-doctor`): with it, a dispatch that names a model
+is refused and the pin is the only path. Going up the ladder therefore means
+dispatching a **different agent** (`checker-critical`, `m-deep-analyst`) —
+they carry the critical criteria, which a model override would not. Never
+write "dispatch X with model: opus": with the rule it is refused, without it
+it is unchecked (PHILOSOPHY rule 5).
 
 ## Ladder
 

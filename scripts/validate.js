@@ -255,7 +255,7 @@ if (hookCommands.length && !hookScripts.size) fail('hook commands found but no s
 
 // ── Agents & commands (rule #5) ────────────────────────────
 console.log('▶ Agents & commands frontmatter');
-const REVIEWER_ALLOWLIST = new Set(['Read', 'Grep', 'Glob', 'WebFetch', 'WebSearch', 'Bash']);
+const REVIEWER_ALLOWLIST = new Set(['Read', 'Grep', 'Glob', 'WebFetch', 'WebSearch', 'Bash', 'Skill']);
 for (const { name, dir } of pluginDirs) {
   for (const sub of ['agents', 'commands']) {
     const d = path.join(dir, sub);
@@ -347,10 +347,23 @@ console.log('▶ Model policy');
   }
 
   // ── Enforced vs instructed (PHILOSOPHY rule 5), applied to the ladder ──
-  // A frontmatter carries exactly ONE model and a dispatch cannot override
-  // it. So "dispatch X with model: opus" is fiction: 5.12.1 shipped three
-  // such escalations that could never happen. Any text that promises opus
-  // must name an agent that is really pinned to opus.
+  // A frontmatter model is a DEFAULT: the platform resolves a dispatch's own
+  // `model` parameter first (sub-agents doc, "Choose a model"). The pin is
+  // enforced only by the permission rule Agent(model:*) in the project's
+  // permissions.deny — so the canonical deny list must carry it, and no text
+  // may rely on "dispatch X with model: opus": with the rule it is refused at
+  // runtime, without it nothing checks it. Escalation = another agent, whose
+  // criteria are the point. Any text that promises opus must name an agent
+  // that is really pinned to opus.
+  const DENY_SOURCES = [
+    ['plugins/maestro-core/skills/00-onboard/actions/04-scaffold.md', /^Agent\(model:\*\)[ \t]*$/m],
+    ['scripts/fleet-apply.sh', /"Agent\(model:\*\)"/],
+  ];
+  for (const [f, re] of DENY_SOURCES) {
+    const p = path.join(ROOT, f);
+    if (!fs.existsSync(p)) { fail(`${f}: missing — it carries the canonical permissions.deny list`); bad++; continue; }
+    if (!re.test(read(p))) { fail(`${f}: canonical permissions.deny lacks Agent(model:*) — without it any agent model pin can be overridden at dispatch`); bad++; }
+  }
   const opusAgents = pinned
     .filter((p) => p.agent && /^model:\s*opus\b/m.test(frontmatter(read(p.file))))
     .map((p) => p.tag.replace(/^agent /, ''));
@@ -369,7 +382,7 @@ console.log('▶ Model policy');
         const mi = m.index + Math.max(0, m[0].search(/model/i));
         const clause = txt.slice(Math.max(0, mi - 160), mi).split(/[.;]\s/).pop();
         if (/\b(never|not|cannot|can't|refuses?|forbids?|fiction)\b/i.test(clause)) continue;
-        fail(`${tag}: "${m[0].replace(/\s+/g, ' ').slice(0, 70)}…" — a dispatch cannot override a pinned model; dispatch an opus-pinned agent instead (rule 5)`);
+        fail(`${tag}: "${m[0].replace(/\s+/g, ' ').slice(0, 70)}…" — a model named at dispatch is refused by Agent(model:*); dispatch an opus-pinned agent instead (rule 5)`);
         bad++;
       }
     }
@@ -379,7 +392,7 @@ console.log('▶ Model policy');
     }
   }
 
-  if (!bad) ok(`${pinned.length} skills/agents on the ladder — opus rung exists and is reachable by dispatch, executor above sonnet, think-steps on fable`);
+  if (!bad) ok(`${pinned.length} skills/agents on the ladder — opus rung exists, Agent(model:*) in the canonical deny list, executor above sonnet, think-steps on fable`);
 }
 
 // ── Cross-references: every skill/agent the router names must exist ──

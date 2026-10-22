@@ -16,8 +16,8 @@ check "list finds p1 and p2 only" '[ "$(echo "$L" | grep -c "/p[12]")" = 2 ] && 
 PROJECTS_ROOT="$T" bash scripts/fleet-apply.sh --settings --dry-run --all >/dev/null
 check "dry-run writes nothing" '! [ -f "$T/p2/.claude/settings.json" ] && [ "$(grep -c "rm -rf" "$T/p1/.claude/settings.json")" = 1 ]'
 O=$(PROJECTS_ROOT="$T" bash scripts/fleet-apply.sh --settings --all)
-check "p1 keeps model opus and other keys" 'python3 -c "import json;d=json.load(open(\"$T/p1/.claude/settings.json\"));assert d[\"model\"]==\"opus\" and d[\"other\"]==1 and d[\"permissions\"][\"allow\"]==[\"Read\"] and len(d[\"permissions\"][\"deny\"])==11"'
-check "p2 gets model sonnet + 11 deny" 'python3 -c "import json;d=json.load(open(\"$T/p2/.claude/settings.json\"));assert d[\"model\"]==\"sonnet\" and len(d[\"permissions\"][\"deny\"])==11"'
+check "p1 keeps model opus and other keys" 'python3 -c "import json;d=json.load(open(\"$T/p1/.claude/settings.json\"));assert d[\"model\"]==\"opus\" and d[\"other\"]==1 and d[\"permissions\"][\"allow\"]==[\"Read\"] and len(d[\"permissions\"][\"deny\"])==12"'
+check "p2 gets model sonnet + 12 deny" 'python3 -c "import json;d=json.load(open(\"$T/p2/.claude/settings.json\"));assert d[\"model\"]==\"sonnet\" and len(d[\"permissions\"][\"deny\"])==12"'
 check "model kept is reported" 'echo "$O" | grep -q "model kept"'
 B1=$(cat "$T/p1/.claude/settings.json" "$T/p2/.claude/settings.json")
 O2=$(PROJECTS_ROOT="$T" bash scripts/fleet-apply.sh --settings --all)

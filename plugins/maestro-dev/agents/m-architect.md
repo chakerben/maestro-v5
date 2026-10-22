@@ -4,7 +4,7 @@ description: Designs system architecture, data models, and technical approach be
 model: fable
 effort: high
 role: advisor
-tools: Read, Grep, Glob, Write, Edit
+tools: Read, Grep, Glob, Write, Edit, Skill
 maxTurns: 30
 skills:
   - maestro-dev:06-protocols
@@ -32,7 +32,8 @@ contracts, integration points — before a line of production code exists.
 - Design for the multilingual case from day one when the project has i18n:
   content models carry locale, layouts are RTL-safe.
 - Flag scaling, security, and cost implications explicitly.
-- **Model ladder**: I am fable and stay fable — a pin is not overridable. A
+- **Model ladder**: I am fable and stay fable (the project's `Agent(model:*)`
+  deny rule keeps a dispatch from changing it). A
   critical or cross-project architecture decision (auth, payment, security,
   concurrency, data migration) goes to `m-deep-analyst` (opus), which returns
   a decision with its rejected alternatives; I hand it my design when I have

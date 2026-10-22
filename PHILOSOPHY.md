@@ -90,15 +90,20 @@ skills use `disable-model-invocation`; hooks carry a platform `timeout`.
 Say what is enforced and what is instructed. A rule described as guaranteed
 when it is only requested is worse than no rule: it stops you checking.
 
-The model ladder was the costly example. Until 5.13.0 four files said the
-orchestrator would "dispatch this agent with `model: opus`" for a critical
-change. Frontmatter carries exactly one `model:` and a dispatch cannot
-override it, so the opus rung existed only as a sentence — every review of a
-payment or auth change ran on the same tier as a CRUD review, and the
-sentence is what stopped anyone checking. The fix was not better wording: it
-was two agents genuinely pinned to opus (`checker-critical`,
-`m-deep-analyst`), and a validator that refuses any text promising an
-escalation no file can perform.
+The model ladder was the costly example, twice. Until 5.13.0 four files
+said the orchestrator would "dispatch this agent with `model: opus`" for a
+critical change; 5.13.0 answered with two agents pinned to opus
+(`checker-critical`, `m-deep-analyst`) and the claim that "a dispatch cannot
+override a pin". The 5.14.0 audit read the platform doc: it can — the
+`model` parameter of a dispatch is resolved **before** the frontmatter. So a
+frontmatter pin is a default, and the only thing that enforces it is the
+permission rule `Agent(model:*)` in `permissions.deny`, which refuses any
+dispatch that names a model (`00-onboard` scaffold 4b, `fleet-apply.sh
+--settings`, checked by `04-doctor`). The separate opus agents stay, for the
+reason that was right all along: `checker-critical` carries the failure-mode
+criteria a CRUD review does not, and a review is its criteria, not its tier.
+`validate.js` checks that the deny rule is in the canonical list and that any
+text promising opus names an opus-pinned agent.
 
 ### 6. Persistent state, resumable sessions
 Every feature lives in `maestro_docs/tasks/<yyyy_mm_dd>_<slug>/` with

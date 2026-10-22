@@ -2,7 +2,7 @@
 name: 03-store-release
 description: Use when a mobile build is about to be submitted to the App Store or Google Play — "on soumet", "TestFlight", "review Apple", "publier sur le store", a release checklist request, or a store rejection to work through. Produces a go/no-go checklist with evidence, KSA-specific items included (Arabic screenshots, age rating, data disclosure, payment rules). Not for cutting the git release (maestro-vcs:02-release) nor for building features.
 argument-hint: "[ios | android | both] [rejection text]"
-allowed-tools: Bash   # turn-scoped: the !`…` injections above use shell builtins, pipes and $(…) that pattern grants do not cover
+allowed-tools: Bash   # turn-scoped: the !`…` injections below use shell builtins, pipes and $(…) that pattern grants do not cover
 ---
 
 # Skill: store-release

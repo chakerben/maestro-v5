@@ -2,7 +2,7 @@
 name: 03-ticket
 description: Use when a defect, gap, or improvement has been FOUND and must be handed to the team instead of fixed on the spot — a bug seen during QA or an audit, a checker finding, a "seen on the way" note from 04-debug, "crée un ticket", "mets ça sur Trello". Turns each finding into one Trello card in the project's backlog list, following the Maestro card convention. Not for fixing the bug (maestro-dev:04-debug), not for product framing (00-prd), not for user stories of a new feature (01-user-stories).
 argument-hint: "<finding, or 'from <report path>'>"
-allowed-tools: Bash   # turn-scoped: the !`…` injections above use shell builtins, pipes and $(…) that pattern grants do not cover
+allowed-tools: Bash   # turn-scoped: the !`…` injections below use shell builtins, pipes and $(…) that pattern grants do not cover
 ---
 
 # Skill: ticket
@@ -14,7 +14,10 @@ it. **It never fixes the code.**
 ## Live state (computed at invocation)
 
 Target board / list (from the plugin's user config, set at enable time):
-!`echo "board: ${CLAUDE_PLUGIN_OPTION_TRELLO_BOARD:-<not set — run: claude plugin config maestro-pm>}   list: ${CLAUDE_PLUGIN_OPTION_TRELLO_LIST:-À faire V1}"`
+Board: `${user_config.TRELLO_BOARD}` · list: `${user_config.TRELLO_LIST}` —
+substituted by the platform from the plugin's userConfig (`/plugin configure
+maestro-pm`, or `claude plugin configure maestro-pm@maestro`); an empty board
+means it was never configured: ask once, never guess.
 
 Repo context for the card body:
 !`echo "repo: $(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")  branch: $(git branch --show-current 2>/dev/null)  head: $(git rev-parse --short HEAD 2>/dev/null)"`

@@ -2,7 +2,7 @@
 name: 04-doctor
 description: Verify the health of a Maestro install in the current project — plugins enabled, hooks compliant, memory bank coherent, and NO leftovers from Maestro v4 or third-party orchestrators (claude-flow, ruv-swarm). Use after a migration, when something feels broken, or as a periodic checkup. Not for first-time setup (00-onboard).
 argument-hint: check | fix
-allowed-tools: Bash   # turn-scoped: the !`…` injections above use shell builtins, pipes and $(…) that pattern grants do not cover
+allowed-tools: Bash   # turn-scoped: the !`…` injections below use shell builtins, pipes and $(…) that pattern grants do not cover
 ---
 
 # Skill: doctor
@@ -13,7 +13,7 @@ Maestro plugins seen by Claude Code here:
 !`claude plugin list 2>/dev/null | grep -B1 -A3 '@maestro' || echo "(claude plugin list unavailable or no @maestro plugin)"`
 
 Project settings hooks (must be absent — v4 came back through here):
-!`[ -f .claude/settings.json ] && node -e 'try{const d=JSON.parse(require("fs").readFileSync(".claude/settings.json","utf8"));const h=d.hooks||{};const n=Object.values(h).flat().flatMap(g=>g.hooks||[]).length;console.log(n?("⚠ "+n+" hook(s) in .claude/settings.json: "+JSON.stringify(h)):"no hooks in .claude/settings.json ✓");const deny=(d.permissions||{}).deny||[];console.log(deny.length?("permissions.deny: "+deny.length+" entr"+(deny.length>1?"ies":"y")):"⚠ permissions.deny empty (see onboard 04-scaffold step 4b)")}catch(e){console.log("⚠ malformed .claude/settings.json: "+e.message)}' || echo "(no .claude/settings.json)"`
+!`[ -f .claude/settings.json ] && node -e 'try{const d=JSON.parse(require("fs").readFileSync(".claude/settings.json","utf8"));const h=d.hooks||{};const n=Object.values(h).flat().flatMap(g=>g.hooks||[]).length;console.log(n?("⚠ "+n+" hook(s) in .claude/settings.json: "+JSON.stringify(h)):"no hooks in .claude/settings.json ✓");const deny=(d.permissions||{}).deny||[];console.log(deny.length?("permissions.deny: "+deny.length+" entr"+(deny.length>1?"ies":"y")):"⚠ permissions.deny empty (see onboard 04-scaffold step 4b)");console.log(deny.includes("Agent(model:*)")?"Agent(model:*) ✓ model pins enforced":"⚠ Agent(model:*) missing — a dispatch can override any agent model pin (04-scaffold 4b)")}catch(e){console.log("⚠ malformed .claude/settings.json: "+e.message)}' || echo "(no .claude/settings.json)"`
 
 v4 leftovers:
 !`for f in scripts/hooks .claude/quality-gates.json .claude/version.txt docs/memory-bank maestro_docs/memory-bank; do [ -e "$f" ] && echo "⚠ $f exists"; done; grep -rl "claude-flow\|ruv-swarm" .claude .mcp.json 2>/dev/null | sed 's/^/⚠ orchestrator ref: /'; echo "(scan done)"`

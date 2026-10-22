@@ -24,12 +24,14 @@ Two problems with that, found by auditing the pins against the doc:
    one place whose output is the deliverable.
 2. **Three escalations in this document could not happen.** It said `checker`
    runs on opus for a critical change, `04-debug` re-dispatches `m-analyst`
-   on opus, `02-perf-audit` re-runs a finding on opus. Frontmatter carries
-   exactly one `model:`, and a dispatch cannot override it — so `checker` was
-   always fable, and the opus rung existed only as a sentence. A fourth
-   instance was in `m-architect`. That is precisely what PHILOSOPHY rule 5
-   forbids: a rule described as guaranteed when it is only requested, which
-   stops you checking.
+   on opus, `02-perf-audit` re-runs a finding on opus — three sentences, no
+   agent behind them. 5.13.0 replaced them with two opus-pinned agents and
+   stated that "a dispatch cannot override a pin". The 5.14.0 audit checked
+   that against the platform: the `model` parameter of a dispatch wins over
+   the frontmatter, so a pin alone was still only requested. The enforced
+   layer is `Agent(model:*)` in `permissions.deny` (below). Rule 5 both
+   times: a rule described as guaranteed when it is only requested stops you
+   checking.
 
 ## The ladder (5.13.0)
 
@@ -82,11 +84,15 @@ release buys the second one down and accepts a higher unit price on the first.
 - the opus rung — `checker-critical`, `m-deep-analyst`, `01-security-audit` —
   **must exist and must be pinned to opus**;
 - `executor` must be fable or above;
-- **no text may promise an opus dispatch that cannot happen**: a body saying
-  "dispatch X with model: opus" is refused, and any file that mentions opus
-  must name an agent that is really pinned to it. A doc may quote the
-  forbidden phrasing in order to forbid it (the negation has to sit in the
-  same clause). Six regression cases in `scripts/tests/validate.test.sh`.
+- the canonical `permissions.deny` list (`04-scaffold` 4b, `fleet-apply.sh`)
+  carries **`Agent(model:*)`** — the platform rule that refuses a dispatch
+  naming a model, which is what turns a frontmatter default into a pin;
+- **no text may promise an opus dispatch by override**: a body saying
+  "dispatch X with model: opus" is refused (with the deny rule it would be
+  blocked at runtime; without it, nothing checks it), and any file that
+  mentions opus must name an agent that is really pinned to it. A doc may
+  quote the forbidden phrasing in order to forbid it (the negation has to sit
+  in the same clause). Regression cases in `scripts/tests/validate.test.sh`.
 
 ## How you work with it
 

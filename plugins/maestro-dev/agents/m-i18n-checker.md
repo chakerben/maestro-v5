@@ -4,7 +4,7 @@ description: Audits code for i18n and RTL correctness — hardcoded strings, mis
 model: sonnet
 effort: medium
 role: reviewer
-tools: Read, Grep, Glob
+tools: Read, Grep, Glob, Skill
 disallowedTools: Write, Edit, MultiEdit, NotebookEdit, Bash
 maxTurns: 20
 skills:

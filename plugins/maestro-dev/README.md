@@ -34,8 +34,9 @@ Pinned per the model ladder (`maestro-core references/model-policy.md`):
   payment, security, concurrency, data migration, cross-project) or gate level
   high/paranoid: adds a failure-mode pass (unauthenticated reach, cross-tenant
   id, concurrent or retried call, halfway state and its rollback, attacker-
-  controlled input, money and rounding). A separate agent, because a pinned
-  model cannot be overridden by a dispatch
+  controlled input, money and rounding). A separate agent, because the
+  criteria are the review — and the project's `Agent(model:*)` deny rule is
+  what keeps a dispatch from lowering either agent's model
 - `m-architect` (fable) — designs structure before code
 - `m-devil-advocate` (fable) — argues the strongest case against a plan
   (replaces the human pause in auto mode)

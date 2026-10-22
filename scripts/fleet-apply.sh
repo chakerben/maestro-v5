@@ -154,7 +154,7 @@ p = os.path.join(proj, ".claude", "settings.json")
 DENY = ["Bash(rm -rf /)", "Bash(rm -rf /*)", "Bash(rm -rf ~)", "Bash(rm -rf ~/*)",
         "Bash(rm -rf $HOME)", "Bash(curl * | bash)", "Bash(curl * | sh)",
         "Bash(wget * | bash)", "Bash(wget * | sh)", "Bash(git push --force*)",
-        "Bash(git push -f*)"]
+        "Bash(git push -f*)", "Agent(model:*)"]
 try:
     raw = open(p).read() if os.path.exists(p) else "{}"
     d = json.loads(raw) if raw.strip() else {}

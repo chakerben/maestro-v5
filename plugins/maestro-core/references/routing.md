@@ -17,7 +17,7 @@ ALWAYS ON
 - prose a human reads (README, PR, client message) → maestro-pm:04-writing
 - 1 page → WebFetch; many → firecrawl if present
 
-MODELS — pinned per step; a dispatch never overrides a pin, complexity picks it, never length
+MODELS — pinned per step (deny `Agent(model:*)` enforces it); complexity picks, never length
 - sonnet orchestrates · fable builds (executor) and thinks/judges (plan, brainstorm, architecture, debug, checker)
 - opus = dispatch another agent: `checker-critical` (critical change, gate ≥ high) · `m-deep-analyst` (fable stuck, security, concurrency, data loss) — maestro-core references/model-policy.md
 

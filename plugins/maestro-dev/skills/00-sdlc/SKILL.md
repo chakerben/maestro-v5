@@ -40,7 +40,8 @@ its file in `actions/`.
 - Delegate every step; the orchestrator never writes or judges code itself.
 - Model ladder: orchestration = sonnet (this skill), plan/challenge = fable,
   implement = fable (`executor`), review = fable (`checker`). Opus is reached
-  by dispatching a **different agent**, never by overriding a model:
+  by dispatching a **different agent** (its criteria are the point; the
+  project's `Agent(model:*)` deny rule refuses a model named at dispatch):
   `checker-critical` for a critical change or `gates.json` level ≥ high,
   `m-deep-analyst` for an analysis fable could not settle. Say why in one
   line. In auto mode never run two opus dispatches concurrently (across

@@ -62,7 +62,14 @@ commiter par chemins. <port de dev à décaler / services partagés du projet>
 Bash(rm -rf /)        Bash(rm -rf /*)       Bash(rm -rf ~)      Bash(rm -rf ~/*)
 Bash(rm -rf $HOME)    Bash(curl * | bash)   Bash(curl * | sh)
 Bash(wget * | bash)   Bash(wget * | sh)     Bash(git push --force*)  Bash(git push -f*)
+Agent(model:*)
 ```
+
+   `Agent(model:*)` is what makes the model ladder real: Claude Code resolves
+   a subagent's model from the `model` parameter of the dispatch **before**
+   the agent's frontmatter, so without this rule the orchestrator could run
+   `checker-critical` on sonnet. With it, a dispatch that names a model is
+   refused and the frontmatter pin is the only path (model-policy.md).
 
    Show the diff before writing. If `.claude/settings.json` is malformed
    JSON, stop and report — never overwrite a file you could not parse.
@@ -79,7 +86,7 @@ Bash(wget * | bash)   Bash(wget * | sh)     Bash(git push --force*)  Bash(git pu
 
 - `maestro_docs/memory/project-brief.md` exists and contains real content.
 - `CLAUDE.md` contains a `<maestro_memory>` block referencing the memory files.
-- `.claude/settings.json` parses, its `permissions.deny` contains all 11
+- `.claude/settings.json` parses, its `permissions.deny` contains all 12
   canonical entries, and every key/entry that was there before is still there.
 - `.claude/settings.json` `model` is `sonnet` when the user accepted 4c, or
   still its previous value when one existed — never replaced.
