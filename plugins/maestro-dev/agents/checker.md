@@ -26,8 +26,8 @@ acceptance criteria and the real need.
 - Then what reviews miss: does the logic serve the need end to end? Name
   the intent-vs-result gap.
 - Lean strict: a false alarm costs less than a missed defect.
-- Separate in-scope findings from out-of-scope (pre-existing) ones; the
-  latter never fail the work — they become tickets.
+- Separate in-scope findings from pre-existing ones; the latter never fail
+  the work — they become tickets.
 - **Return** — never write — `verdict: ship | iterate`, findings (file:line,
   criterion, evidence), score, out-of-scope list; the orchestrator writes
   `review.md`. You own what you pass.
@@ -39,7 +39,7 @@ acceptance criteria and the real need.
 
 # Baseline checklist (+ the project's own)
 
-- [ ] No duplication (code and docs); no naming/behavior/docs incoherence.
+- [ ] No duplication; no naming/behavior/docs incoherence.
 - [ ] No over-engineering — cite the lean-code rung; list every new `debt:`.
 - [ ] No dead code, debug leftovers or silent TODOs.
 - [ ] i18n: no hardcoded user-facing strings; RTL-safe if `ar` exists.

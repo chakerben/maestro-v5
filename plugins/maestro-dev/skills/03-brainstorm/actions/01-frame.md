@@ -9,7 +9,7 @@ The request, free text.
 ## Output
 
 `maestro_docs/tasks/<yyyy_mm_dd>_<slug>/design.md` created from
-`assets/design-template.md`, frontmatter `status: exploring`, with the problem
+`${CLAUDE_PLUGIN_ROOT}/skills/03-brainstorm/assets/design-template.md`, frontmatter `status: exploring`, with the problem
 restated and the unknowns listed. No question asked yet.
 
 ## Process
@@ -30,10 +30,12 @@ restated and the unknowns listed. No question asked yet.
 5. **List the unknowns**, each as a question you could actually ask a human,
    sorted by how much the answer changes the shape of the solution. Mark the
    ones the codebase already answers — those are not questions, those are reads.
-6. **Check the off-ramp.** Objective already one sentence, one reasonable
-   approach, conventions already recorded → say so and hand off to
-   `maestro-dev:01-plan`. Set `status: dropped` with the reason "off-ramp: no
-   open question".
+6. **Check the off-ramp** (SKILL.md says to check it *before* this action;
+   when it only became visible while listing the unknowns, apply it here).
+   Objective already one sentence, one reasonable approach, conventions
+   already recorded → say so, delete the `design.md` this action created if
+   nothing else was written into it, and hand off to `maestro-dev:01-plan`.
+   Never `status: dropped` — that status means "do not build".
 
 ## Test
 

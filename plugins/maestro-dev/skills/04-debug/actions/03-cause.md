@@ -21,9 +21,10 @@ Name the cause, with evidence, and separate it from the symptom.
    `debug.md` and the previous analysis — a different agent, not a model
    override; a critical bug goes to it directly, without `m-analyst`.
 4. If the cause is a design decision recorded in `tech-decisions.md`, do
-   NOT reverse it here — stop with `status: cause-found` and a note that
-   the fix needs a decision (route to `03-brainstorm` or the human).
-5. Set `status: cause-found`.
+   NOT reverse it here — stop with `status: needs-decision` and a note that
+   the fix needs a decision (route to `03-brainstorm` or the human); a
+   resumed session must not run action 04 on it.
+5. Otherwise set `status: cause-found` — action 04 may run.
 
 ## Test
 

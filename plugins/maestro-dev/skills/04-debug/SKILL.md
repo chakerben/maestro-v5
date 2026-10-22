@@ -37,8 +37,9 @@ Adopt the **Root-cause analyst** posture
 ## Binding rules
 
 **No repro, no edit.** Until action 01 produces a command (or a test) whose
-exit code says "still broken", the only files touched are `debug.md` and,
-at most, a throwaway script under `maestro_docs/tasks/<folder>/`.
+exit code says "still broken", the only files touched are `debug.md`, at
+most one **new** test file that encodes the report (never an existing source
+or test file), and a throwaway script under `maestro_docs/tasks/<folder>/`.
 
 **The symptom is where it hurts; the cause is where it starts.** Action 03
 must state both, and why the fix goes at the cause. "Add a null check where
@@ -56,8 +57,9 @@ isolation, multi-layer, or a failed fix → action 03 spawns `m-analyst`
 Opus is a different agent, never a model override.
 
 **Resume.** `debug.md` carries `status: reproducing | isolating | cause-found
-| fixed | not-reproducible`. On entry, if the folder exists, continue from
-the recorded status. `not-reproducible` after three honest attempts is a
+| needs-decision | fixed | not-reproducible`. On entry, if the folder exists,
+continue from the recorded status; `needs-decision` waits for a human (or
+`03-brainstorm`), it never proceeds to 04. `not-reproducible` after three honest attempts is a
 legitimate end state: record what was tried, hand the report back.
 
 **If the project has an `ar` locale**, every repro is also run under `ar`

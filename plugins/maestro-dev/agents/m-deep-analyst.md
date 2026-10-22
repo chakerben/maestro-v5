@@ -33,7 +33,8 @@ file already carries a high-confidence cause, say so and hand it back.
 - Return, never write: `cause` (file:line + mechanism) or `decision` (the
   choice, the alternatives rejected, what would invalidate it), then a
   **falsifiable plan** — ordered steps, each with the command whose exit code
-  proves it. The orchestrator records it; execution goes back to the executor.
+  proves it. The caller records it and executes it (`executor` in
+  02-implement, the debug session in 04-debug).
 - State confidence (protocols rule 2). Still not high after this? Say what
   cannot be known from the code, and what experiment would settle it. An
   inconclusive answer is a result; a confident guess is a defect.

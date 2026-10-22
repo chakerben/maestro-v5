@@ -19,7 +19,7 @@ by default; autonomous when the caller says `auto`.
 | 02 | `plan`      | Produce the plan + phase files              | `maestro-dev:01-plan`          |
 | 03 | `implement` | Build the plan, phase by phase, gated       | `executor` via `maestro-dev:02-implement` |
 | 04 | `review`    | Independent verdict: ship or iterate        | `checker` agent                |
-| 05 | `ship`      | Commit + open the change request            | `maestro-vcs:00-commit` |
+| 05 | `ship`      | Commit + open the change request            | `maestro-vcs:00-commit`, then `01-pull-request` (when installed) |
 
 Run `01 → 05`. On `04 = iterate`, loop `03 → 04` (`iterations` in plan.md
 counts them; `blocked` at 3). `01` self-skips when the request already
@@ -32,7 +32,8 @@ its file in `actions/`.
 - **auto**: no pauses. Decide alone using protocols rule 4
   (`${CLAUDE_PLUGIN_ROOT}/skills/06-protocols/SKILL.md`). HARD STOPS that
   always break auto: a `blocked` status, a gate still red after 3 repair
-  attempts, any payment or destructive action, any credential need. On a hard stop: write the state into the plan frontmatter,
+  attempts, a devil-advocate verdict of `reconsider` (02), any payment or
+  destructive action, any credential need. On a hard stop: write the state into the plan frontmatter,
   summarize what a human must decide, end the turn.
 
 ## Transversal rules

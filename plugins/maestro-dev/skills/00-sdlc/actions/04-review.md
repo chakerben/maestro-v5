@@ -15,7 +15,7 @@ Independent verdict.
    projects).
 2. Spawn that agent with: spec.md, plan.md, the diff, and the expert
    posture. Fresh context — it must not see the build conversation.
-   If the project has an `ar` locale (`messages/ar*`, `**/ar.json`, `*.arb`),
+   If the project has an `ar` locale (`messages/ar*`, `**/ar.json`, `app_ar*.arb` / `intl_ar*.arb`),
    also spawn `m-i18n-checker` in parallel, on the same diff.
 3. The checker RETURNS a structured verdict (verdict, findings, score,
    evidence) — it has no write tool. The orchestrator writes it to
@@ -24,7 +24,9 @@ Independent verdict.
 4. Verdict `ship` → mark plan `reviewed`, continue. Verdict `iterate` →
    increment `iterations` in plan.md; at 3 set `status: blocked` and stop.
    Else write the in-scope findings as `phase-N+1.md` (`status: pending`,
-   scope = the findings, criteria = the failed ones) and re-enter 03.
+   scope = the findings, criteria = the failed ones), append its row to the
+   plan's `## Phases` table (the table is the only source of "every phase
+   done"), and re-enter 03.
 5. Findings the checker marks **out of scope** (pre-existing defects it met
    on the way) are never folded into the iteration: hand them to
    `maestro-pm:03-ticket` when installed, else list them in `review.md`

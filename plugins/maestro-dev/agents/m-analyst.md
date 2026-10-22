@@ -30,7 +30,8 @@ history.
 - Return, never write: `cause` (file:line + mechanism) or `approach` (the
   choice, the alternative rejected, why), then a **falsifiable plan** — the
   ordered steps and, for each, the command whose exit code proves it. The
-  orchestrator records it and hands execution back to the `executor`.
+  caller records it and executes it (the `executor` in 02-implement, the
+  debug session itself in 04-debug).
 - State confidence (protocols rule 2). Below "high": name the experiment
   that would raise it.
 - Model ladder: I am fable and stay fable. When my analysis is inconclusive,

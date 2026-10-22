@@ -17,8 +17,8 @@ Close the design and name exactly one next step.
 
    | What the journal is mostly about | Next step |
    |---|---|
-   | Who this serves, what changes for them, how success is measured | `maestro-pm:00-prd` |
-   | Data model, contracts, integration points, structural risk | `maestro-pm:02-specs`, or agent `m-architect` |
+   | Who this serves, what changes for them, how success is measured | `maestro-pm:00-prd` when installed, else `01-plan` with the journal as source |
+   | Data model, contracts, integration points, structural risk | `maestro-pm:02-specs` when installed, else agent `m-architect` |
    | How to build it, in what order | `maestro-dev:01-plan` |
    | Decision was **do not build** | stop; `status: dropped` is the deliverable |
 

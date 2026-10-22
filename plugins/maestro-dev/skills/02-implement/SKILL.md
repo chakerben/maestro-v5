@@ -31,4 +31,9 @@ Run `01 → 03`. Before running an action, read its file in `actions/`.
 - Drift from the plan → protocols rule 5: stop with "replan needed" + the
   specific drift.
 - Resume: on entry, read all phase statuses; skip `done` phases; continue
-  from the first `pending`/`in-progress`.
+  from the first `in-progress` (a half-done phase: the executor gets
+  `git status --short` and the phase `## Log` with it) or `pending`. A
+  `blocked` phase stops entry — a human resets it to `pending` first; the
+  loop never re-enters it on its own, nor builds the next phase on top of it.
+- Mode: the caller's `auto` / `interactive` is passed to every delegate
+  (`00-commit` included) — a commit pause in auto mode is a defect.

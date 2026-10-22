@@ -1,6 +1,7 @@
 ---
 status: pending        # pending | in-progress | done | blocked
 phase: <n>
+attempts: 0            # 02-implement increments it; blocked at 3
 ---
 
 # Phase <n> — <name>
@@ -21,4 +22,4 @@ phase: <n>
 
 ## Log
 
-<!-- executor appends attempts here: timestamp, what, result -->
+<!-- the orchestrator (02-implement) logs each attempt: timestamp, what, result -->

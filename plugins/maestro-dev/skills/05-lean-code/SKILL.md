@@ -28,7 +28,8 @@ Announce the rung when it changes the answer ("stdlib covers this").
 ## Surgical changes
 
 - Touch what the task names. No drive-by renames, no reformatting untouched
-  lines, no "while I'm here" — that goes to `03-ticket` or a `debt:` marker.
+  lines, no "while I'm here" — that goes to `maestro-pm:03-ticket` (when
+  installed) or a `debt:` marker.
 - New abstraction only with **≥ 3 callers today**. No config for one value.
 - Delete what you replace; git is the reference, not dead code.
 

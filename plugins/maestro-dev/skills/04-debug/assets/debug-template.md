@@ -1,6 +1,6 @@
 ---
-status: reproducing     # reproducing | isolating | cause-found | fixed | not-reproducible
-date: <yyyy-mm-dd>
+status: reproducing     # reproducing | isolating | cause-found | needs-decision | fixed | not-reproducible
+created: <yyyy-mm-dd>
 slug: <slug>
 ---
 
