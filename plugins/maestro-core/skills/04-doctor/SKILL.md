@@ -18,6 +18,9 @@ Hooks every active settings file declares (project, local, user — v4 came back
 Project settings permissions:
 !`[ -f .claude/settings.json ] && node -e 'try{const d=JSON.parse(require("fs").readFileSync(".claude/settings.json","utf8"));const h=d.hooks||{};const n=Object.values(h).flat().flatMap(g=>g.hooks||[]).length;console.log(n?("⚠ "+n+" hook(s) in .claude/settings.json: "+JSON.stringify(h)):"no hooks in .claude/settings.json ✓");const deny=(d.permissions||{}).deny||[];console.log(deny.length?("permissions.deny: "+deny.length+" entr"+(deny.length>1?"ies":"y")):"⚠ permissions.deny empty (see onboard 04-scaffold step 4b)");console.log(deny.includes("Agent(model:*)")?"Agent(model:*) ✓ model pins enforced":"⚠ Agent(model:*) missing — a dispatch can override any agent model pin (04-scaffold 4b)");const dead=deny.filter(r=>/\|/.test(r));if(dead.length)console.log("⚠ dead deny rule(s) — a rule with a pipe never matches a subcommand: "+dead.join(", "));const broad=deny.filter(r=>/--force\*|push -f\*/.test(r));if(broad.length)console.log("ℹ over-broad: "+broad.join(", ")+" also blocks --force-with-lease (yours to keep or narrow)")}catch(e){console.log("⚠ malformed .claude/settings.json: "+e.message)}' || echo "(no .claude/settings.json)"`
 
+Installed CLI vs the platform watch (`${CLAUDE_PLUGIN_ROOT}/references/platform-watch.md` — rows marked **open** are capabilities the platform now carries and Maestro still reimplements):
+!`echo "claude $(claude --version 2>/dev/null | head -1 || echo '(version unavailable)')"; grep -c '\*\*open\*\*' "${CLAUDE_PLUGIN_ROOT}/references/platform-watch.md" 2>/dev/null | sed 's/^/open rows: /'`
+
 v4 leftovers:
 !`for f in scripts/hooks .claude/quality-gates.json .claude/version.txt docs/memory-bank maestro_docs/memory-bank; do [ -e "$f" ] && echo "⚠ $f exists"; done; grep -rl "claude-flow\|ruv-swarm" .claude .mcp.json 2>/dev/null | sed 's/^/⚠ orchestrator ref: /'; echo "(scan done)"`
 

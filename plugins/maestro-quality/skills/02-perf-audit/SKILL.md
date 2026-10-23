@@ -4,6 +4,7 @@ description: Performance audit of a scope — DB query patterns, N+1, bundle wei
 argument-hint: "[scope path]"
 allowed-tools: Read, Grep, Glob, Bash
 disallowed-tools: Write, Edit, NotebookEdit   # enforced: an audit never edits (allowed-tools alone only pre-approves)
+context: fork   # the audit reads a lot and returns a report; the session keeps the report, not the reading
 model: fable
 effort: high
 ---

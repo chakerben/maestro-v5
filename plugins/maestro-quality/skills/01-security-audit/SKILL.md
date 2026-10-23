@@ -4,6 +4,7 @@ description: Deep on-demand security audit of the codebase or a scope — auth f
 argument-hint: "[scope path]"
 allowed-tools: Read, Grep, Glob, Bash
 disallowed-tools: Write, Edit, NotebookEdit   # enforced: an audit never edits (allowed-tools alone only pre-approves)
+context: fork   # the audit reads a lot and returns a report; the session keeps the report, not the reading
 model: opus
 effort: high
 ---

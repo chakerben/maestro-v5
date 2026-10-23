@@ -4,6 +4,7 @@ description: Review a screen or component against Maestro UX standards, RTL read
 argument-hint: "<path, screenshot, or URL>"
 allowed-tools: Read, Grep, Glob, Bash
 disallowed-tools: Write, Edit, NotebookEdit   # enforced: an audit never edits (allowed-tools alone only pre-approves)
+context: fork   # the audit reads a lot and returns a report; the session keeps the report, not the reading
 model: fable
 effort: high
 ---

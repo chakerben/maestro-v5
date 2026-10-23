@@ -23,6 +23,12 @@ journal included, and file what broke as the next release's changelog.
 - **skill-eval harness** — automated test cases validating that skill
   descriptions trigger on the right prompts (pattern from AIDD).
 
+## Next (platform-watch rows marked open)
+
+- **Shortcuts as skills** — `install-shortcuts.sh` writes `~/.claude/commands/*.md`,
+  the older format; move them to `~/.claude/skills/<name>/SKILL.md`
+  (`platform-watch.md`).
+
 ## v5.4 candidates
 
 - **i18n of the framework itself** — AR/FR translations of user-facing skill

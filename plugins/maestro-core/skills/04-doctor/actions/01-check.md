@@ -32,7 +32,10 @@ A findings report grouped by severity: 🔴 contraband / 🟠 broken / 🟡 drif
    `permissions.deny` canonical entries missing from `.claude/settings.json`
    (the list is in onboard `04-scaffold` step 4b — bash-guard is only the
    accident guard, `permissions.deny` is the enforced layer).
-3. **🟡 Drift scan.** Memory files untouched > 60 days; tier-1 context over
+3. **🟡 Drift scan.** Every **open** row of `platform-watch.md` (the live
+   state prints the count) → one 🟡 line "the platform does this since
+   <version>; retire <Maestro side>" — rule #8 is a verb, not a sentence.
+   Memory files untouched > 60 days; tier-1 context over
    the 200-line budget (delegate detail to gardener 01-measure); official
    plugin recommendations for this stack not installed; session model is
    not `sonnet` or unset (`.claude/settings.json` `"model"`) — the ladder
