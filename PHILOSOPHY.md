@@ -28,7 +28,7 @@ No other hook, ever. Not for quality. Not for convenience. Not "just this once".
 ### 2. Never typecheck, test, or format inside a hook
 - Formatting → the executor agent formats what it touches (agent instruction).
 - Typecheck → real-time via official LSP plugins; final gate at commit.
-- Tests → gates of `maestro-vcs:00-commit` (every commit, phase commits included) and the `checker` agent at `maestro-dev:00-sdlc` step 04.
+- Tests → gates of `maestro-vcs:00-commit` at level `high` and above (phase commits included; the level table lives in `maestro-quality:00-quality-gate`, default `standard` = secrets + typecheck) and the `checker` agent at `maestro-dev:00-sdlc` step 04.
 
 ### 2b. What a skill must know, it computes
 A skill that depends on the repository's state (what is staged, the gate

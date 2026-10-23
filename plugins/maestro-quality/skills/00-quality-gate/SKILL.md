@@ -15,21 +15,38 @@ effort: low
 
 Requested: `$ARGUMENTS` (first word = action, second = level)
 
-Owns `maestro_docs/gates.json` and the on-demand gate run.
+Owns `maestro_docs/gates.json`, the level contract below, and the on-demand
+gate run.
+
+## The levels (single source — `maestro-vcs:00-commit` applies this table)
+
+| Level | Checks, on the **staged** diff |
+|---|---|
+| `off` | secrets scan only (never disableable) |
+| `standard` | secrets + typecheck (the project's `typecheck` script; skipped with a note when absent — LSP covers real time) |
+| `high` | standard + `lint` script + tests touching the changed paths |
+| `paranoid` | high + the full test suite |
+
+Default when `gates.json` is absent: `standard`. Tests therefore run at
+every commit only from `high` — a project that wants them on every phase
+commit sets `high` (`set high`; the guidance below says when). Runner from
+the lockfile, never `--silent`.
 
 ## Actions (dispatch by argument)
 
-- `status` — print the current level, what it checks, last run summary.
+- `status` — print the current level and the row of the table above.
 - `set <level>` — validate the level (off|standard|high|paranoid), write
   `maestro_docs/gates.json`, explain what changes. Warn on `off`: "secrets
   scan still always runs at commit".
-- `run` — execute the current level's checks on the working tree NOW (same
-  logic as maestro-vcs:00-commit action 01, without committing). Useful
-  before a review or as a health pulse. The secrets scan lives in
-  maestro-vcs: when it is installed, invoke `maestro-vcs:00-commit` action
-  01 (`gate`) — its `!` injection runs `secret-scan.sh` before the skill is
-  read; when it is not installed, say plainly that the secrets scan did NOT
-  run (never report "clean" for a scan that never happened).
+- `run` — execute the current level's checks NOW, without committing: on
+  the staged diff when something is staged, else on the whole working tree
+  (say which). Useful before a review or as a health pulse. The secrets
+  scan lives in maestro-vcs: when it is installed, invoke
+  `maestro-vcs:00-commit` action 01 (`gate`) — its `!` injection runs
+  `secret-scan.sh` before the skill is read; when it is not installed, run
+  the typecheck/lint/tests of the level yourself and say plainly that the
+  secrets scan did NOT run (never report "clean" for a scan that never
+  happened).
 
 ## Rules
 

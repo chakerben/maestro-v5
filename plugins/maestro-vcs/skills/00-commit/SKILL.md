@@ -48,12 +48,11 @@ Read `maestro_docs/gates.json` (fallback: level `standard`):
 { "level": "standard" }
 ```
 
-| Level | Checks |
-|---|---|
-| `off` | secrets scan only (never disableable) |
-| `standard` | secrets + typecheck (project script) |
-| `high` | standard + lint + tests related to changed files |
-| `paranoid` | high + full test suite |
+The level contract (what each of `off | standard | high | paranoid` runs)
+is owned by `maestro-quality:00-quality-gate` — one table, read it there
+when installed. Without maestro-quality the same four rows apply:
+secrets always; `standard` adds typecheck; `high` adds lint and tests on
+the changed paths; `paranoid` the full suite.
 
 ## Transversal rules
 
