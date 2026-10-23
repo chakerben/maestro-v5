@@ -1,0 +1,83 @@
+#!/bin/bash
+# maestro-check + rtl-lint — the gate is commands with exit codes, not sentences.
+# Run from repo root: bash scripts/tests/maestro-check.test.sh
+set -u
+cd "$(dirname "$0")/../.." || exit 1
+ROOT="$(pwd)"
+CHECK="$ROOT/plugins/maestro-quality/bin/maestro-check"
+LINT="$ROOT/plugins/maestro-quality/bin/rtl-lint.js"
+export CLAUDE_PLUGIN_ROOT="$ROOT/plugins/maestro-quality"
+pass=0; fail=0
+chk() { if [ "$2" = "$3" ]; then pass=$((pass+1)); else fail=$((fail+1)); echo "  ❌ [$1] got='$2' want='$3'"; fi; }
+T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
+
+# ── rtl-lint ────────────────────────────────────────────────────────────────
+mkdir -p "$T/l" && cd "$T/l"
+cat > a.tsx <<'EOF'
+export default function Row() {
+  return <View style={{ marginLeft: 8, paddingStart: 4, flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row' }}>
+    <Text style={{ textAlign: 'left', letterSpacing: 1.2 }}>{`${count} items`}</Text>
+    <View style={{ direction: 'ltr', flexDirection: 'row' }}>{/* phone: rtl-ok LTR object */}</View>
+    <div className="ml-4 pe-2 text-right rounded-l-md" dir="auto" />
+    <span dir="ltr" className="price">x</span>
+    <Text style={{ marginStart: 8, letterSpacing: 0 }}>ok</Text>
+    <View style={{ marginLeft: 8 }} /> // rtl-ok mirrored by hand for the map
+  </View>;
+}
+EOF
+printf 'import { View } from "react-native"; // marginLeft in an import comment\nconst u = "http://x.test/left:1";\nconst s = { left: 0, position: "absolute" };\n' > b.tsx
+printf 'final p = EdgeInsets.only(left: 8);\nfinal q = EdgeInsetsDirectional.only(start: 8);\nfinal a = Alignment.centerLeft;\nfinal t = TextStyle(letterSpacing: 0.5);\nfinal z = TextStyle(letterSpacing: 0);\n' > c.dart
+OUT=$(node "$LINT" a.tsx b.tsx c.dart); RC=$?
+chk "rtl-lint exits 1 on findings" "$RC" "1"
+chk "a.tsx:2 physical + reverse" "$(echo "$OUT" | grep -c '^a.tsx:2  RTL-\(PHYS\|REVERSE\)')" "2"
+chk "a.tsx:3 textAlign left + letterSpacing + bare plural (3), not Tailwind" "$(echo "$OUT" | grep -c '^a.tsx:3 ')" "3"
+chk "a.tsx:4 direction ltr with rtl-ok: not a finding" "$(echo "$OUT" | grep -c '^a.tsx:4 ')" "0"
+chk "a.tsx:5 Tailwind ml-4/text-right/rounded-l (1 line, 1 rule)" "$(echo "$OUT" | grep -c '^a.tsx:5  RTL-TW')" "1"
+chk "a.tsx:6 dir=ltr on a price wrapper is exempt" "$(echo "$OUT" | grep -c '^a.tsx:6 ')" "0"
+chk "a.tsx:7 marginStart + letterSpacing 0: clean" "$(echo "$OUT" | grep -c '^a.tsx:7 ')" "0"
+chk "a.tsx:8 rtl-ok marker lists as ALLOWED" "$(echo "$OUT" | grep -c 'ALLOWED a.tsx:8')" "1"
+chk "b.tsx: import comment, url, absolute left — only the style object fires" "$(echo "$OUT" | grep -c '^b.tsx:')" "1"
+chk "c.dart: EdgeInsets.only(left), centerLeft, letterSpacing 0.5 (3); Directional and 0 clean" "$(echo "$OUT" | grep -c '^c.dart:')" "3"
+chk "rtl-lint clean file exits 0" "$(printf 'const a = { marginStart: 1 };\n' > ok.tsx; node "$LINT" ok.tsx >/dev/null; echo $?)" "0"
+
+# ── maestro-check on a fake Expo + Arabic project ───────────────────────────
+mkdir -p "$T/p/app" "$T/p/messages" && cd "$T/p" && git init -q
+cat > package.json <<'EOF'
+{ "name": "demo", "private": true,
+  "scripts": { "typecheck": "node -e 'process.exit(0)'", "lint": "node -e 'process.exit(0)'", "test": "node -e \"console.log('1 test ok')\"" },
+  "dependencies": { "expo": "54.0.0", "react-native": "0.81.0" } }
+EOF
+echo '{}' > package-lock.json; echo '{"hello":"مرحبا"}' > messages/ar.json
+printf 'export const ok = { marginStart: 1 };\n' > app/ok.tsx
+git add -A && git -c user.name=t -c user.email=t@t commit -qm init
+# 1. clean staged change → green
+printf 'export const y = 2;\n' >> app/ok.tsx && git add -A
+J=$(bash "$CHECK" --level standard --json-only 2>/dev/null); RC=$?
+chk "clean change: exit 0" "$RC" "0"
+chk "clean change: verdict green, stack expo, ar locale" "$(echo "$J" | node -e 'const j=JSON.parse(require("fs").readFileSync(0,"utf8"));console.log(j.verdict,j.stack,j.ar_locale)')" "green expo true"
+chk "standard runs tests-related (not high only)" "$(echo "$J" | grep -c '"name": "tests-related"')" "1"
+chk "boundaries skipped with a reason, not green" "$(echo "$J" | node -e 'const j=JSON.parse(require("fs").readFileSync(0,"utf8"));const b=j.checks.find(c=>c.name==="boundaries");console.log(b.status, /dependency-cruiser/.test(b.output))')" "skipped true"
+git -c user.name=t -c user.email=t@t commit -qm clean
+# 2. secret + RTL defect → red, both named
+printf 'const apiKey = "sk_live_4eC39HqLyjWDarjtT1zdp7dc";\n' > app/k.ts
+printf 'export const bad = <View style={{ marginLeft: 8 }} />;\n' > app/bad.tsx
+git add -A
+J=$(bash "$CHECK" --level standard --json-only 2>/dev/null); RC=$?
+chk "secret + rtl defect: exit 1" "$RC" "1"
+chk "secrets red, rtl red, typecheck green" "$(echo "$J" | node -e 'const j=JSON.parse(require("fs").readFileSync(0,"utf8"));const s=n=>j.checks.find(c=>c.name===n).status;console.log(s("secrets"),s("rtl"),s("typecheck"))')" "red red green"
+chk "rtl output names the file:line and the rule" "$(echo "$J" | grep -c 'app/bad.tsx:1  RTL-PHYS')" "1"
+# 3. level off: only secrets
+chk "level off runs secrets only" "$(bash "$CHECK" --level off --list | tr '\n' ' ')" "secrets "
+chk "level high adds tests-full and lighthouse" "$(bash "$CHECK" --level high --list | grep -c 'tests-full\|lighthouse')" "2"
+# 4. a scan that cannot run is red, never green
+git reset -q; git checkout -q -- . ; rm -f app/k.ts app/bad.tsx
+printf 'export const z = 3;\n' >> app/ok.tsx && git add -A
+mkdir -p "$T/lone/bin" && cp "$CHECK" "$LINT" "$T/lone/bin/"   # a copy with no maestro-vcs sibling
+J=$(CLAUDE_PLUGIN_ROOT="$T/lone" HOME="$T/emptyhome" bash "$T/lone/bin/maestro-check" --level off --json-only 2>/dev/null); RC=$?
+chk "no secret-scan reachable: red (a scan that did not run is not clean)" "$RC:$(echo "$J" | node -e 'console.log(JSON.parse(require("fs").readFileSync(0,"utf8")).checks[0].status)')" "1:red"
+# 5. gates.json is read when --level is absent
+mkdir -p maestro_docs && echo '{ "level": "off" }' > maestro_docs/gates.json
+chk "level read from maestro_docs/gates.json" "$(bash "$CHECK" --list | tr '\n' ' ')" "secrets "
+
+echo "maestro-check: $pass passed, $fail failed"
+[ "$fail" = "0" ] || exit 1
