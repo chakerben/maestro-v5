@@ -21,9 +21,11 @@
  * Quoted strings: rules 1–3 (rm / curl|sh / chmod) are matched on a copy of
  * the command whose quoted strings are blanked, so `git commit -m "fix: chmod
  * 777 removed"` passes. Rule 1 keeps a second pass on the raw command for the
- * QUOTED spellings of its targets (`rm -rf "$HOME"`, `rm -rf '~'`). Rules 4–7
- * (disk, .env, secrets, git push) read the raw command: there the quotes are
- * the workaround, not the false positive.
+ * QUOTED spellings of its targets (`rm -rf "$HOME"`, `rm -rf '~'`). Rules 4–6
+ * (disk, .env, secrets) read the raw command: there the quotes are the
+ * workaround, not the false positive. Rule 7 (git push) is blanked too: the
+ * push command is never written inside quotes, but its text is — in the
+ * deny list a scaffold writes.
  *
  * Nothing else runs here: no quality checks, no typecheck, no format
  * (Philosophy rule #2 — quality lives in the workflow, this is safety only).
@@ -92,7 +94,11 @@ const RULES = [
     msg: 'BLOCKED: printing secrets from the environment',
   },
   {
+    // On the blanked command: a quoted "git push --force" is text — the first
+    // pilot's scaffold wrote the deny LIST through a node -e script and this
+    // rule blocked the script (5.15.0). The command itself is never quoted.
     re: /\bgit(\s+-[cC]\s*\S+)*\s+push(?=[^\n]*(\s--force(?!-with-lease)\b|\s-[a-zA-Z]*f[a-zA-Z]*\b|\s\+\w))/,
+    blank: true,
     msg: 'BLOCKED: git push --force / -f / +ref (use --force-with-lease)',
   },
 ];

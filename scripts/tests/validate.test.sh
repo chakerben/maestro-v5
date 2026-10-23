@@ -95,8 +95,8 @@ fresh
 sed -i.bak 's/^Agent(model:\*)$//' "$T/r/plugins/maestro-core/skills/00-onboard/actions/04-scaffold.md"
 red "scaffold deny list without Agent(model:*)" "lacks Agent(model"
 fresh
-sed -i.bak 's/, "Agent(model:\*)"//' "$T/r/scripts/fleet-apply.sh"
-red "fleet-apply deny list without Agent(model:*)" "lacks Agent(model"
+sed -i.bak 's/, "Agent(model:\*)"//' "$T/r/plugins/maestro-quality/bin/maestro-settings"
+red "maestro-settings deny list without Agent(model:*)" "lacks Agent(model"
 
 # 8b. The quoted counter-example stays legal (model-policy.md forbids the
 #     phrasing by quoting it) — the negation must be adjacent, not anywhere.

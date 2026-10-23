@@ -150,57 +150,10 @@ SUMMARY="$RUN_DIR/summary.tsv"
 
 # ── --settings : merge JSON déterministe (même contrat que 04-scaffold 4b/4c) ──
 apply_settings() {
-  python3 - "$1" "$DRY_RUN" <<'PY'
-import json, os, sys
-proj, dry = sys.argv[1], sys.argv[2] == "1"
-p = os.path.join(proj, ".claude", "settings.json")
-# Same list as 00-onboard 04-scaffold 4b. No rule with a pipe: the platform
-# matches deny rules per subcommand after splitting at | && ; so such a rule
-# never fires (audit 5.14.0 1.2) — bash-guard covers curl|sh as an accident guard.
-DENY = ["Bash(rm -rf /)", "Bash(rm -rf /*)", "Bash(rm -rf ~)", "Bash(rm -rf ~/*)",
-        "Bash(rm -rf $HOME)", "Bash(git push --force)", "Bash(git push --force *)",
-        "Bash(git push -f)", "Bash(git push -f *)", "Agent(model:*)"]
-# Pruned: only rules that can never match (a pipe never survives the
-# platform's per-subcommand split). `--force*` is live and merely over-broad:
-# a user may have written it on purpose, it is never removed — doctor reports it.
-STALE = ["Bash(curl * | bash)", "Bash(curl * | sh)", "Bash(wget * | bash)",
-         "Bash(wget * | sh)"]
-try:
-    raw = open(p).read() if os.path.exists(p) else "{}"
-    d = json.loads(raw) if raw.strip() else {}
-except Exception as e:
-    print(f"MALFORMED {p}: {e}"); sys.exit(3)
-if not isinstance(d, dict):
-    print(f"MALFORMED {p}: not an object"); sys.exit(3)
-changes = []
-perms = d.setdefault("permissions", {})
-if not isinstance(perms, dict):
-    print(f"MALFORMED {p}: permissions is not an object"); sys.exit(3)
-deny = perms.setdefault("deny", [])
-if not isinstance(deny, list):
-    print(f"MALFORMED {p}: permissions.deny is not a list"); sys.exit(3)
-missing = [x for x in DENY if x not in deny]
-if missing:
-    deny.extend(missing); changes.append(f"permissions.deny +{len(missing)}")
-stale = [x for x in deny if x in STALE]
-if stale:
-    deny[:] = [x for x in deny if x not in STALE]; changes.append("permissions.deny -" + ", ".join(stale) + " (dead: a deny rule cannot contain a pipe)")
-note = ""
-if "model" not in d:
-    d["model"] = "sonnet"; changes.append('model=sonnet')
-elif d["model"] != "sonnet":
-    note = f" (model kept: {d['model']!r} — the ladder assumes sonnet)"
-if not changes:
-    print("UNCHANGED" + note); sys.exit(0)
-if dry:
-    print("WOULD " + ", ".join(changes) + note); sys.exit(0)
-os.makedirs(os.path.dirname(p), exist_ok=True)
-tmp = p + ".tmp"
-with open(tmp, "w") as f:
-    json.dump(d, f, indent=2, ensure_ascii=False); f.write("\n")
-os.replace(tmp, p)
-print("CHANGED " + ", ".join(changes) + note)
-PY
+  # Single source: the merge lives in maestro-quality/bin/maestro-settings (a
+  # human runs it inside a project; .claude/ is a protected path a skill
+  # cannot write). Dry-run is passed through.
+  if [ "$DRY_RUN" = "1" ]; then "$REPO_ROOT/plugins/maestro-quality/bin/maestro-settings" --dry-run "$1"; else "$REPO_ROOT/plugins/maestro-quality/bin/maestro-settings" "$1"; fi
 }
 
 # ── Une action LLM sur un projet, headless ───────────────────────────────

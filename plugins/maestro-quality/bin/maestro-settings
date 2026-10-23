@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# maestro-settings — merge Maestro's canonical permissions.deny and session model
+# into a project's .claude/settings.json. Deterministic, idempotent, never
+# overwrites a value you wrote; removes only the four dead pipe rules, by name.
+#
+# Why a command and not a skill step: .claude/ is a platform-protected path —
+# Claude prompts a human before writing there and refuses headless. So the
+# human runs this (or fleet-apply.sh --settings from the marketplace checkout);
+# a skill only prints the one-liner. Same code path as fleet-apply.sh.
+#
+#   maestro-settings [--dry-run] [<project dir>]      default: the cwd
+#   exit 0 ok · 3 malformed settings (nothing written)
+set -uo pipefail
+DRY=0; PROJ="."
+for a in "$@"; do case "$a" in --dry-run) DRY=1 ;; -h|--help) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;; *) PROJ="$a" ;; esac; done
+command -v python3 >/dev/null || { echo "python3 required" >&2; exit 2; }
+python3 - "$PROJ" "$DRY" <<'PY'
+import json, os, sys
+proj, dry = sys.argv[1], sys.argv[2] == "1"
+p = os.path.join(proj, ".claude", "settings.json")
+# Same list as 00-onboard 04-scaffold 4b. No rule with a pipe: the platform
+# matches deny rules per subcommand after splitting at | && ; so such a rule
+# never fires (audit 5.14.0 1.2) — bash-guard covers curl|sh as an accident guard.
+DENY = ["Bash(rm -rf /)", "Bash(rm -rf /*)", "Bash(rm -rf ~)", "Bash(rm -rf ~/*)",
+        "Bash(rm -rf $HOME)", "Bash(git push --force)", "Bash(git push --force *)",
+        "Bash(git push -f)", "Bash(git push -f *)", "Agent(model:*)"]
+# Pruned: only rules that can never match (a pipe never survives the
+# platform's per-subcommand split). `--force*` is live and merely over-broad:
+# a user may have written it on purpose, it is never removed — doctor reports it.
+STALE = ["Bash(curl * | bash)", "Bash(curl * | sh)", "Bash(wget * | bash)",
+         "Bash(wget * | sh)"]
+try:
+    raw = open(p).read() if os.path.exists(p) else "{}"
+    d = json.loads(raw) if raw.strip() else {}
+except Exception as e:
+    print(f"MALFORMED {p}: {e}"); sys.exit(3)
+if not isinstance(d, dict):
+    print(f"MALFORMED {p}: not an object"); sys.exit(3)
+changes = []
+perms = d.setdefault("permissions", {})
+if not isinstance(perms, dict):
+    print(f"MALFORMED {p}: permissions is not an object"); sys.exit(3)
+deny = perms.setdefault("deny", [])
+if not isinstance(deny, list):
+    print(f"MALFORMED {p}: permissions.deny is not a list"); sys.exit(3)
+missing = [x for x in DENY if x not in deny]
+if missing:
+    deny.extend(missing); changes.append(f"permissions.deny +{len(missing)}")
+stale = [x for x in deny if x in STALE]
+if stale:
+    deny[:] = [x for x in deny if x not in STALE]; changes.append("permissions.deny -" + ", ".join(stale) + " (dead: a deny rule cannot contain a pipe)")
+note = ""
+if "model" not in d:
+    d["model"] = "sonnet"; changes.append('model=sonnet')
+elif d["model"] != "sonnet":
+    note = f" (model kept: {d['model']!r} — the ladder assumes sonnet)"
+if not changes:
+    print("UNCHANGED" + note); sys.exit(0)
+if dry:
+    print("WOULD " + ", ".join(changes) + note); sys.exit(0)
+os.makedirs(os.path.dirname(p), exist_ok=True)
+tmp = p + ".tmp"
+with open(tmp, "w") as f:
+    json.dump(d, f, indent=2, ensure_ascii=False); f.write("\n")
+os.replace(tmp, p)
+print("CHANGED " + ", ".join(changes) + note)
+PY

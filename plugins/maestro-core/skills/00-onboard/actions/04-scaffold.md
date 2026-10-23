@@ -56,12 +56,24 @@ commiter par chemins. <port de dev à décaler / services partagés du projet>
    appear immediately in the exact shape the hook expects — tags alone on
    their line; a hand-typed block with a tag inline becomes a stray tag the
    hook refuses to touch forever. Never write these blocks by hand.
-4b. Merge the canonical `permissions.deny` entries into the project's
-   `.claude/settings.json` (create the file with `{}` if absent; parse it,
-   never regex it; keep every other key and every existing deny entry; add
-   only the entries below that are missing; write back pretty-printed). The
-   `bash-guard` hook is the accident guard — this list is the enforced layer
-   the platform applies, and nothing else installs it:
+4b. The canonical `permissions.deny` entries in the project's
+   `.claude/settings.json`. **`.claude/` is a platform-protected path**: a
+   write there prompts the human even in `acceptEdits`, and is refused
+   headless (`claude -p`, `fleet-apply --scaffold`, `00-sdlc auto`) — the
+   first pilot proved it. So this step is a merge the human runs, never a
+   silent write: print the one-liner below and, when a human is present,
+   offer the Edit (they answer the prompt — "allow Claude to edit its own
+   settings for this session" is theirs to say). Headless: print it and
+   move on; `04-doctor` reports the gap until it is closed.
+
+```bash
+maestro-settings .      # maestro-quality bin/, on the PATH while that plugin is enabled — or, from the marketplace checkout: scripts/fleet-apply.sh --settings <project>
+```
+
+   Either path parses the file, never regexes it; keeps every other key and
+   every existing entry (except the four dead pipe rules, named); adds only
+   what is missing; writes back pretty-printed. The `bash-guard` hook is the
+   accident guard — this list is the enforced layer the platform applies:
 
 ```
 Bash(rm -rf /)        Bash(rm -rf /*)       Bash(rm -rf ~)      Bash(rm -rf ~/*)
@@ -90,13 +102,11 @@ Agent(model:*)
 
    Show the diff before writing. If `.claude/settings.json` is malformed
    JSON, stop and report — never overwrite a file you could not parse.
-4c. Session model. If `.claude/settings.json` has no top-level `"model"`
-   key, ask once: write `"model": "sonnet"`? — "Maestro's ladder keeps the
-   session on sonnet (it orchestrates: dispatch, gates, commits, docs); the
-   agents pin their own tier — fable to build and judge, opus for the
-   critical ones. Raising the session raises everything, including commits" (`${CLAUDE_PLUGIN_ROOT}/references/model-policy.md`). Yes → add
-   the key (same parse-merge-write as 4b). An existing value, whatever it
-   is, is never overwritten — report it and move on.
+4c. Session model `"model": "sonnet"` — same file, same rule as 4b (the
+   human runs the merge; `maestro-settings` writes it when absent, never
+   overwrites an existing value). Why sonnet: the session orchestrates
+   (dispatch, gates, commits, docs); the agents pin their own tier
+   (`${CLAUDE_PLUGIN_ROOT}/references/model-policy.md`).
 4d. Merge into `.gitignore` (create it if absent; append only what is
    missing, one entry per line): `.claude-md.maestro.lock` and
    `CLAUDE.md.*.tmp` — the hook's lock and atomic-write temp files. Show the
@@ -128,9 +138,11 @@ Agent(model:*)
 - A boundary config exists (`.dependency-cruiser.cjs` or `import_lint` in
   `analysis_options.yaml`), its linter is a dev dependency, and
   `maestro-check --list` shows `boundaries` running, not skipped.
-- `.claude/settings.json` parses, its `permissions.deny` contains all 10
-  canonical entries, and every key/entry that was there before is still there.
-- `.claude/settings.json` `model` is `sonnet` when the user accepted 4c, or
-  still its previous value when one existed — never replaced.
+- The report prints the `maestro-settings` / `fleet-apply --settings`
+  one-liner whenever `.claude/settings.json` lacks a canonical entry or the
+  model key, and never claims to have written that file headless.
+- After the human ran it: the file parses, `permissions.deny` contains all
+  10 canonical entries, every pre-existing key/entry is still there (minus
+  the four named dead pipe rules), `model` is `sonnet` or its previous value.
 - Re-running this action changes nothing (idempotent) — including
   `.claude/settings.json` and `.gitignore`, byte for byte.

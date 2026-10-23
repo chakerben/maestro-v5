@@ -357,7 +357,7 @@ console.log('▶ Model policy');
   // that is really pinned to opus.
   const DENY_SOURCES = [
     ['plugins/maestro-core/skills/00-onboard/actions/04-scaffold.md', /^Agent\(model:\*\)[ \t]*$/m],
-    ['scripts/fleet-apply.sh', /"Agent\(model:\*\)"/],
+    ['plugins/maestro-quality/bin/maestro-settings', /"Agent\(model:\*\)"/],
   ];
   for (const [f, re] of DENY_SOURCES) {
     const p = path.join(ROOT, f);
