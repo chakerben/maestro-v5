@@ -1,0 +1,22 @@
+# Maestro architecture boundaries for Flutter — written by maestro-core:00-onboard
+# scaffold, enforced by `maestro-check boundaries` (`dart run import_lint`).
+# Add to pubspec.yaml dev_dependencies: import_lint: ^0.14.0
+# Layers under lib/: domain/ · application/ · infrastructure/ · presentation/ (or ui/, features/*/presentation/)
+import_lint:
+  rules:
+    domain_stays_pure:
+      target_file_path: "lib/**/domain/**/*.dart"
+      not_allow_imports: ["lib/**/application/**/*.dart", "lib/**/infrastructure/**/*.dart", "lib/**/presentation/**/*.dart", "lib/**/ui/**/*.dart"]
+      exclude_imports: []
+    domain_no_framework:
+      target_file_path: "lib/**/domain/**/*.dart"
+      not_allow_imports: ["package:flutter/**", "package:cloud_firestore/**", "package:firebase_*/**", "package:http/**", "package:dio/**", "package:hive/**", "package:sqflite/**"]
+      exclude_imports: []
+    application_no_infrastructure:
+      target_file_path: "lib/**/application/**/*.dart"
+      not_allow_imports: ["lib/**/infrastructure/**/*.dart"]
+      exclude_imports: []
+    presentation_no_infrastructure:
+      target_file_path: "lib/**/{presentation,ui}/**/*.dart"
+      not_allow_imports: ["lib/**/infrastructure/**/*.dart"]
+      exclude_imports: []

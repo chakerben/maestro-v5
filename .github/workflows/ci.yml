@@ -14,6 +14,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - run: npm ci   # dependency-cruiser + typescript for the boundaries fixture
       - name: npm test (version drift, validate.js, budget, bash test suites incl. maestro-check)
         run: npm test
 
@@ -25,6 +26,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - run: npm ci
       - name: bash scripts/tests/*.test.sh
         run: for t in scripts/tests/*.test.sh; do echo "▶ $t"; bash "$t" || exit 1; done
 

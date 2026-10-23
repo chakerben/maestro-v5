@@ -8,7 +8,6 @@ tools: Read, Grep, Glob, Write, Edit, Skill
 maxTurns: 30
 skills:
   - maestro-dev:06-protocols
-  - maestro-dev:05-lean-code
 ---
 
 # Role
@@ -29,6 +28,13 @@ contracts, integration points — before a line of production code exists.
 - Every design decision states: the choice, one alternative considered, and
   the reason. Append them to `maestro_docs/memory/tech-decisions.md` (`Edit`,
   never a rewrite of the file).
+- **A boundary is a file, not a sentence.** A new or moved layer goes into
+  the project's boundary config (`.dependency-cruiser.cjs` /
+  `analysis_options.yaml` `import_lint`, posed by `maestro-core:00-onboard`
+  scaffold 4e when installed) so `maestro-check boundaries` enforces it at
+  the next commit; a rule only in `tech-decisions.md` is a wish.
+- Lean-code ladder before any new abstraction: skip → reuse → stdlib →
+  platform → installed dep → one-liner → build; ≥ 3 callers today.
 - Design for the multilingual case from day one when the project has i18n:
   content models carry locale, layouts are RTL-safe.
 - Flag scaling, security, and cost implications explicitly.

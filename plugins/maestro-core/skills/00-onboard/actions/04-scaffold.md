@@ -101,6 +101,21 @@ Agent(model:*)
    missing, one entry per line): `.claude-md.maestro.lock` and
    `CLAUDE.md.*.tmp` — the hook's lock and atomic-write temp files. Show the
    diff before writing.
+4e. **Architecture the tool enforces** (skip when a boundary config already
+   exists — never overwrite one): node/Expo/Next → copy
+   `${CLAUDE_PLUGIN_ROOT}/skills/00-onboard/assets/architecture/dependency-cruiser.node.cjs`
+   to `.dependency-cruiser.cjs` and add `dependency-cruiser` to
+   devDependencies (install with the lockfile's runner; `typescript` must
+   be a devDependency too — depcruise cannot read `.ts/.tsx` without it);
+   Flutter → copy
+   `import_lint.flutter.yaml` into `analysis_options.yaml` (merge under
+   `import_lint:`) and add `import_lint` to `dev_dependencies`. Create the
+   four layer folders (`domain/ application/ infrastructure/` + the stack's
+   UI folder) with a one-line README each when they do not exist, from
+   `assets/architecture/README.md`. From now on `maestro-check boundaries`
+   is red when `domain/` imports a framework or `ui/` imports an adapter.
+   A project with its own architecture keeps it: record the deviation in
+   `tech-decisions.md` and edit the config instead of deleting it.
 5. Report created vs skipped files.
 
 ## Test
@@ -110,6 +125,9 @@ Agent(model:*)
   files and one `<maestro_routing>` block whose second line is the hook's
   `<!-- maestro-routing <hash> … -->` comment; each tag sits alone on its line.
 - `.gitignore` lists `.claude-md.maestro.lock` and `CLAUDE.md.*.tmp`.
+- A boundary config exists (`.dependency-cruiser.cjs` or `import_lint` in
+  `analysis_options.yaml`), its linter is a dev dependency, and
+  `maestro-check --list` shows `boundaries` running, not skipped.
 - `.claude/settings.json` parses, its `permissions.deny` contains all 10
   canonical entries, and every key/entry that was there before is still there.
 - `.claude/settings.json` `model` is `sonnet` when the user accepted 4c, or

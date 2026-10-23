@@ -143,8 +143,18 @@ fi
 # ── boundaries (domain never imports infrastructure) ────────────────────────
 if want boundaries; then
   if [ -f .dependency-cruiser.cjs ] || [ -f .dependency-cruiser.js ] || [ -f .dependency-cruiser.json ]; then
-    if [ -x node_modules/.bin/depcruise ]; then run_check boundaries node_modules/.bin/depcruise --config src app lib 2>/dev/null || run_check boundaries node_modules/.bin/depcruise --config .
-    else skip boundaries "dependency-cruiser config present but not installed (npm i -D dependency-cruiser)"; fi
+    if [ ! -x node_modules/.bin/depcruise ]; then skip boundaries "dependency-cruiser config present but not installed (npm i -D dependency-cruiser)"
+    elif ls tsconfig*.json >/dev/null 2>&1 && [ ! -d node_modules/typescript ]; then skip boundaries "typescript not installed — dependency-cruiser cannot read .ts/.tsx without it (npm i -D typescript)"
+    else
+      DC_CFG=$(ls .dependency-cruiser.cjs .dependency-cruiser.js .dependency-cruiser.json 2>/dev/null | head -1)
+      DIRS=""; for d in src app lib packages apps; do [ -d "$d" ] && DIRS="$DIRS $d"; done
+      [ -n "$DIRS" ] || DIRS="."
+      run_check boundaries node_modules/.bin/depcruise --config "$DC_CFG" $DIRS
+      LAST="${RESULTS[${#RESULTS[@]}-1]}"
+      if printf '%s' "$LAST" | grep -q '"status":"green"' && printf '%s' "$LAST" | grep -q '(0 modules'; then
+        unset 'RESULTS[${#RESULTS[@]}-1]'; record boundaries red 0 "depcruise --config $DC_CFG $DIRS" "0 modules cruised — the config matched nothing (wrong folders, or a transpiler missing: depcruise --info); a boundary that checks nothing is not green"
+      fi
+    fi
   elif [ "$STACK" = flutter ] && grep -q 'dart_code_metrics\|import_lint' pubspec.yaml 2>/dev/null; then run_check boundaries dart run import_lint
   else skip boundaries "no .dependency-cruiser.cjs — run maestro-core:00-onboard scaffold (architecture) to get one"; fi
 fi

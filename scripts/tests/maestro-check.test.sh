@@ -79,5 +79,31 @@ chk "no secret-scan reachable: red (a scan that did not run is not clean)" "$RC:
 mkdir -p maestro_docs && echo '{ "level": "off" }' > maestro_docs/gates.json
 chk "level read from maestro_docs/gates.json" "$(bash "$CHECK" --list | tr '\n' ' ')" "secrets "
 
+# ── boundaries: the shipped dependency-cruiser config catches domain→framework and ui→infrastructure ──
+# Needs dependency-cruiser + typescript: skipped (not failed) when not installed in the repo's node_modules
+# or when ARCH_FIXTURE_NODE_MODULES points nowhere — CI installs them.
+NM="${ARCH_FIXTURE_NODE_MODULES:-$ROOT/node_modules}"
+if [ -x "$NM/.bin/depcruise" ] && [ -d "$NM/typescript" ]; then
+  mkdir -p "$T/arch/src/domain" "$T/arch/src/application" "$T/arch/src/infrastructure" "$T/arch/src/ui" "$T/arch/node_modules/@prisma/client" && cd "$T/arch"
+  ln -s "$NM/.bin" node_modules/.bin; ln -s "$NM/typescript" node_modules/typescript; ln -s "$NM/dependency-cruiser" node_modules/dependency-cruiser
+  for d in "$NM"/*; do b=$(basename "$d"); [ -e "node_modules/$b" ] || ln -s "$d" "node_modules/$b"; done
+  echo '{"name":"@prisma/client","main":"index.js"}' > node_modules/@prisma/client/package.json; echo 'module.exports={PrismaClient:class{}}' > node_modules/@prisma/client/index.js
+  echo '{"name":"arch","private":true}' > package.json; echo '{"compilerOptions":{"module":"esnext","moduleResolution":"bundler","jsx":"react-jsx"}}' > tsconfig.json
+  cp "$ROOT/plugins/maestro-core/skills/00-onboard/assets/architecture/dependency-cruiser.node.cjs" .dependency-cruiser.cjs
+  printf 'export interface Repo { save(): Promise<void>; }\n' > src/domain/repo.ts
+  printf 'import { PrismaClient } from "@prisma/client";\nexport const leak = new PrismaClient();\n' > src/domain/bad.ts
+  printf 'import { Repo } from "../domain/repo";\nexport const uc = (r: Repo) => r.save();\n' > src/application/uc.ts
+  printf 'import { Repo } from "../domain/repo";\nexport class PrismaRepo implements Repo { async save() {} }\n' > src/infrastructure/prisma-repo.ts
+  printf 'import { PrismaRepo } from "../infrastructure/prisma-repo";\nexport const S = () => new PrismaRepo();\n' > src/ui/Screen.tsx
+  git init -q && git add -A
+  J=$(bash "$CHECK" --level standard --json-only 2>/dev/null)
+  chk "boundaries red: domain→@prisma and ui→infrastructure named" "$(echo "$J" | node -e 'const j=JSON.parse(require("fs").readFileSync(0,"utf8"));const b=j.checks.find(c=>c.name==="boundaries");console.log(b.status, /domain-no-framework/.test(b.output), /ui-no-infrastructure/.test(b.output))')" "red true true"
+  rm src/domain/bad.ts; printf 'import { uc } from "../application/uc";\nexport const S = () => uc({ save: async () => {} });\n' > src/ui/Screen.tsx; git add -A
+  J=$(bash "$CHECK" --level standard --json-only 2>/dev/null)
+  chk "boundaries green once the layers point one way" "$(echo "$J" | node -e 'console.log(JSON.parse(require("fs").readFileSync(0,"utf8")).checks.find(c=>c.name==="boundaries").status)')" "green"
+else
+  echo "  ⏭  boundaries fixture skipped (dependency-cruiser/typescript not in $NM)"
+fi
+
 echo "maestro-check: $pass passed, $fail failed"
 [ "$fail" = "0" ] || exit 1
