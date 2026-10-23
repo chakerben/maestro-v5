@@ -19,22 +19,23 @@ refused by 01):
    (timestamp, result) in the phase's `## Log` and increment `attempts`.
    - Red → repair loop (new executor dispatch WITH the failure output);
      at `attempts: 3` set `status: blocked` with the last failure and stop.
-   - Green → **stage** the phase's code and its phase file (explicit paths,
-     never `-a`), then run the gate, then mark `done`:
+   - Green → write `status: done` in the phase file, **stage** the phase's
+     code and that phase file (explicit paths, never `-a`), then commit
+     through the gate — the gate and the `git commit` are one invocation,
+     so the status has to be on disk and staged before it:
      - maestro-vcs installed → invoke `maestro-vcs:00-commit` with the
        caller's mode (`auto` = no message pause) and the message
        `feat(<slug>): phase <n> — <name>`; its injected scan and the gate
-       level's checks run on the staged diff. **A red gate is one more
-       attempt**: the phase stays `in-progress`, the failing output goes to
-       the repair loop above — never `done` with nothing committed.
+       level's checks run on the staged diff.
      - else → grep the staged diff's added lines against
        `${CLAUDE_PLUGIN_ROOT}/skills/02-implement/assets/secret-patterns.md`
        (each row's regex; this fallback has no placeholder filter and no
-       `gate:allow` — any hit is a hard stop, phase stays `in-progress`),
-       then commit.
-     - Gate green and committed → set `status: done` in the same commit
-       (write the status before the commit command runs; the phase file is
-       staged with the code). ONE commit per phase: code + status.
+       `gate:allow` — any hit is a hard stop), then `git commit`.
+     - **The gate went red, nothing was committed** → undo the status:
+       set `status: in-progress` back, `git restore --staged` the phase
+       file, count the attempt, and hand the failing output to the repair
+       loop above. A phase file never reads `done` while its diff is
+       uncommitted. ONE commit per phase: code + status.
 4. **Drift check.** If the executor reports the plan doesn't match reality,
    stop the loop and return "replan needed: <specifics>".
 

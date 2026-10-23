@@ -66,6 +66,15 @@ chk "canonical fixture sk_live_4eC39… is RED" "$(echo "$OUT" | grep -c 'env.ts
 chk "quoted literal secret still RED" "$(echo "$OUT" | grep -c 'env.ts:2  Generic')" "1"
 chk "unquoted value with digits still RED" "$(echo "$OUT" | grep -c 'env.ts:3  Generic')" "1"
 chk "real Twilio key still RED" "$(echo "$OUT" | grep -c 'env.ts:4  Twilio')" "1"
+# cold review of the 5.14.0 fixes: a quoted value is a literal whatever it starts with; in a config
+# file nothing is an identifier (a passphrase without digits is a secret); in code, identifiers are.
+CR=$(printf 'diff --git a/.env b/.env\n--- a/.env\n+++ b/.env\n@@ -0,0 +1,4 @@\n+API_KEY=correcthorsebatterystaple\n+DB_PASSWORD=ThisIsMyProdPassphrase\n+SESSION_SECRET=process.env.FROM_PLATFORM\n+TOKEN=changeme_placeholder_value\ndiff --git a/config.yml b/config.yml\n--- a/config.yml\n+++ b/config.yml\n@@ -0,0 +1 @@\n+password: SuperSecretPasswordNoDigits\ndiff --git a/k.ts b/k.ts\n--- a/k.ts\n+++ b/k.ts\n@@ -0,0 +1,3 @@\n+const apiKey = "process.env.MY_REAL_SECRET_VALUE_9f8e7d";\n+const secret = %s;\n+const k = { secret: config.auth.clientSecret, s2: buildSecret(users), s3: SOME_CONSTANT_NAME };\n' "'env.hunter2hunter2hunter2'")
+OUT=$(printf '%s\n' "$CR" | bash "$S" stdin)
+chk ".env passphrases without digits: RED (2)" "$(echo "$OUT" | grep -c '^  .env:[12]  Generic')" "2"
+chk ".env lookup value and placeholder: clean" "$(echo "$OUT" | grep -c '^  .env:[34]')" "0"
+chk "yaml passphrase: RED" "$(echo "$OUT" | grep -c 'config.yml:1  Generic')" "1"
+chk "quoted 'process.env.…' / 'env.…' strings are literals: RED (2)" "$(echo "$OUT" | grep -c 'k.ts:[12]  Generic')" "2"
+chk "dotted path, call and CONSTANT in code are references" "$(echo "$OUT" | grep -c 'k.ts:3')" "0"
 for i in $(seq 1 3000); do echo "const value_$i = compute($i) + 'an ordinary string literal';"; done > big.js && git add big.js
 T0=$(date +%s); OUT=$(bash "$S" cached); T1=$(date +%s)
 chk "perf: 3000 clean lines scanned" "$(echo "$OUT" | head -1 | cut -d' ' -f1-6)" "SECRET SCAN: clean — 3000 added"

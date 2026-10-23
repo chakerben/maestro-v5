@@ -5,7 +5,7 @@ Turn the report into a command that fails on demand.
 ## Process
 
 1. Resolve the task folder (`maestro_docs/tasks/<date>_<slug>/`); create
-   `debug.md` from `../assets/debug-template.md` with `status: reproducing`.
+   `debug.md` from `${CLAUDE_PLUGIN_ROOT}/skills/04-debug/assets/debug-template.md` with `status: reproducing`.
    Copy the report verbatim into `## Report` — the user's words, the stack
    trace, the failing test path, the screenshot description.
 2. Read before assuming: open the file the stack trace names, the route the

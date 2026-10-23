@@ -73,10 +73,14 @@ Agent(model:*)
    What is NOT in the list, and why: a rule with a pipe in it
    (`Bash(curl * | bash)`) never matches — the platform splits a compound
    command at `|`, `&&`, `;` and matches each subcommand on its own, so no
-   subcommand ever contains the pipe. Piping remote content into a shell is
-   bash-guard's job (rule 3 of `bash-guard.js`), and that layer is an
-   accident guard, not a boundary; say so when asked. `--force*` used to
-   match `--force-with-lease`, the form the framework recommends.
+   subcommand ever contains the pipe. The four former pipe entries
+   (`curl`/`wget` × `bash`/`sh`) are the one exception to "keep every
+   existing entry": remove them, naming each, as `fleet-apply.sh --settings`
+   does. Piping remote content into a shell is bash-guard's job (rule 3 of
+   `bash-guard.js`), and that layer is an accident guard, not a boundary;
+   say so when asked. `--force*` used to match `--force-with-lease`, the
+   form the framework recommends; an existing `--force*` is the user's and
+   stays — `04-doctor` reports it.
 
    `Agent(model:*)` is what makes the model ladder real: Claude Code resolves
    a subagent's model from the `model` parameter of the dispatch **before**

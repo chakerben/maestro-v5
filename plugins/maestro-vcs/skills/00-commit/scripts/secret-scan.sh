@@ -81,21 +81,32 @@ PLACEHOLDER='example|changeme|placeholder|xxx+|your[_-]?|<.*>|\$\{'
 # The generic row ("apiKey = <value>") is the only case-insensitive one — a
 # provider prefix like AKIA or SK is a literal, and `-i` on it made
 # "task1234…" a Twilio key (5.14.0 audit 3.3). It is also the only row whose
-# value can be a REFERENCE rather than a secret: `process.env.X`, `env.X`,
-# `import.meta.env.X`, `os.environ[...]`, `getenv(...)`, or a bare identifier
-# with no quote and no digit (`DEFAULT_PASSWORD_LENGTH`). Those are what the
-# mandated env.ts pattern looks like, and they must stay green (3.2).
+# value can be a REFERENCE rather than a secret. A reference is UNQUOTED and
+# is either a lookup (`process.env.X`, `env.X`, `import.meta.env.X`,
+# `os.environ[...]`, `getenv(...)`) or, IN A CODE FILE, a plain identifier /
+# dotted path / call (`DEFAULT_PASSWORD_LENGTH`, `config.auth.secret`,
+# `buildAssignments(users)` — the regex stops at the `(`). A quoted value is
+# always a literal, whatever it starts with. In a config file (.env, .yml,
+# .ini, .toml, .properties, .conf…) nothing is an identifier: an unquoted
+# `DB_PASSWORD=correcthorsebatterystaple` is a passphrase and stays RED. This
+# keeps the mandated env.ts pattern green (audit 3.2) without the .env hole
+# the 5.14.0 cold review found.
 GENERIC_NAME='Generic hardcoded credential'
-ENV_REF='^(process\.env\.|env\.|import\.meta\.env\.|os\.environ|getenv\(|System\.getenv|Deno\.env|dotenv|config\.|settings\.|secrets\.)'
-generic_value() { # the value part of a generic match: after the first : or =, quotes stripped
-  local v="${1#*[:=]}"; v="${v#"${v%%[![:space:]]*}"}"; v="${v#[\"\']}"; printf '%s' "$v"
+ENV_REF='^(process\.env\.|env\.|import\.meta\.env\.|os\.environ|getenv\(|System\.getenv|Deno\.env\.|dotenv\.)'
+# code identifier: ALL_CAPS (digits allowed), or a dotted path, or a word with no digit —
+# `hunter2hunter2hunter2` unquoted in a .ts file is a value someone forgot to quote, keep it
+IDENT='^([A-Z][A-Z0-9_]*|[A-Za-z_][A-Za-z_]*(\.[A-Za-z_][A-Za-z0-9_]*)*|[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)+)$'
+CONFIG_FILE='(^|/)(\.env[^/]*|[^/]+\.(ya?ml|ini|toml|properties|conf|cfg|env|txt|json|xml))$'
+generic_value() { # the value part of a generic match: after the first : or =, leading spaces stripped
+  local v="${1#*[:=]}"; v="${v#"${v%%[![:space:]]*}"}"; printf '%s' "$v"
 }
-is_reference() { # $1 = generic match text → 0 when it is a reference, not a secret
+is_reference() { # $1 = generic match text, $2 = file → 0 when it is a reference, not a secret
   local v; v="$(generic_value "$1")"
-  printf '%s\n' "$v" | grep -Eq "$ENV_REF" && return 0
-  case "$1" in *\"*|*\'*) return 1 ;; esac          # quoted → a literal, keep
-  printf '%s\n' "$v" | grep -q '[0-9]' && return 1  # unquoted with a digit → keep
-  return 0                                           # bare identifier → reference
+  case "$v" in \"*|\'*) return 1 ;; esac                 # quoted → a literal, keep
+  printf '%s\n' "$v" | grep -Eq "$ENV_REF" && return 0   # a lookup, in any file
+  printf '%s\n' "$2" | grep -Eq "$CONFIG_FILE" && return 1  # config file: values only
+  printf '%s\n' "$v" | grep -Eq "$IDENT" && return 0     # code: an identifier
+  return 1
 }
 # gate:allow marker, anchored at end of line, in any common comment syntax.
 ALLOW_RE='(//|#|--|/\*|<!--)[[:space:]]*gate:allow([[:space:]].*)?$'
@@ -149,7 +160,7 @@ for n in $CANDIDATES; do
     if [ "${NAMES[$i]}" = "$GENERIC_NAME" ]; then
       m="$(printf '%s\n' "$added" | grep -Eio -e "${PATS[$i]}" | head -1)" || true
       [ -n "$m" ] || continue
-      if is_reference "$m"; then continue; fi
+      if is_reference "$m" "$FILE"; then continue; fi
     else
       m="$(printf '%s\n' "$added" | grep -Eo -e "${PATS[$i]}" | head -1)" || true
       [ -n "$m" ] || continue

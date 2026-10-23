@@ -419,6 +419,8 @@ console.log('▶ Mirrored assets');
 console.log('▶ Plugin-cache paths & cross-plugin guards');
 {
   const PLUGIN_NAMES = marketplace.plugins.map((e) => e.name);
+  const shipped = new Set();
+  for (const { dir } of pluginDirs) walk(dir, (p) => { const m = /[\\/](assets|references)[\\/]([^\\/]+)$/.exec(p); if (m) shipped.add(`${m[1]}/${m[2]}`); });
   let n = 0;
   for (const { name, dir } of pluginDirs) {
     walk(dir, (p, fname) => {
@@ -426,17 +428,22 @@ console.log('▶ Plugin-cache paths & cross-plugin guards');
       const txt = read(p);
       const inActions = /[\\/]actions[\\/]/.test(p);
       // (a) `assets/x` or `references/x` written from an actions/ file resolves
-      //     to actions/assets — absent. Only ${CLAUDE_PLUGIN_ROOT}/… is real
-      //     from the project cwd (AUDIT-5.10 #1, AUDIT-5.14 4.4, 5.1, 5.19).
+      //     to actions/assets — absent — whatever prefix it carries (`../`,
+      //     `./`, `skills/…/`). Only ${CLAUDE_PLUGIN_ROOT}/… is real from the
+      //     project cwd (AUDIT-5.10 #1, AUDIT-5.14 4.4, 5.1, 5.19). Flagged
+      //     only when the basename is a file this marketplace ships, so an
+      //     action may still say "put icons under assets/icons/" about the
+      //     user's project.
       if (inActions) {
-        for (const m of txt.matchAll(/(^|[^\w/$}.-])(assets|references)\/[A-Za-z0-9._-]+/g)) {
-          const before = txt.slice(Math.max(0, m.index - 40), m.index);
-          if (/CLAUDE_PLUGIN_ROOT\}\/(skills\/[^\s`]*)?$/.test(before)) continue;
-          fail(`${rel(p)}: "${m[0].trim().replace(/^\`/, '')}" is relative to a directory an action never runs from — use \${CLAUDE_PLUGIN_ROOT}/skills/<skill>/${m[2]}/… (or \${CLAUDE_PLUGIN_ROOT}/${m[2]}/… for the plugin's own)`); n++;
+        for (const m of txt.matchAll(/(assets|references)\/([A-Za-z0-9._-]+\.(md|py|svg|sh|js|json|yml|yaml|txt))\b/g)) {
+          const before = txt.slice(Math.max(0, m.index - 80), m.index);
+          if (/\$\{?CLAUDE_PLUGIN_ROOT\}?\/[^\s`'"]*$/.test(before)) continue;
+          if (!shipped.has(`${m[1]}/${m[2]}`)) continue;
+          fail(`${rel(p)}: "${m[0]}" is written relative to a directory an action never runs from — use \${CLAUDE_PLUGIN_ROOT}/skills/<skill>/${m[1]}/… (or \${CLAUDE_PLUGIN_ROOT}/${m[1]}/… for the plugin's own)`); n++;
         }
       }
       // (b) `$VAR/…` paths: only the platform's variables exist in the cache.
-      for (const m of txt.matchAll(/\$\{?([A-Z][A-Z0-9_]+)\}?\/skills\//g)) {
+      for (const m of txt.matchAll(/\$\{?([A-Z][A-Z0-9_]+)\}?\/(skills|assets|references|scripts|agents|hooks|bin)\//g)) {
         if (!['CLAUDE_PLUGIN_ROOT', 'CLAUDE_PLUGIN_DATA', 'CLAUDE_PROJECT_DIR'].includes(m[1])) {
           fail(`${rel(p)}: $${m[1]} is not a platform variable — a reader has no way to set it (use \${CLAUDE_PLUGIN_ROOT})`); n++;
         }
@@ -451,12 +458,21 @@ console.log('▶ Plugin-cache paths & cross-plugin guards');
       // "lives in X", "shared with X"), the frontmatter description, and a
       // fenced block (a snippet written into the user's files) are exempt.
       const body = txt.replace(/^---\n[\s\S]*?\n---/, '').replace(/```[\s\S]*?```/g, '');
+      const VERB = /\b(invoke|hand(s|ed)? off|delegat\w*|run|route|dispatch\w*|go(es)? to|use|call|start|→)(?![a-z])/i;
       for (const para of body.split(/\n\s*\n/)) {
         for (const m of para.matchAll(/\b(maestro-[a-z]+):\d{2}-[a-z0-9-]+/g)) {
           if (m[1] === name || !PLUGIN_NAMES.includes(m[1])) continue;
           if (/\binstalled\b/i.test(para)) continue;
-          const sentence = para.slice(Math.max(0, para.lastIndexOf('.', m.index)), m.index + 120);
-          if (!/\b(invoke|hand(s|ed)? off|delegate|run|route|dispatch|go(es)? to|→)/i.test(sentence)) continue;
+          // the sentence around the reference: bounded by sentence punctuation
+          // followed by whitespace, a table cell bar, or the paragraph edge —
+          // never by a dot inside a path
+          const left = para.slice(0, m.index), right = para.slice(m.index);
+          const lb = left.search(/(?:[.;:!?]\s+|\|)(?![\s\S]*(?:[.;:!?]\s+|\|))/);
+          const rb = right.search(/[.;:!?](?:\s|$)|\|/);
+          const sentence = (lb < 0 ? left : left.slice(lb + 1)) + (rb < 0 ? right : right.slice(0, rb));
+          const verb = VERB.exec(sentence);
+          if (!verb) continue;
+          if (/\b(never|not|don'?t|no)\b[^.]{0,40}$/i.test(sentence.slice(0, verb.index))) continue; // "never invoke X" is a rule, not an action
           fail(`${rel(p)}: acts on ${m[0]} with no "when installed" fallback in the same paragraph (rule 7b)`); n++;
         }
       }

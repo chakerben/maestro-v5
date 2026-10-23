@@ -121,6 +121,21 @@ fresh
 printf -- '\nNot for the PR itself (maestro-vcs:01-pull-request).\n' >> "$T/r/plugins/maestro-pm/skills/02-specs/SKILL.md"
 node scripts/validate.js "$T/r" >/dev/null 2>&1
 chk "a mere mention of another plugin skill stays green" "$?" "0"
+# 8d. The cold review's evasions and false positives
+fresh
+printf -- '\n6. Copy `../assets/plan-template.md` first.\n' >> "$T/r/plugins/maestro-dev/skills/01-plan/actions/03-plan.md"
+red "../assets/ path inside an action" "never runs from"
+fresh
+printf -- '\nRun `python3 $MAESTRO_MOBILE/assets/font-metrics.py check`.\n' >> "$T/r/plugins/maestro-mobile/skills/01-rtl-i18n/SKILL.md"
+red "$VAR/assets path (not only /skills/)" "not a platform variable"
+fresh
+printf -- '\n9. Use `maestro-vcs:01-pull-request` to open the PR.\n' >> "$T/r/plugins/maestro-pm/skills/02-specs/SKILL.md"
+red "'Use X' counts as an action" "no \"when installed\" fallback"
+fresh
+printf -- '\nPut the app icons under `assets/icons/` and the copy under `assets/copy.txt`.\n' >> "$T/r/plugins/maestro-core/skills/00-onboard/actions/04-scaffold.md"
+printf -- '\nNever invoke `maestro-vcs:01-pull-request` from here. The router lists maestro-vcs:01-pull-request too.\n' >> "$T/r/plugins/maestro-pm/skills/02-specs/SKILL.md"
+node scripts/validate.js "$T/r" >/dev/null 2>&1
+chk "user-project assets/, a negated action and a plain mention stay green" "$?" "0"
 
 # 9. Promising opus without naming an agent that is pinned to opus.
 fresh

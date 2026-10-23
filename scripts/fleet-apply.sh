@@ -160,8 +160,11 @@ p = os.path.join(proj, ".claude", "settings.json")
 DENY = ["Bash(rm -rf /)", "Bash(rm -rf /*)", "Bash(rm -rf ~)", "Bash(rm -rf ~/*)",
         "Bash(rm -rf $HOME)", "Bash(git push --force)", "Bash(git push --force *)",
         "Bash(git push -f)", "Bash(git push -f *)", "Agent(model:*)"]
+# Pruned: only rules that can never match (a pipe never survives the
+# platform's per-subcommand split). `--force*` is live and merely over-broad:
+# a user may have written it on purpose, it is never removed — doctor reports it.
 STALE = ["Bash(curl * | bash)", "Bash(curl * | sh)", "Bash(wget * | bash)",
-         "Bash(wget * | sh)", "Bash(git push --force*)", "Bash(git push -f*)"]
+         "Bash(wget * | sh)"]
 try:
     raw = open(p).read() if os.path.exists(p) else "{}"
     d = json.loads(raw) if raw.strip() else {}
@@ -181,7 +184,7 @@ if missing:
     deny.extend(missing); changes.append(f"permissions.deny +{len(missing)}")
 stale = [x for x in deny if x in STALE]
 if stale:
-    deny[:] = [x for x in deny if x not in STALE]; changes.append(f"permissions.deny -{len(stale)} dead rule(s)")
+    deny[:] = [x for x in deny if x not in STALE]; changes.append("permissions.deny -" + ", ".join(stale) + " (dead: a deny rule cannot contain a pipe)")
 note = ""
 if "model" not in d:
     d["model"] = "sonnet"; changes.append('model=sonnet')
