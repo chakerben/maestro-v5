@@ -58,12 +58,13 @@ changed_files() {
   case "$SCOPE" in
     staged) git diff --cached --name-only --diff-filter=ACMR 2>/dev/null ;;
     branch) git diff --name-only --diff-filter=ACMR "origin/$DEFAULT_BRANCH...HEAD" 2>/dev/null || git diff --name-only --diff-filter=ACMR "$DEFAULT_BRANCH...HEAD" 2>/dev/null ;;
-    all) git ls-files 2>/dev/null ;;
+    all) git ls-files 2>/dev/null | grep -vE '(^|/)(node_modules|\.expo|\.next|dist|build)/' ;;
   esac
 }
 CHANGED="$(changed_files)"
 AR_LOCALE=0
-if ls messages/ar* locales/ar* 2>/dev/null | grep -q . || git ls-files 2>/dev/null | grep -qE '(^|/)(ar\.json|ar-[a-z]+\.json|app_ar.*\.arb|intl_ar.*\.arb)$'; then AR_LOCALE=1; fi
+# (no `grep -q` on a git pipeline: under pipefail the early exit turns a hit into a failure — pilot bug)
+if [ -n "$(ls messages/ar* locales/ar* 2>/dev/null)" ] || [ "$(git ls-files 2>/dev/null | grep -cE '(^|/)(ar\.json|ar-[a-z]+\.json|app_ar.*\.arb|intl_ar.*\.arb)$')" != 0 ]; then AR_LOCALE=1; fi
 
 # ── result accumulation ─────────────────────────────────────────────────────
 RESULTS=(); RED=0
@@ -172,7 +173,7 @@ if want tests-related || want tests-full; then
           if [ -z "$REL" ]; then skip tests-related "no source file in scope"
           elif [ -x node_modules/.bin/jest ]; then run_check tests-related node_modules/.bin/jest --findRelatedTests --passWithNoTests $REL
           elif [ -x node_modules/.bin/vitest ]; then run_check tests-related node_modules/.bin/vitest related --run --passWithNoTests $REL
-          else run_check tests-related run_script test; fi
+          else run_check tests-related run_script test; fi   # no related-tests runner: the whole script, named as such in the output
         fi
       else skip tests-related "no test script in package.json — a project with none has no gate against regressions"; fi ;;
   esac

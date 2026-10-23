@@ -109,8 +109,11 @@ Agent(model:*)
    (`${CLAUDE_PLUGIN_ROOT}/references/model-policy.md`).
 4d. Merge into `.gitignore` (create it if absent; append only what is
    missing, one entry per line): `.claude-md.maestro.lock` and
-   `CLAUDE.md.*.tmp` — the hook's lock and atomic-write temp files. Show the
-   diff before writing.
+   `CLAUDE.md.*.tmp` — the hook's lock and atomic-write temp files — and,
+   when the file did not exist, the stack's build output too
+   (`node_modules/`, `.expo/`, `dist/`; Flutter: `build/`, `.dart_tool/`):
+   the first pilot tracked 28 000 files of `node_modules` because nothing
+   had ever ignored them. Show the diff before writing.
 4e. **Architecture the tool enforces** (skip when a boundary config already
    exists — never overwrite one): node/Expo/Next → copy
    `${CLAUDE_PLUGIN_ROOT}/skills/00-onboard/assets/architecture/dependency-cruiser.node.cjs`
