@@ -17,8 +17,10 @@
 #   /stories  → user stories               /specs    → spec technique
 #   /wt       → worktree (une branche = un répertoire)
 #
-# Installe aussi la commande `gwt` dans ~/.local/bin (lien vers scripts/gwt) :
-# c'est l'outil du skill maestro-vcs:03-worktree.
+# `gwt` (skill maestro-vcs:03-worktree) n'a plus besoin d'être installé : il
+# vit dans plugins/maestro-vcs/bin/ et le CLI le met sur le PATH du Bash dès que
+# maestro-vcs est activé dans un projet. Le lien ~/.local/bin/gwt n'est posé
+# que pour les sessions hors plugin (ce dépôt lui-même).
 #
 # NB: /doctor /memory /review sont des built-ins Claude Code
 #     → d'où /check /mem /design ici.
@@ -47,7 +49,6 @@ echo "📦 Installation des raccourcis Maestro dans $DIR"
 mk menu    "maestro-core command /maestro (run it: /maestro \$ARGUMENTS)" "Show the Maestro capability map grouped by intent" ""
 mk onboard "maestro-core:00-onboard"   "Onboard this project into Maestro 5 (stack detection, plugins, memory)" ""
 mk sdlc    "maestro-dev:00-sdlc"       "Full pipeline: spec → plan → implement → review → ship" "<feature>"
-mk auto    "maestro-dev:00-sdlc"       "Full pipeline UNATTENDED (auto mode, hard stops only)" "<feature>"
 mk plan    "maestro-dev:01-plan"       "Turn a request/spec into a phased, resumable plan" "<request or spec path>"
 mk impl    "maestro-dev:02-implement"  "Execute an existing plan phase by phase (resumes automatically)" "<plan path>"
 mk check   "maestro-core:04-doctor"    "Project health check: contraband, structure, drift" "check | fix"
@@ -85,9 +86,9 @@ echo "✅ raccourcis Maestro écrits dans $DIR ($(ls "$DIR" | wc -l | tr -d ' ')
 echo "▶ Relance ta session Claude Code, puis tape / pour voir la liste."
 echo "▶ Désinstallation d'un raccourci : rm ~/.claude/commands/<nom>.md"
 
-# ── gwt : l'outil du skill maestro-vcs:03-worktree ─────────────────────────
-# Un lien, pas une copie : une mise à jour du marketplace met l'outil à jour.
-BIN_SRC="$(cd "$(dirname "$0")" && pwd)/gwt"
+# ── gwt hors plugin (ce dépôt, sessions sans maestro-vcs) ──────────────────
+# Un lien, pas une copie : une mise à jour du checkout met l'outil à jour.
+BIN_SRC="$(cd "$(dirname "$0")/.." && pwd)/plugins/maestro-vcs/bin/gwt"
 BIN_DIR="$HOME/.local/bin"
 mkdir -p "$BIN_DIR"
 chmod +x "$BIN_SRC"

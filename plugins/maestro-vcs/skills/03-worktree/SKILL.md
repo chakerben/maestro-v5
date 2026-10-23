@@ -31,8 +31,8 @@ Run `01` before any branch work. `02` when it says so. `03` after the merge.
 
 ## The tool
 
-`gwt` — shipped with this marketplace (`scripts/gwt`), installed to
-`~/.local/bin/gwt` by `scripts/install-shortcuts.sh`. Never call
+`gwt` — shipped in this plugin's `bin/`, on the Bash PATH wherever
+maestro-vcs is enabled (no install step). Never call
 `git worktree add` by hand: `gwt` also carries the parts that make a worktree
 actually usable, and the two traps below.
 
@@ -44,7 +44,7 @@ gwt ls · gwt rm feat/x · gwt clean · gwt --help
 
 | It does | Why |
 |---|---|
-| Places the worktree in `<parent-of-repo>/.worktrees/<repo>/<branch>` | outside the repo → nothing to add to `.gitignore` |
+| Places the worktree in `<parent-of-repo>/.worktrees/<repo>/<branch>` (`/` in the branch name becomes `-`) | outside the repo → nothing to add to `.gitignore` |
 | Symlinks `node_modules`, `.venv`, `venv`, `vendor` | a fresh install per worktree costs minutes for nothing |
 | Copies `.env*`, `CLAUDE.md`, `AGENTS.md`, `.mcp.json`, `.claude/*.local.json` | git does not carry them (ignored) — without the copy the worktree has no project instructions and no granted permissions |
 | Creates the branch `--no-track` | with tracking, the branch follows `origin/<default>` and a bare `git push` aims at the default branch |

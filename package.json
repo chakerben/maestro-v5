@@ -27,7 +27,6 @@
     "docs/ROADMAP.md",
     "docs/PERF-AUDIT-5.9.0.md",
     "docs/AUDIT-5.10.0.md",
-    "scripts/gwt",
     "scripts/install-shortcuts.sh",
     "scripts/update-projects.sh",
     "scripts/fleet-apply.sh",

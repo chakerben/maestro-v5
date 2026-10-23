@@ -12,20 +12,13 @@ gwt new <branch> --from <base>
 cd "$(gwt path <branch>)"
 ```
 
-2. Check it is there: `command -v gwt || echo "gwt missing: run
-   install-shortcuts.sh from the maestro-v5 checkout
-   (https://github.com/chakerben/maestro-v5)"`. Install it once from that
-   checkout (`bash scripts/install-shortcuts.sh`) — the marketplace cache path
-   varies per machine, never hard-code it.
-   Fall back to the raw commands ONLY if that is impossible, and reproduce what
-   `gwt` guarantees — otherwise the worktree is unusable or dangerous:
-
-```bash
-git branch --no-track <branch> origin/<default>   # --no-track: a bare push must not aim at main
-git worktree add ../.worktrees/<repo>/<branch> <branch>
-ln -s "$(git rev-parse --show-toplevel)/node_modules" <worktree>/node_modules
-cp .env* CLAUDE.md <worktree>/                    # git does not carry the ignored files
-```
+   `gwt` ships in this plugin's `bin/`, which the platform puts on the Bash
+   PATH while maestro-vcs is enabled — nothing to install. `command -v gwt`
+   failing means the plugin is not enabled in this project
+   (`claude plugin enable maestro-vcs@maestro --scope project`); stop and say
+   so. There is no hand-rolled fallback: the raw commands never reproduced
+   the slug (`feat/x` → `feat-x`), the copied files, or the local-ahead base,
+   and a half-provisioned worktree is worse than none.
 
 3. Announce the absolute path of the worktree to the user, and work there for
    the whole task — commits, gates, PR.

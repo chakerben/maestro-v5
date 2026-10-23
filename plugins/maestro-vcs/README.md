@@ -10,5 +10,6 @@ Delivery, layered on the official commit-commands plugin.
   moment.
 - `01-pull-request` — structured PR from the task folder. Never merges.
 - `02-release` — semver from conventional commits, changelog, annotated tag.
-- `03-worktree` — one branch, one worktree (`gwt`): the main checkout stays on
+- `03-worktree` — one branch, one worktree (`gwt`, shipped in `bin/` and on
+  the Bash PATH while the plugin is enabled): the main checkout stays on
   the default branch, so concurrent sessions stop moving each other's branch
