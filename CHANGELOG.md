@@ -24,7 +24,9 @@ keeps the full table and the suggested order for what it does not.
   `xxx` placeholder rule) and went RED on `const apiKey = process.env.X` —
   the `env.ts` pattern `00-web-standards` mandates. References are dropped,
   the fixture is a realistic key, provider prefixes are case-sensitive
-  (`task123…` was a "Twilio key"); 11 cases join `secret-scan.test.sh`.
+  (`task123…` was a "Twilio key"). A quoted value is always a literal and a
+  config file (`.env`, `.yml`…) never holds an identifier — the cold review
+  of this branch caught both holes; 16 cases join `secret-scan.test.sh`.
   `Gate-Allow:` trailers reach the commit body (they were lost between the
   gate and the compose action).
 - **`02-implement`** marked a phase `done` before the commit gate ran and
