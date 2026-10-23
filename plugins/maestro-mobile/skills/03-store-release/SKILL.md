@@ -38,7 +38,8 @@ Arguments: `$ARGUMENTS` (platform, then optional rejection text)
    the store's words and the planned answer.
 4. Verdict at the top of the file: `GO` (zero ❌), `NO-GO (n blocking)`.
    Never `GO` with a ❌ anywhere, even in Store listing.
-5. Hand off: `GO` → `maestro-vcs:02-release` for the tag; the store upload
+5. Hand off: `GO` → `maestro-vcs:02-release` for the tag when installed
+   (else say the tag is the human's: `git tag -a v<x.y.z>`); the store upload
    itself is a human act (EAS submit / Play Console) and this skill says so.
 
 ## Binding rules

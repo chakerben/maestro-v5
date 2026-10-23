@@ -38,7 +38,7 @@ A findings report grouped by severity: 🔴 contraband / 🟠 broken / 🟡 drif
    not `sonnet` or unset (`.claude/settings.json` `"model"`) — the ladder
    keeps the session on orchestration and lets the agents pin their tier; a
    session on opus pays the expert rate for commits and docs too
-   (`references/model-policy.md`; onboard `04-scaffold` step 4c sets it).
+   (`${CLAUDE_PLUGIN_ROOT}/references/model-policy.md`; onboard `04-scaffold` step 4c sets it).
 4. **Runtime spot-check.** Suggest the user run
    `ps aux | grep -E "jest|tsc|claude-flow|ruv-swarm" | grep -v grep` and
    report phantom processes.

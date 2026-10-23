@@ -105,6 +105,23 @@ printf -- '\nGoing up means dispatching another agent, never "dispatching it wit
 node scripts/validate.js "$T/r" >/dev/null 2>&1
 chk "quoted counter-example: still green" "$?" "0"
 
+# 8c. Recurring defect classes (audit 5.14.0, pattern 4): a skill-relative
+#     assets/ path in an action, a made-up $VAR path, an unguarded action on
+#     another plugin's skill.
+fresh
+printf -- '\n5. Write it from `assets/plan-template.md`.\n' >> "$T/r/plugins/maestro-dev/skills/01-plan/actions/03-plan.md"
+red "assets/ path relative to the skill dir inside an action" "relative to a directory an action never runs from"
+fresh
+printf -- '\nRun `python3 $MAESTRO_MOBILE/skills/x/assets/t.py`.\n' >> "$T/r/plugins/maestro-mobile/skills/01-rtl-i18n/SKILL.md"
+red "a path through a variable the platform never sets" "not a platform variable"
+fresh
+printf -- '\n9. Then invoke `maestro-vcs:01-pull-request` to open the PR.\n' >> "$T/r/plugins/maestro-pm/skills/02-specs/SKILL.md"
+red "unguarded action on another plugin skill" "no \"when installed\" fallback"
+fresh
+printf -- '\nNot for the PR itself (maestro-vcs:01-pull-request).\n' >> "$T/r/plugins/maestro-pm/skills/02-specs/SKILL.md"
+node scripts/validate.js "$T/r" >/dev/null 2>&1
+chk "a mere mention of another plugin skill stays green" "$?" "0"
+
 # 9. Promising opus without naming an agent that is pinned to opus.
 fresh
 printf -- '\nEscalate to opus when the analysis is unsure.\n' >> "$T/r/plugins/maestro-core/skills/01-memory/SKILL.md"

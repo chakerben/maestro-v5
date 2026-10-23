@@ -413,6 +413,58 @@ console.log('▶ Mirrored assets');
   }
 }
 
+// ── Recurring defect classes (5.14.0 audit, cross-cutting pattern 4) ──────
+// Each one was fixed by hand twice (5.10, 5.14) where the audit pointed and
+// left standing elsewhere. A rule per class is cheaper than a third audit.
+console.log('▶ Plugin-cache paths & cross-plugin guards');
+{
+  const PLUGIN_NAMES = marketplace.plugins.map((e) => e.name);
+  let n = 0;
+  for (const { name, dir } of pluginDirs) {
+    walk(dir, (p, fname) => {
+      if (!fname.endsWith('.md')) return;
+      const txt = read(p);
+      const inActions = /[\\/]actions[\\/]/.test(p);
+      // (a) `assets/x` or `references/x` written from an actions/ file resolves
+      //     to actions/assets — absent. Only ${CLAUDE_PLUGIN_ROOT}/… is real
+      //     from the project cwd (AUDIT-5.10 #1, AUDIT-5.14 4.4, 5.1, 5.19).
+      if (inActions) {
+        for (const m of txt.matchAll(/(^|[^\w/$}.-])(assets|references)\/[A-Za-z0-9._-]+/g)) {
+          const before = txt.slice(Math.max(0, m.index - 40), m.index);
+          if (/CLAUDE_PLUGIN_ROOT\}\/(skills\/[^\s`]*)?$/.test(before)) continue;
+          fail(`${rel(p)}: "${m[0].trim().replace(/^\`/, '')}" is relative to a directory an action never runs from — use \${CLAUDE_PLUGIN_ROOT}/skills/<skill>/${m[2]}/… (or \${CLAUDE_PLUGIN_ROOT}/${m[2]}/… for the plugin's own)`); n++;
+        }
+      }
+      // (b) `$VAR/…` paths: only the platform's variables exist in the cache.
+      for (const m of txt.matchAll(/\$\{?([A-Z][A-Z0-9_]+)\}?\/skills\//g)) {
+        if (!['CLAUDE_PLUGIN_ROOT', 'CLAUDE_PLUGIN_DATA', 'CLAUDE_PROJECT_DIR'].includes(m[1])) {
+          fail(`${rel(p)}: $${m[1]} is not a platform variable — a reader has no way to set it (use \${CLAUDE_PLUGIN_ROOT})`); n++;
+        }
+      }
+      // (c) another plugin's skill named without "installed" in the same
+      //     paragraph — PHILOSOPHY 7b: plugins stand alone, the fallback is
+      //     written where the reference is. References files are exempt
+      //     (routing.md, model-policy.md name every skill by design).
+      if (/[\\/]references[\\/]/.test(p) || /[\\/]commands[\\/]/.test(p)) return;
+      // Only an ACTION on another plugin's skill needs a fallback: invoke,
+      // hand off, delegate, run, route, dispatch. A mention ("not for X",
+      // "lives in X", "shared with X"), the frontmatter description, and a
+      // fenced block (a snippet written into the user's files) are exempt.
+      const body = txt.replace(/^---\n[\s\S]*?\n---/, '').replace(/```[\s\S]*?```/g, '');
+      for (const para of body.split(/\n\s*\n/)) {
+        for (const m of para.matchAll(/\b(maestro-[a-z]+):\d{2}-[a-z0-9-]+/g)) {
+          if (m[1] === name || !PLUGIN_NAMES.includes(m[1])) continue;
+          if (/\binstalled\b/i.test(para)) continue;
+          const sentence = para.slice(Math.max(0, para.lastIndexOf('.', m.index)), m.index + 120);
+          if (!/\b(invoke|hand(s|ed)? off|delegate|run|route|dispatch|go(es)? to|→)/i.test(sentence)) continue;
+          fail(`${rel(p)}: acts on ${m[0]} with no "when installed" fallback in the same paragraph (rule 7b)`); n++;
+        }
+      }
+    });
+  }
+  if (!n) ok('no skill-relative asset path in an action, no foreign $VAR path, every cross-plugin skill reference is guarded');
+}
+
 console.log('▶ Router references');
 {
   const knownAgents = new Set();
