@@ -14,7 +14,9 @@
  * The ENFORCED layer is the platform's `permissions.deny` in settings.json
  * (Philosophy rule #8 — never rebuild what Anthropic maintains), written by
  * maestro-core:00-onboard (04-scaffold) and checked by 04-doctor. This guard
- * is the belt; that is the braces.
+ * is the belt; that is the braces — except for rule 3 below (curl|sh): a
+ * deny rule cannot contain a pipe (the platform matches per subcommand), so
+ * for piped remote execution this accident guard is the only layer.
  *
  * Quoted strings: rules 1–3 (rm / curl|sh / chmod) are matched on a copy of
  * the command whose quoted strings are blanked, so `git commit -m "fix: chmod

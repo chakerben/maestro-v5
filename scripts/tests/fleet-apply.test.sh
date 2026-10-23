@@ -7,7 +7,7 @@ pass=0; fail=0
 check() { if eval "$2"; then pass=$((pass+1)); else fail=$((fail+1)); echo "  ❌ $1"; fi; }
 T=$(mktemp -d); export HOME="$T/home"; mkdir -p "$HOME"
 mkdir -p "$T/p1/.claude" "$T/p2/.claude" "$T/none/.claude" "$T/.maestro-v4-backup-x/.claude" "$T/.worktrees/p1/feat-x/.claude"
-printf '{"enabledPlugins":{"maestro-core@maestro":true},"permissions":{"deny":["Bash(rm -rf /)"],"allow":["Read"]},"model":"opus","other":1}\n' > "$T/p1/.claude/settings.json"
+printf '{"enabledPlugins":{"maestro-core@maestro":true},"permissions":{"deny":["Bash(rm -rf /)","Bash(curl * | bash)"],"allow":["Read"]},"model":"opus","other":1}\n' > "$T/p1/.claude/settings.json"
 printf '{"enabledPlugins":{"maestro-dev@maestro":true}}\n' > "$T/p2/.claude/settings.local.json"
 printf '{"enabledPlugins":{"maestro-core@maestro":true}}\n' > "$T/.worktrees/p1/feat-x/.claude/settings.json"
 printf '{}\n' > "$T/none/.claude/settings.json"
@@ -17,8 +17,9 @@ check "list finds p1, p2 and the gwt worktree only" '[ "$(echo "$L" | grep -c "/
 PROJECTS_ROOT="$T" bash scripts/fleet-apply.sh --settings --dry-run --all >/dev/null
 check "dry-run writes nothing" '! [ -f "$T/p2/.claude/settings.json" ] && [ "$(grep -c "rm -rf" "$T/p1/.claude/settings.json")" = 1 ]'
 O=$(PROJECTS_ROOT="$T" bash scripts/fleet-apply.sh --settings --all)
-check "p1 keeps model opus and other keys" 'python3 -c "import json;d=json.load(open(\"$T/p1/.claude/settings.json\"));assert d[\"model\"]==\"opus\" and d[\"other\"]==1 and d[\"permissions\"][\"allow\"]==[\"Read\"] and len(d[\"permissions\"][\"deny\"])==12"'
-check "p2 gets model sonnet + 12 deny" 'python3 -c "import json;d=json.load(open(\"$T/p2/.claude/settings.json\"));assert d[\"model\"]==\"sonnet\" and len(d[\"permissions\"][\"deny\"])==12"'
+check "p1 dead pipe rule removed" 'python3 -c "import json;d=json.load(open(\"$T/p1/.claude/settings.json\"));assert \"Bash(curl * | bash)\" not in d[\"permissions\"][\"deny\"]"'
+check "p1 keeps model opus and other keys" 'python3 -c "import json;d=json.load(open(\"$T/p1/.claude/settings.json\"));assert d[\"model\"]==\"opus\" and d[\"other\"]==1 and d[\"permissions\"][\"allow\"]==[\"Read\"] and len(d[\"permissions\"][\"deny\"])==10"'
+check "p2 gets model sonnet + 10 deny" 'python3 -c "import json;d=json.load(open(\"$T/p2/.claude/settings.json\"));assert d[\"model\"]==\"sonnet\" and len(d[\"permissions\"][\"deny\"])==10"'
 check "model kept is reported" 'echo "$O" | grep -q "model kept"'
 B1=$(cat "$T/p1/.claude/settings.json" "$T/p2/.claude/settings.json")
 O2=$(PROJECTS_ROOT="$T" bash scripts/fleet-apply.sh --settings --all)

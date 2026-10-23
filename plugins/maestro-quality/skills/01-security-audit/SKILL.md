@@ -3,6 +3,7 @@ name: 01-security-audit
 description: Deep on-demand security audit of the codebase or a scope — auth flows, injection surfaces, secrets handling, dependency risks, OWASP-aligned. Use for a periodic audit, before a release, or when touching sensitive surfaces. Real-time diff review is the official security-guidance plugin's job, not this one.
 argument-hint: "[scope path]"
 allowed-tools: Read, Grep, Glob, Bash
+disallowed-tools: Write, Edit, NotebookEdit   # enforced: an audit never edits (allowed-tools alone only pre-approves)
 model: opus
 effort: high
 ---

@@ -61,7 +61,8 @@ effort: medium
 
 ## Test
 
-- `grep -r "type: *'chars'"` finds nothing on components rendered under an
-  `ar` locale.
+- `grep -rE "type: *['\"][^'\"]*chars"` finds nothing on components rendered
+  under an `ar` locale (catches `'chars'`, `"chars"`, `'words,chars'`).
 - Every timeline has a `matchMedia` reduced-motion branch.
-- LCP measured before/after and reported; no layout property animated.
+- LCP measured before/after (Lighthouse, or `web-vitals` in the console) and
+  reported with the tool named; no layout property animated.

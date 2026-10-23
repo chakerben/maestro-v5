@@ -69,7 +69,9 @@ the changed paths; `paranoid` the full suite.
   `assets/secret-patterns.md`); it ran above before you read this line, and it
   can never be skipped. If it was staged after invocation, re-run it:
   `bash "${CLAUDE_PLUGIN_ROOT}/skills/00-commit/scripts/secret-scan.sh" cached`.
-- Delegate the raw git mechanics to the official commit-commands plugin when
-  installed; this skill owns the gate and the message.
+- This skill owns the gate, the message and the `git commit` call. The
+  official commit-commands plugin composes its own message and
+  `/commit-push-pr` pushes — neither is delegated to; it stays installed for
+  the user's own direct use.
 - The working directory may be shared with another session. Commit by paths,
   never `-a`, and put branch work in a worktree — `maestro-vcs:03-worktree`.

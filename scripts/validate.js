@@ -445,7 +445,7 @@ console.log('▶ Router references');
 console.log('▶ Frontmatter keys');
 {
   // Documented at https://code.claude.com/docs/en/skills (checked 2026-09-19).
-  const SKILL_KEYS = new Set(['name', 'description', 'argument-hint', 'arguments', 'allowed-tools', 'disallowed-tools', 'disable-model-invocation', 'user-invocable', 'paths', 'model', 'effort', 'context', 'agent', 'background', 'shell', 'hooks', 'when_to_use', 'license', 'compatibility', 'metadata', 'version']);
+  const SKILL_KEYS = new Set(['name', 'description', 'argument-hint', 'arguments', 'allowed-tools', 'disallowed-tools', 'disable-model-invocation', 'user-invocable', 'paths', 'model', 'effort', 'context', 'agent', 'background', 'shell', 'hooks', 'when_to_use', 'license', 'compatibility', 'metadata']);
   // Documented at https://code.claude.com/docs/en/sub-agents (checked 2026-09-19); `role` is Maestro's own key.
   const AGENT_KEYS = new Set(['name', 'description', 'model', 'tools', 'disallowedTools', 'maxTurns', 'skills', 'role', 'permissionMode', 'color', 'hooks', 'effort', 'mcpServers', 'memory', 'background', 'omitClaudeMd', 'isolation', 'initialPrompt', 'experimental']);
   let warned = 0;

@@ -37,7 +37,7 @@ quoted errors, and security warnings.
 ## Test
 
 - After `lite|full|ultra`, the next three responses contain no filler word
-  from the Drop list and every code block / quoted error is byte-identical to
-  what it would have been in normal mode.
+  from the Drop list and every code block / quoted error is reproduced
+  verbatim from its source or tool output — no edit, no elision inside it.
 - After `stop`, the following response is normal prose again.
 - A security warning during condense mode was printed in full, not condensed.

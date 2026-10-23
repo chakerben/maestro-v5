@@ -9,7 +9,9 @@
 #   --settings   déterministe, sans LLM : merge les entrées permissions.deny
 #                canoniques et "model": "sonnet" dans .claude/settings.json
 #                (idempotent, ne remplace jamais une valeur existante).
-#   --doctor     `claude -p "/maestro-core:04-doctor check"` en lecture seule,
+#   --doctor     `claude -p "/maestro-core:04-doctor check"` — le skill
+#                n'écrit rien par contrat, mais Bash lui est ouvert pour ses
+#                injections, donc "lecture seule" est instruit, pas enforcé ;
 #                rapport par projet dans le log.
 #   --scaffold   `claude -p "/maestro-core:00-onboard scaffold"` (crée
 #                maestro_docs/, le bloc CLAUDE.md, settings) — écrit des
@@ -152,10 +154,14 @@ apply_settings() {
 import json, os, sys
 proj, dry = sys.argv[1], sys.argv[2] == "1"
 p = os.path.join(proj, ".claude", "settings.json")
+# Same list as 00-onboard 04-scaffold 4b. No rule with a pipe: the platform
+# matches deny rules per subcommand after splitting at | && ; so such a rule
+# never fires (audit 5.14.0 1.2) — bash-guard covers curl|sh as an accident guard.
 DENY = ["Bash(rm -rf /)", "Bash(rm -rf /*)", "Bash(rm -rf ~)", "Bash(rm -rf ~/*)",
-        "Bash(rm -rf $HOME)", "Bash(curl * | bash)", "Bash(curl * | sh)",
-        "Bash(wget * | bash)", "Bash(wget * | sh)", "Bash(git push --force*)",
-        "Bash(git push -f*)", "Agent(model:*)"]
+        "Bash(rm -rf $HOME)", "Bash(git push --force)", "Bash(git push --force *)",
+        "Bash(git push -f)", "Bash(git push -f *)", "Agent(model:*)"]
+STALE = ["Bash(curl * | bash)", "Bash(curl * | sh)", "Bash(wget * | bash)",
+         "Bash(wget * | sh)", "Bash(git push --force*)", "Bash(git push -f*)"]
 try:
     raw = open(p).read() if os.path.exists(p) else "{}"
     d = json.loads(raw) if raw.strip() else {}
@@ -173,6 +179,9 @@ if not isinstance(deny, list):
 missing = [x for x in DENY if x not in deny]
 if missing:
     deny.extend(missing); changes.append(f"permissions.deny +{len(missing)}")
+stale = [x for x in deny if x in STALE]
+if stale:
+    deny[:] = [x for x in deny if x not in STALE]; changes.append(f"permissions.deny -{len(stale)} dead rule(s)")
 note = ""
 if "model" not in d:
     d["model"] = "sonnet"; changes.append('model=sonnet')

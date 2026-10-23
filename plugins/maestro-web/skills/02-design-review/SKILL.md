@@ -3,6 +3,7 @@ name: 02-design-review
 description: Review a screen or component against Maestro UX standards, RTL readiness, and visual quality — from code, a screenshot, or a live URL. Use before shipping UI or when a screen feels off. Produces a scored findings report. Not for building UI (that's implement + frontend-design).
 argument-hint: "<path, screenshot, or URL>"
 allowed-tools: Read, Grep, Glob, Bash
+disallowed-tools: Write, Edit, NotebookEdit   # enforced: an audit never edits (allowed-tools alone only pre-approves)
 model: fable
 effort: high
 ---
@@ -28,10 +29,16 @@ Adopt the senior product designer posture. Judge, don't rebuild.
    centered-everything, gradient soup) — align with the frontend-design
    plugin's direction when installed.
 6. Report: findings by severity, each with evidence (line or region) and the
-   concrete fix. Score /10 per pass + overall. Criticals → `maestro-pm:03-ticket`
-   when installed, else list them in the review output.
+   concrete fix. Score each pass /10 with the rubric in
+   `${CLAUDE_PLUGIN_ROOT}/skills/02-design-review/assets/rubric.md` (fixed
+   deductions, so two runs on the same screen give the same number); overall
+   = the lowest pass, not the mean — one unusable state sinks the screen.
+   Criticals → `maestro-pm:03-ticket` when installed, else list them in the
+   review output.
 
 ## Test
 
 - Every finding is actionable (a developer could fix it without asking what you meant).
 - RTL pass ran whenever an `ar` locale exists.
+- Every score cites the rubric lines it deducted; the same screen reviewed
+  twice gets the same scores.

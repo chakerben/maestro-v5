@@ -6,8 +6,9 @@
  * block; every agent dispatch pays its preloaded skills. Those numbers only
  * ever grow unless something says no. This says no.
  *
- * Budgets are in characters (deterministic; ≈ chars/3.6 tokens for this
- * repo's EN/FR/AR mix). Exit 1 on any breach; prints the bill otherwise.
+ * Budgets are in characters (deterministic). The printed token figures use
+ * chars/3.6, an ENGLISH estimate: Arabic tokenises at 1–2 chars/token, so
+ * AR templates cost 2–3× what the figure says — the char ceilings still hold. Exit 1 on any breach; prints the bill otherwise.
  */
 'use strict';
 const fs = require('fs');

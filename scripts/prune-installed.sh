@@ -20,7 +20,7 @@ F="$HOME/.claude/plugins/installed_plugins.json"
 [ -f "$F" ] || { echo "❌ $F introuvable"; exit 1; }
 # Le CLI peut tourner comme binaire `claude`, comme script `…/bin/claude`, ou
 # comme `node …/claude` (installation npm) : les trois réécrivent ce fichier.
-if pgrep -x claude >/dev/null 2>&1 || pgrep -f '(^|/)claude( |$)' >/dev/null 2>&1 || pgrep -f 'node.*claude' >/dev/null 2>&1; then
+if pgrep -x claude >/dev/null 2>&1 || pgrep -f '(^|/)claude( |$)' >/dev/null 2>&1 || pgrep -f '(^|/)node .*(^|/)claude( |$)' >/dev/null 2>&1; then
   echo "❌ une session claude tourne — ferme-la d'abord (le CLI réécrit ce fichier)"; exit 1
 fi
 python3 - "$F" "$APPLY" <<'PY'

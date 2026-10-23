@@ -3,6 +3,7 @@ name: 02-perf-audit
 description: Performance audit of a scope — DB query patterns, N+1, bundle weight, render behavior, caching. Use when something is slow, before scaling, or as a periodic pulse. Measures before recommending. Not for micro-optimizing readable code.
 argument-hint: "[scope path]"
 allowed-tools: Read, Grep, Glob, Bash
+disallowed-tools: Write, Edit, NotebookEdit   # enforced: an audit never edits (allowed-tools alone only pre-approves)
 model: fable
 effort: high
 ---
@@ -15,10 +16,11 @@ labeled "hypothesis".
 
 ## Process
 
-1. **Data layer.** Prisma queries in the scope: missing `select` (over-fetch),
-   loops containing queries (N+1 — propose `include`/batched variants),
-   missing indexes for frequent `where`/`orderBy` (check schema), unbounded
-   `findMany` without pagination.
+1. **Data layer.** Queries in the scope — Prisma, raw SQL, Firestore/Dart,
+   Supabase: over-fetch (missing `select` / field mask), loops containing
+   queries (N+1 — propose `include`, batched reads, `whereIn`), missing
+   indexes for frequent `where`/`orderBy` (schema, or Firestore composite
+   index), unbounded list reads without pagination / `limit`.
 2. **Server.** Route handlers doing serial awaits that could be `Promise.all`,
    missing caching (`revalidate`, `unstable_cache`, HTTP cache headers),
    heavyweight work in request path that belongs in a queue.

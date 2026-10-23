@@ -65,10 +65,18 @@ commiter par chemins. <port de dev à décaler / services partagés du projet>
 
 ```
 Bash(rm -rf /)        Bash(rm -rf /*)       Bash(rm -rf ~)      Bash(rm -rf ~/*)
-Bash(rm -rf $HOME)    Bash(curl * | bash)   Bash(curl * | sh)
-Bash(wget * | bash)   Bash(wget * | sh)     Bash(git push --force*)  Bash(git push -f*)
+Bash(rm -rf $HOME)    Bash(git push --force)  Bash(git push --force *)
+Bash(git push -f)     Bash(git push -f *)
 Agent(model:*)
 ```
+
+   What is NOT in the list, and why: a rule with a pipe in it
+   (`Bash(curl * | bash)`) never matches — the platform splits a compound
+   command at `|`, `&&`, `;` and matches each subcommand on its own, so no
+   subcommand ever contains the pipe. Piping remote content into a shell is
+   bash-guard's job (rule 3 of `bash-guard.js`), and that layer is an
+   accident guard, not a boundary; say so when asked. `--force*` used to
+   match `--force-with-lease`, the form the framework recommends.
 
    `Agent(model:*)` is what makes the model ladder real: Claude Code resolves
    a subagent's model from the `model` parameter of the dispatch **before**
@@ -98,7 +106,7 @@ Agent(model:*)
   files and one `<maestro_routing>` block whose second line is the hook's
   `<!-- maestro-routing <hash> … -->` comment; each tag sits alone on its line.
 - `.gitignore` lists `.claude-md.maestro.lock` and `CLAUDE.md.*.tmp`.
-- `.claude/settings.json` parses, its `permissions.deny` contains all 12
+- `.claude/settings.json` parses, its `permissions.deny` contains all 10
   canonical entries, and every key/entry that was there before is still there.
 - `.claude/settings.json` `model` is `sonnet` when the user accepted 4c, or
   still its previous value when one existed — never replaced.
