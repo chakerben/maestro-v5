@@ -28,7 +28,7 @@ No other hook, ever. Not for quality. Not for convenience. Not "just this once".
 ### 2. Never typecheck, test, or format inside a hook
 - Formatting → the executor agent formats what it touches (agent instruction).
 - Typecheck → real-time via official LSP plugins; final gate at commit.
-- Tests → gates of `maestro-vcs:00-commit` at level `high` and above (phase commits included; the level table lives in `maestro-quality:00-quality-gate`, default `standard` = secrets + typecheck) and the `checker` agent at `maestro-dev:00-sdlc` step 04.
+- Tests → `maestro-check` (maestro-quality `bin/`), run by `maestro-vcs:00-commit` at every commit — phase commits included — and by the `checker` agent at `maestro-dev:00-sdlc` step 04. At the default level `standard` it runs typecheck, lint, rtl-lint, the architecture boundaries and the tests touching the changed paths; `high` adds the full suite and Lighthouse. The gate is a command with an exit code, never a sentence (rule #2d).
 
 ### 2b. What a skill must know, it computes
 A skill that depends on the repository's state (what is staged, the gate
@@ -37,6 +37,17 @@ injection at invocation — measured before the model reads the skill, never
 recalled or "checked" in prose. The secrets scan is the canonical case:
 `scripts/secret-scan.sh` runs before `00-commit` is read, and its verdict is
 in the context, not in a promise.
+
+### 2d. A quality claim is a command, or it is a wish
+"SOLID", "no bug", "RTL-correct", "performant" are not instructions a model
+can follow; they are verdicts a tool returns. Every standard this framework
+states must have a check behind it that exits non-zero — `maestro-check`
+holds them (typecheck, lint, `rtl-lint`, `dependency-cruiser` boundaries,
+tests, `font-metrics.py`, Lighthouse, audit) and prints one JSON verdict.
+A reviewer agent reads that verdict first and judges only what no tool can
+(intent, naming, the gap between the need and the result). A check whose
+tool is missing is reported `skipped` with its reason, never silently
+green: a skip is a gap the project chose, and the report says so.
 
 ### 2c. Context has a budget, and the budget is tested
 The skill index and the routing block are paid in every session; a

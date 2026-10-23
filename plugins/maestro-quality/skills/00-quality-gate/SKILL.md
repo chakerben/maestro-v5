@@ -18,35 +18,35 @@ Requested: `$ARGUMENTS` (first word = action, second = level)
 Owns `maestro_docs/gates.json`, the level contract below, and the on-demand
 gate run.
 
-## The levels (single source — `maestro-vcs:00-commit` applies this table)
+## The levels — executed by `maestro-check`, never by reading
 
-| Level | Checks, on the **staged** diff |
+The gate is a command: `maestro-check` (this plugin's `bin/`, on the Bash
+PATH while maestro-quality is enabled). It detects the stack and the runner,
+runs the level's checks on the staged diff and prints one JSON verdict; exit
+1 on any red. `maestro-check --list` prints the checks of the current level.
+
+| Level | Checks (each a command with an exit code) |
 |---|---|
-| `off` | secrets scan only (never disableable) |
-| `standard` | secrets + typecheck (the project's `typecheck` script; skipped with a note when absent — LSP covers real time) |
-| `high` | standard + `lint` script + tests touching the changed paths |
-| `paranoid` | high + the full test suite |
+| `off` | `secrets` only — never disableable, and **red when the scan cannot run** |
+| `standard` | secrets · `typecheck` · `lint` · `rtl` (rtl-lint, when an `ar` locale exists) · `boundaries` (dependency-cruiser) · `tests-related` (tests touching the changed paths) · `fonts` (Arabic metrics, mobile) |
+| `high` | standard + `tests-full` + `lighthouse` (web, when `lighthouserc` exists) |
+| `paranoid` | high + `audit` (dependency vulnerabilities) |
 
-Default when `gates.json` is absent: `standard`. Tests therefore run at
-every commit only from `high` — a project that wants them on every phase
-commit sets `high` (`set high`; the guidance below says when). Runner from
-the lockfile, never `--silent`.
+Default when `gates.json` is absent: `standard` — tests on the changed paths
+run at **every** commit, phase commits included. A check whose tool is
+absent is `skipped` with the reason in the verdict, never silently green;
+the skill reports every skip, because a skip is a gap the project chose.
 
 ## Actions (dispatch by argument)
 
-- `status` — print the current level and the row of the table above.
+- `status` — print the current level and `maestro-check --list`.
 - `set <level>` — validate the level (off|standard|high|paranoid), write
   `maestro_docs/gates.json`, explain what changes. Warn on `off`: "secrets
   scan still always runs at commit".
-- `run` — execute the current level's checks NOW, without committing: on
-  the staged diff when something is staged, else on the whole working tree
-  (say which). Useful before a review or as a health pulse. The secrets
-  scan lives in maestro-vcs: when it is installed, invoke
-  `maestro-vcs:00-commit` action 01 (`gate`) — its `!` injection runs
-  `secret-scan.sh` before the skill is read; when it is not installed, run
-  the typecheck/lint/tests of the level yourself and say plainly that the
-  secrets scan did NOT run (never report "clean" for a scan that never
-  happened).
+- `run` — `maestro-check --scope staged` when something is staged, else
+  `--scope all` (say which); print the verdict table and every `skipped`
+  reason. The secrets check is maestro-vcs' scan; without maestro-vcs the
+  verdict is red on `secrets` — report it as red, never as "clean".
 
 ## Rules
 
@@ -58,8 +58,6 @@ the lockfile, never `--silent`.
 
 - `set <level>` wrote `maestro_docs/gates.json` with exactly `{ "level": "<level>" }`
   and refused any value outside off|standard|high|paranoid.
-- `run` at level `off` still executed the secrets scan (via
-  maestro-vcs:00-commit) and printed its result — or stated that maestro-vcs
-  is not installed and the scan did not run.
-- `run` executed no check with `--silent`, and reported each command with its
-  exit code and duration.
+- `run` printed `maestro-check`'s JSON verdict; at level `off` the `secrets`
+  check is in it, red when maestro-vcs is absent.
+- Every `skipped` check appears in the report with its reason.

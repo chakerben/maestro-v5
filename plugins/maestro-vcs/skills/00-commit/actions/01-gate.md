@@ -21,19 +21,23 @@ Run the quality gate on the diff.
    invocation). If anything was staged since, re-run it. `RED` → the output
    already names file:line, pattern, masked match → stop. `ALLOWED` entries
    go verbatim into the commit body as `Gate-Allow:` lines (action 02).
-3. Read `maestro_docs/gates.json` (default `standard`). Run the level's
-   checks with the lockfile-detected runner:
-   - typecheck: the project's `typecheck` script if present (skip with a note
-     if absent — LSP already covered real-time)
-   - lint: `high` and above → the `lint` script if present
-   - tests: `high` → tests touching changed paths; `paranoid` → full suite
-4. Log each check: command, exit code, duration. Any red → print the failing
-   output tail (20 lines max), stop with "gate RED — fix or 'bypass gate: <reason>'".
-5. All green → report the checklist and proceed.
+3. Run the level's checks: `maestro-check --scope staged` (maestro-quality's
+   `bin/`, on the PATH when that plugin is enabled — level from
+   `maestro_docs/gates.json`, default `standard`: typecheck, lint, rtl,
+   boundaries, tests on the changed paths, fonts). Read its JSON verdict,
+   not its prose. Without maestro-quality: run the project's `typecheck`
+   script yourself and say that lint/rtl/tests did not run.
+4. Report the verdict table (name · status · seconds) and every `skipped`
+   reason. Any `red` → print that check's output tail, stop with
+   "gate RED — fix or 'bypass gate: <reason>'".
+5. All green → proceed.
 
 ## Test
 
 - A diff containing `sk_live_4eC39HqLyjWDarjtT1zdp7dc` is blocked even at level `off`.
+- The report quotes `maestro-check`'s verdict (or says maestro-quality is
+  absent and which checks therefore did not run); no check was declared
+  green without a command behind it.
 - With another session's staged rename in the tree, the commit carries only the
   paths this session touched.
 - No check ran with `--silent`.

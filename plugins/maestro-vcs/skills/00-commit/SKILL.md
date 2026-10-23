@@ -49,10 +49,10 @@ Read `maestro_docs/gates.json` (fallback: level `standard`):
 ```
 
 The level contract (what each of `off | standard | high | paranoid` runs)
-is owned by `maestro-quality:00-quality-gate` — one table, read it there
-when installed. Without maestro-quality the same four rows apply:
-secrets always; `standard` adds typecheck; `high` adds lint and tests on
-the changed paths; `paranoid` the full suite.
+is owned by `maestro-quality:00-quality-gate` and **executed** by its
+`maestro-check` command — one JSON verdict, exit 1 on red. Without
+maestro-quality only the secrets scan and the project's `typecheck` script
+run here, and the report says what did not.
 
 ## Transversal rules
 

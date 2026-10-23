@@ -13,8 +13,10 @@ Independent verdict.
    (opus, adds the failure-mode pass); otherwise `checker` (fable). Say in one
    line which and why. Never two opus dispatches at once (auto mode, across
    projects).
-2. Spawn that agent with: spec.md, plan.md, the diff, and the expert
-   posture. Fresh context — it must not see the build conversation.
+2. Spawn that agent with: spec.md, plan.md, the diff, the expert posture,
+   and the current `maestro-check --scope branch --json-only` verdict
+   (maestro-quality, when installed) so the review starts from the tools'
+   facts. Fresh context — it must not see the build conversation.
    If the project has an `ar` locale (`messages/ar*`, `**/ar.json`, `app_ar*.arb` / `intl_ar*.arb`),
    also spawn `m-i18n-checker` in parallel, on the same diff.
 3. The checker RETURNS a structured verdict (verdict, findings, score,

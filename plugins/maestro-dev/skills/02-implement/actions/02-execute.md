@@ -15,8 +15,11 @@ refused by 01):
    half-done phase, the `git status --short` and `## Log` from 01, so it
    continues the partial work instead of starting over. The executor
    builds, formats what it touches, and fixes LSP diagnostics as it goes.
-3. **Assert.** Run the phase's validation commands. Log the attempt
-   (timestamp, result) in the phase's `## Log` and increment `attempts`.
+3. **Assert.** Run the phase's validation commands, then
+   `maestro-check --scope staged --json-only` after staging (maestro-quality,
+   when installed) — the phase is green only when both are. Log the attempt
+   (timestamp, result, red check names) in the phase's `## Log` and
+   increment `attempts`.
    - Red → repair loop (new executor dispatch WITH the failure output);
      at `attempts: 3` set `status: blocked` with the last failure and stop.
    - Green → write `status: done` in the phase file, **stage** the phase's
