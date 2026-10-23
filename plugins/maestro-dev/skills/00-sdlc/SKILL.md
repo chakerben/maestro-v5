@@ -29,12 +29,17 @@ its file in `actions/`.
 ## Modes
 
 - **interactive** (default): pause for approval after 01, 02, and 04.
-- **auto**: no pauses. Decide alone using protocols rule 4
+- **auto**: no pauses, and **no narrated next step**. The turn ends only at
+  05's final report or at a hard stop — never after writing a file and
+  saying what comes next. The first real run (5.15.0 pilot) wrote the plan,
+  announced "Next: run m-devil-advocate, then phase 1" and ended; that is a
+  failed run, not a paused one. After every action, the very next tool call
+  is the next action's first step. Decide alone using protocols rule 4
   (`${CLAUDE_PLUGIN_ROOT}/skills/06-protocols/SKILL.md`). HARD STOPS that
   always break auto: a `blocked` status, a gate still red after 3 repair
   attempts, a devil-advocate verdict of `reconsider` (02), any payment or
-  destructive action, any credential need. On a hard stop: write the state into the plan frontmatter,
-  summarize what a human must decide, end the turn.
+  destructive action, any credential need. On a hard stop: write the state
+  into the plan frontmatter, summarize what a human must decide, end the turn.
 
 ## Transversal rules
 
@@ -57,3 +62,5 @@ its file in `actions/`.
 - Never auto-branch onto the default branch; a feature branch is created in 03.
 - Resume support: if the folder already exists with a plan, read its statuses
   and continue from the first incomplete step — never restart from scratch.
+  A plan with every phase `pending` and no devil-advocate verdict recorded
+  resumes at 02 step 2 (the verdict), then 03.

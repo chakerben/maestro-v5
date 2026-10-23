@@ -8,6 +8,55 @@ framework rests on, ran the secrets gate on the code the framework mandates,
 and found `main` red. This section lists what this branch closes; the audit
 keeps the full table and the suggested order for what it does not.
 
+### The gate becomes a command (PHILOSOPHY rule 2d)
+
+Every quality promise of the framework was a sentence a model read. This
+release gives each one an exit code:
+
+- **`maestro-check`** (`maestro-quality/bin/`, on the Bash PATH while the
+  plugin is enabled) runs the gate level's checks on the staged diff and
+  prints one JSON verdict: secrets (red when the scan cannot run), typecheck,
+  lint, **`rtl-lint`**, **`boundaries`** (dependency-cruiser), tests on the
+  changed paths, Arabic font metrics — all at `standard`, so tests run at
+  every commit; `high` adds the full suite and Lighthouse, `paranoid` the
+  dependency audit. A missing tool is `skipped` with its reason, never
+  silently green. `00-commit`, `00-quality-gate`, `checker`,
+  `checker-critical` and the phase loop read the verdict instead of judging
+  in prose.
+- **`rtl-lint`**: the structural rules of `01-rtl-i18n` as a linter —
+  physical left/right (web and RN), Tailwind `ml-`/`text-left`, row-reverse
+  compensation, hardcoded `dir`, `letter-spacing ≠ 0`, bare plural after a
+  count, `EdgeInsets.only(left:)` & co; `// rtl-ok <reason>` exempts a line.
+- **Architecture the tool enforces**: `00-onboard` scaffold poses a
+  dependency-cruiser (node/Expo/Next) or `import_lint` (Flutter) config —
+  `domain/` pure and framework-free, `application/` never imports
+  `infrastructure/`, UI never imports adapters, no cycles — and
+  `m-architect` puts a layer in the config, not only in `tech-decisions.md`.
+- **Design**: `02-design-review` starts from `maestro-check`'s RTL findings,
+  refuses to score without an Arabic device/simulator screenshot, judges the
+  Saudi layer on it and hands the visual pass to `frontend-design` /
+  `impeccable`; a UI phase in an `ar` project validates on a stored Arabic
+  screenshot.
+- `context: fork` on the three audits; `model-policy.md` is one page;
+  `platform-watch.md` lists what Claude Code now does that Maestro used to,
+  and `04-doctor` files each open row as "retire ours".
+- **The first real `/sdlc` run happened** (ROADMAP prerequisite since 5.3):
+  `00-onboard` and `00-sdlc auto` on a throwaway Expo + Arabic project. What
+  it broke is fixed below under *Pilot*.
+
+### Pilot — what the first real run broke
+
+- `.claude/settings.json` is a platform-protected path: a skill cannot write
+  it headless. The deny list and session model are written by the human
+  with **`maestro-settings`** (one source, also used by `fleet-apply.sh`);
+  scaffold prints the one-liner, doctor reports the gap.
+- `bash-guard` blocked the scaffold's own `node -e` script because the JSON
+  it wrote contained the text `git push --force`; rule 7 now runs on the
+  blanked command.
+- `maestro-check`: `git ls-files | grep -q` under `pipefail` hid the `ar`
+  locale (SIGPIPE on 28 000 files); `--scope all` walked `node_modules`;
+  scaffold now adds the stack's build output to a `.gitignore` it creates.
+
 ### Fixed
 
 - **`main` was red** since 2026-10-16: `01-rtl-i18n/SKILL.md` over the

@@ -32,8 +32,8 @@ module.exports = {
     {
       name: 'ui-no-infrastructure',
       severity: 'error',
-      comment: 'Screens and components call use cases (application/), not Prisma/Firebase/HTTP adapters.',
-      from: { path: '(^|/)(ui|components|screens)/' },
+      comment: 'Screens and components — including Expo Router / Next app/ routes — call use cases (application/), not Prisma/Firebase/HTTP adapters. The one place that may import infrastructure to wire ports is the composition edge: composition/, di/, providers/, or a root layout (app/_layout.tsx, app/layout.tsx).',
+      from: { path: '(^|/)(ui|components|screens|app|features|pages)/', pathNot: '(^|/)(composition|di|providers)/|(^|/)app/(_layout|layout|providers)\\.[jt]sx?$' },
       to: { path: '(^|/)infrastructure/' },
     },
     { name: 'no-circular', severity: 'error', from: {}, to: { circular: true } },

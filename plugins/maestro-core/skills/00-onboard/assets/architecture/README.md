@@ -12,9 +12,11 @@ ui | app | components | presentation/   screens — call use cases, never adapte
 
 Allowed: `ui → application → domain`, `infrastructure → domain` (to implement
 a port). Forbidden, and red at commit: `domain → anything`, `application →
-infrastructure`, `ui → infrastructure`, any cycle. The wiring (which adapter
-satisfies which port) lives at the edge: `app/_layout.tsx`, `app/providers`,
-`infrastructure/di.ts`, `main.dart`.
+infrastructure`, `ui → infrastructure` — `app/` (Expo Router, Next) counts
+as UI — any cycle. The wiring (which adapter satisfies which port) lives at
+the composition edge, the only UI-side place allowed to import
+`infrastructure/`: `composition/`, `di/`, `providers/`, or the root layout
+(`app/_layout.tsx`, `app/layout.tsx`); `main.dart` on Flutter.
 
 Why files and not a rule in prose: a model writes `import { prisma } from
 '@/infrastructure/db'` inside a use case the first time it is convenient,
