@@ -15,7 +15,12 @@ refused by 01):
    half-done phase, the `git status --short` and `## Log` from 01, so it
    continues the partial work instead of starting over. The executor
    builds, formats what it touches, and fixes LSP diagnostics as it goes.
-3. **Assert.** Run the phase's validation commands, then
+3. **Assert.** A phase that touches UI in a project with an `ar` locale
+   validates on an Arabic device/simulator screenshot stored in the task
+   folder (`screens/phase-<n>-ar.png`; `xcrun simctl io booted screenshot`,
+   `adb exec-out screencap -p`, Playwright `locale: 'ar-SA'`) — Chrome does
+   not clip what the device clips, and a web prototype proves nothing for
+   RTL. Run the phase's validation commands, then
    `maestro-check --scope staged --json-only` after staging (maestro-quality,
    when installed) — the phase is green only when both are. Log the attempt
    (timestamp, result, red check names) in the phase's `## Log` and

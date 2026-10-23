@@ -35,7 +35,7 @@ status report (installed / already present / skipped).
 
 | Signal | Tool | How | Why it passed vetting |
 |---|---|---|---|
-| Frontend with visual ambition (ask) | Impeccable (`npx impeccable install`) | skill + commands only; **decline its PostToolUse design hook** | Best generic design-taste skill; no RTL knowledge — `maestro-mobile:01-rtl-i18n` and `maestro-web:02-design-review` layer Arabic on top |
+| Any project with UI | Impeccable (`npx impeccable install`) | skill + commands only; **decline its PostToolUse design hook** | The generic design taste Maestro does not write; `maestro-web:02-design-review`'s visual pass is Impeccable's (or `frontend-design`'s) verdict, Maestro keeps only the Arabic/KSA layer |
 | Looking for a niche skill | skills.sh CLI (`npx skills find <kw>`) | discovery only | Run `${CLAUDE_PLUGIN_ROOT}/references/third-party-vetting.md` on anything before `add` |
 
 Everything else from the 2026-09 tooling audit (`docs/TOOLING-AUDIT-2026-09.md` in the marketplace repo, not shipped in the plugin)

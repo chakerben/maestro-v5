@@ -21,18 +21,22 @@ occurrence.
 - R-A11Y-4 (−1): focus ring removed with no replacement; tap target < 44 px.
 - R-A11Y-5 (−1): motion with no `prefers-reduced-motion` branch.
 
-## RTL (R-RTL) — only when an `ar` locale exists
-- R-RTL-1 (−3): a physical property (`left`/`right`, `ml-`/`mr-`,
-  `text-align: left`) on a directional element.
+## RTL / KSA (R-RTL) — only when an `ar` locale exists; judged on the Arabic device screenshot
+- R-RTL-1 (−3): any `rtl-lint` finding left in the diff (physical property,
+  `letter-spacing`, bare plural, hardcoded `dir`) — `maestro-check` lists
+  them; one deduction for the set.
 - R-RTL-2 (−2): a directional icon that does not flip, or a non-directional
   one (logo, clock, play) that does.
-- R-RTL-3 (−2): `letter-spacing` ≠ 0 on Arabic text, or a Latin-only font
-  rendering Arabic.
-- R-RTL-4 (−1): mixed bidi text without isolation (`dir="auto"`, `<bdi>`,
-  phone/code not forced LTR).
-- R-RTL-5 (−1): count string without ICU plural.
+- R-RTL-3 (−3): Arabic glyphs clipped (ي dots, diacritics) or a Latin-only
+  font rendering Arabic — `font-metrics.py` says `CLIP` / `NO-ARABIC`.
+- R-RTL-4 (−1): mixed bidi text without isolation (`<bdi>`, `dir="auto"`,
+  phone/code/IBAN not LTR), or the riyal symbol after the amount.
+- R-RTL-5 (−1): numerals inconsistent with the recorded arab/latn decision,
+  or a date where the market expects Hijri and gets Gregorian only.
+- R-RTL-6 (−1): Arabic copy in the wrong register (machine-translated
+  phrasing, Latin punctuation) — `maestro-pm:04-writing`'s `ar.md`.
 
-## Visual (R-VISUAL)
+## Visual (R-VISUAL) — used only when neither `frontend-design` nor `impeccable` ran
 - R-VISUAL-1 (−2): more than one primary action per view.
 - R-VISUAL-2 (−2): spacing or type sizes off the project's scale (name the
   value and the scale).
