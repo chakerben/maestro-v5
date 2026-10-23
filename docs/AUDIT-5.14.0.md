@@ -13,6 +13,15 @@ Severity, as in AUDIT-5.10.0: **H** = cannot work as written, or unsafe, or a
 technical claim that would ship a bug; **M** = wrong or inconsistent; **L** =
 cosmetic. "Unverified" is said where it applies; nothing else is a guess.
 
+**Status (branch `audit/5.14.0-fixes`, 11 commits):** every H and M is
+closed; of the L items, 1.8 (`~/.claude/commands` undocumented location),
+2.4 (bash 3.2 `wait -n`, now documented), 2.6 (`gh run watch` before the
+tag) and 0.4 (the npm publish channel) are left as they are — the first two
+are notes, the last two are the maintainer's call. Still open by design: the
+first real `/sdlc auto` run (§6 pattern 6, §7 step 4) and an in-session check
+that the 10 deny rules match what they claim (1.2 is reasoned from the
+documented splitting, not executed).
+
 ## 0. State of `main`
 
 | # | Sev | Where | Finding | Evidence / fix |

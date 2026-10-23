@@ -59,13 +59,41 @@ keeps the full table and the suggested order for what it does not.
 - Plugin-cache paths (`assets/…` from `actions/`, `docs/…` from a skill) and
   unguarded cross-plugin references in quality, web, pm and brainstorm.
 
+- **Four `permissions.deny` rules were dead**: the platform splits a
+  compound command and matches deny rules per subcommand, so
+  `Bash(curl * | bash)` and its three siblings never fired. Removed (and
+  pruned from projects by `fleet-apply --settings`); bash-guard states it is
+  the only layer for piped remote execution. `--force*` also matched
+  `--force-with-lease`: four exact forms instead. The canonical list is 10.
+- The level table (`off | standard | high | paranoid`) had three
+  disagreeing copies; it is owned by `00-quality-gate` now.
+- Audit skills (`01-security-audit`, `02-perf-audit`, `02-design-review`)
+  carry `disallowed-tools: Write, Edit` — `allowed-tools` only pre-approves,
+  and their Tests claimed "no code modified" as if enforced.
+
+### Added
+
+- **`gwt` ships in `plugins/maestro-vcs/bin/`** — on the Bash PATH wherever
+  maestro-vcs is enabled, no install step, no hand-rolled fallback in
+  `03-worktree` (it never reproduced the slug, the copied files or the
+  local-ahead base). `scripts/gwt` is a shim for this repo's contributors.
+- `02-design-review/assets/rubric.md`: fixed deductions per pass, overall =
+  lowest pass, so two runs on one screen agree.
+- `validate.js` refuses three defect classes two audits had fixed by hand:
+  a skill-relative `assets/` path inside an action, a path through a
+  variable the platform never sets, and an action on another plugin's skill
+  with no "when installed" fallback (a mention stays legal). It caught one
+  more on the spot.
+
 ### Changed
 
 - `01-plan` resolves the feature folder itself and requires a validation
   *command* per phase; `04-debug` gains `needs-decision`; brainstorm's
   off-ramp no longer writes `dropped`; `ux-standards` no longer fires on Expo
   Router screens; `02-release` refuses to run on a marketplace repo;
-  `release.sh` logs to `mktemp`.
+  `release.sh` logs to `mktemp`; `02-gardener`'s skill-gap log reads the
+  evidence a session can read; `00-commit` no longer claims to delegate to
+  commit-commands; `install-shortcuts.sh` no longer writes `/auto` twice.
 
 ## 5.14.0 — the ي keeps its dots (2026-10-15)
 
