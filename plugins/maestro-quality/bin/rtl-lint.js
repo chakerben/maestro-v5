@@ -64,29 +64,41 @@ const RULES = [
 ];
 const ALLOW = new RegExp('(//|#|/\\*|<!--)\\s*rtl-ok(\\s|$|\\*/|-->)');
 
-let findings = 0, allowed = 0;
+let findings = 0, allowed = 0, unreadable = 0;
+// Blank /* … */ block comments (same length, newlines kept) so a commented-out
+// style never fires and line numbers stay right.
+function blankBlockComments(src) {
+  return src.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '));
+}
+const DART_OPENER = /\b(EdgeInsets\.(only|fromLTRB)|Positioned|BorderRadius\.only)\s*\(/;
 for (const file of process.argv.slice(2)) {
   let txt;
-  try { txt = fs.readFileSync(file, 'utf8'); } catch { continue; }
-  const lines = txt.split('\n');
+  try { txt = fs.readFileSync(file, 'utf8'); } catch (e) { unreadable++; console.log('unreadable: ' + file + ' (' + (e.code || e.message) + ')'); continue; }
+  const lines = blankBlockComments(txt).split('\n');
+  const raw = txt.split('\n'); // markers (rtl-ok, exemptions) are read on the raw line, comments included
   const applicable = RULES.filter((r) => r.ext.test(file));
   if (!applicable.length) continue;
+  const isDart = /\.dart$/.test(file);
   lines.forEach((line, i) => {
-    // comments and imports are not styles
     // a trailing // comment is not code (unless it carries the rtl-ok marker); an
     // import line / re-export line is a path, not a style — a component body is code
     const code = line.replace(/(^|[^:])\/\/(?!.*rtl-ok).*$/, '$1').replace(/^\s*(import\b.*\bfrom\b|import\s+['"]|export\s*(\*|\{[^}]*\})\s*from\b).*$/, '');
     if (!code.trim()) return;
+    // Dart: `dart format` splits EdgeInsets.only(\n  left: 8,\n) over lines — the
+    // Dart rule reads a window from an opener line to its closing paren (≤ 8 lines)
+    let dartSubject = null;
+    if (isDart && DART_OPENER.test(code) && !/\)/.test(code)) dartSubject = lines.slice(i, i + 8).join(' ').split(')')[0] + ')';
     const loc = path.relative(process.cwd(), file) + ':' + (i + 1);
-    const isAllowed = ALLOW.test(line);
+    const isAllowed = ALLOW.test(raw[i] || '');
     for (const r of applicable) {
-      if (!r.re.test(code)) continue;
-      if (r.exempt && r.exempt.test(line)) continue;
+      const subject = (r.id === 'RTL-DART' && dartSubject) ? dartSubject : code;
+      if (!r.re.test(subject)) continue;
+      if (r.exempt && r.exempt.test(raw[i] || '')) continue;
       if (isAllowed) { allowed++; console.log('  ALLOWED ' + loc + '  ' + r.id + '  ' + line.trim().slice(0, 100)); continue; }
       findings++;
       console.log(loc + '  ' + r.id + '  ' + line.trim().slice(0, 100) + '  ->  ' + r.fix);
     }
   });
 }
-console.log('rtl-lint: ' + findings + ' finding(s), ' + allowed + ' allowed');
-process.exit(findings ? 1 : 0);
+console.log('rtl-lint: ' + findings + ' finding(s), ' + allowed + ' allowed' + (unreadable ? ', ' + unreadable + ' unreadable' : ''));
+process.exit(findings || unreadable ? 1 : 0);

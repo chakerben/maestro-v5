@@ -30,7 +30,11 @@ Arabic-first screen with Hijri + Gregorian dates and RTL-safe styles.
   saved *before* the ledger claim (two rows on overlapping runs), and
   `"10٬5"` parsed as 105 SAR. Phase 5 fixed them; review 2: **`ship` 9/10**.
 - 37 tests green, typecheck clean, `depcruise` clean, `rtl-lint` zero
-  findings on the screen, `maestro-check` green at every commit.
+  findings on the screen; `maestro-check` exit 0 at every commit — with the
+  caveat that until break 7 was fixed (phase 5) its `rtl`/`tests-related`
+  checks were *skipped* on the branch scope, and the project's `lint`
+  script is a no-op. The green of phases 1–4 was partly vacuous; the final
+  branch verdict (6 green, base `master`) is not.
 - A final report that lists its residual risks (crash window before the
   ledger, UTC month math vs Riyadh, no worker host, digits decision, Hermes
   unverified, screen never run on a device) **and its own pipeline breaks**.

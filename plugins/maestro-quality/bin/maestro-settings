@@ -30,7 +30,7 @@ DENY = ["Bash(rm -rf /)", "Bash(rm -rf /*)", "Bash(rm -rf ~)", "Bash(rm -rf ~/*)
 STALE = ["Bash(curl * | bash)", "Bash(curl * | sh)", "Bash(wget * | bash)",
          "Bash(wget * | sh)"]
 try:
-    raw = open(p).read() if os.path.exists(p) else "{}"
+    raw = open(p, encoding="utf-8-sig").read() if os.path.exists(p) else "{}"
     d = json.loads(raw) if raw.strip() else {}
 except Exception as e:
     print(f"MALFORMED {p}: {e}"); sys.exit(3)
@@ -60,7 +60,7 @@ if dry:
     print("WOULD " + ", ".join(changes) + note); sys.exit(0)
 os.makedirs(os.path.dirname(p), exist_ok=True)
 tmp = p + ".tmp"
-with open(tmp, "w") as f:
+with open(tmp, "w", encoding="utf-8") as f:
     json.dump(d, f, indent=2, ensure_ascii=False); f.write("\n")
 os.replace(tmp, p)
 print("CHANGED " + ", ".join(changes) + note)

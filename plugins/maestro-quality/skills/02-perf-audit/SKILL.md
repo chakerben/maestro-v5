@@ -5,6 +5,7 @@ argument-hint: "[scope path]"
 allowed-tools: Read, Grep, Glob, Bash
 disallowed-tools: Write, Edit, NotebookEdit   # enforced: an audit never edits (allowed-tools alone only pre-approves)
 context: fork   # the audit reads a lot and returns a report; the session keeps the report, not the reading
+background: false   # fork defaults to background — the caller needs the report in this turn
 model: fable
 effort: high
 ---

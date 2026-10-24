@@ -18,7 +18,7 @@ module.exports = {
     {
       name: 'domain-no-framework',
       severity: 'error',
-      comment: 'domain/ does not import a framework or an adapter package (Prisma, Firebase, React, Expo, Next, Clerk, axios…).',
+      comment: 'domain/ does not import a framework or an adapter package (Prisma, Firebase, React, Expo, Next, Clerk, axios…). Pure libraries are allowed on purpose — zod/valibot as value-object schemas, date-fns, decimal.js: no I/O, no runtime of their own. Add a package here the day it starts doing I/O.',
       from: { path: '(^|/)domain/' },
       to: { path: 'node_modules/(@prisma|prisma|firebase|@firebase|@react-native-firebase|react|react-dom|react-native|expo|@expo|next|@clerk|axios|@tanstack|zustand|@supabase|@stripe|stripe)/' },
     },
@@ -33,7 +33,8 @@ module.exports = {
       name: 'ui-no-infrastructure',
       severity: 'error',
       comment: 'Screens and components — including Expo Router / Next app/ routes — call use cases (application/), not Prisma/Firebase/HTTP adapters. The one place that may import infrastructure to wire ports is the composition edge: composition/, di/, providers/, or a root layout (app/_layout.tsx, app/layout.tsx).',
-      from: { path: '(^|/)(ui|components|screens|app|features|pages)/', pathNot: '(^|/)(composition|di|providers)/|(^|/)app/(_layout|layout|providers)\\.[jt]sx?$' },
+      // features/ is feature-sliced: only its UI-ish folders count as UI; infrastructure/application/domain inside a feature are those layers
+      from: { path: '(^|/)(ui|components|screens|app|features|pages)/', pathNot: '(^|/)(composition|di|providers|infrastructure|application|domain)/|(^|/)app/(_layout|layout|providers)\\.[jt]sx?$' },
       to: { path: '(^|/)infrastructure/' },
     },
     { name: 'no-circular', severity: 'error', from: {}, to: { circular: true } },

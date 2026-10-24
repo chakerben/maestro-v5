@@ -83,6 +83,24 @@ printf 'export const bad = <View style={{ marginLeft: 8 }} />;\n' > app/bad2.tsx
 J=$(bash "$CHECK" --level standard --scope branch --json-only 2>/dev/null)
 chk "branch scope resolves base=master locally and rtl runs red on the branch file" "$(echo "$J" | node -e 'const j=JSON.parse(require("fs").readFileSync(0,"utf8"));console.log(j.base, j.checks.find(c=>c.name==="rtl").status)')" "master red"
 git checkout -q master 2>/dev/null; git branch -D feat/x -q 2>/dev/null
+# 4c. master-only repo (no other branch, no remote): --scope branch falls back to all WITH the note in the JSON,
+#     and a committed secret is red on that scope (zero scanned lines is never green)
+mkdir -p "$T/solo/src" && cd "$T/solo" && git init -q && git branch -M master
+echo '{"name":"solo","private":true}' > package.json; printf 'export const k = "AKIAABCDEFGHIJKLMNOP";\n' > src/k.ts
+git add -A && git -c user.name=t -c user.email=t@t commit -qm init
+J=$(bash "$CHECK" --level off --scope branch --json-only 2>/dev/null)
+chk "master-only: scope note present and effective scope all" "$(echo "$J" | node -e 'const j=JSON.parse(require("fs").readFileSync(0,"utf8"));console.log(j.scope, /no base branch/.test(j.scope_note||""))')" "all true"
+chk "master-only: committed AKIA key is red on the all scope" "$(echo "$J" | node -e 'console.log(JSON.parse(require("fs").readFileSync(0,"utf8")).checks[0].status)')" "red"
+# 4d. a staged path with a space is one file for rtl-lint
+mkdir -p "$T/sp/my dir" "$T/sp/messages" && cd "$T/sp" && git init -q && echo '{"name":"sp","private":true,"dependencies":{"expo":"54.0.0"}}' > package.json && echo '{}' > messages/ar.json
+printf 'export const a = { marginLeft: 1 };\nexport const b = { paddingRight: 2 };\n' > "my dir/a b.tsx" && git add -A
+J=$(bash "$CHECK" --level standard --scope staged --json-only 2>/dev/null)
+chk "path with a space: both findings seen" "$(echo "$J" | node -e 'const r=JSON.parse(require("fs").readFileSync(0,"utf8")).checks.find(c=>c.name==="rtl");console.log(r.status,(r.output.match(/RTL-PHYS/g)||[]).length)')" "red 2"
+# 4e. rtl-lint: block comments blanked, dart multi-line caught, unreadable file is non-zero
+cd "$T/l"; printf '/* marginLeft: 4 */\nconst ok = 1;\n' > blk.tsx; printf 'final p = EdgeInsets.only(\n  left: 8,\n);\nfinal q = EdgeInsets.only(top: 8);\n' > ml.dart
+chk "block comment does not fire" "$(node "$LINT" blk.tsx | tail -1)" "rtl-lint: 0 finding(s), 0 allowed"
+chk "dart format multi-line EdgeInsets.only(left:) caught, top: not" "$(node "$LINT" ml.dart | grep -c 'ml.dart:1  RTL-DART'):$(node "$LINT" ml.dart | grep -c 'ml.dart:4')" "1:0"
+chk "unreadable file: reported and exit 1" "$(node "$LINT" nope.tsx >/dev/null; echo $?)" "1"
 # 5. gates.json is read when --level is absent
 mkdir -p maestro_docs && echo '{ "level": "off" }' > maestro_docs/gates.json
 chk "level read from maestro_docs/gates.json" "$(bash "$CHECK" --list | tr '\n' ' ')" "secrets "

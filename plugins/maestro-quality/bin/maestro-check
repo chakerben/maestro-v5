@@ -60,19 +60,26 @@ BASE_REF=""
 r="$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null)"; [ -n "$r" ] && git rev-parse --verify -q "$r" >/dev/null && BASE_REF="$r"
 if [ -z "$BASE_REF" ]; then for b in main master develop; do [ "$b" != "$CURRENT_BRANCH" ] && git rev-parse --verify -q "refs/heads/$b" >/dev/null && { BASE_REF="$b"; break; }; done; fi
 SCOPE_NOTE=""
-changed_files() {
-  case "$SCOPE" in
-    staged) git diff --cached --name-only --diff-filter=ACMR 2>/dev/null ;;
-    branch)
-      if [ -n "$BASE_REF" ]; then git diff --name-only --diff-filter=ACMR "$BASE_REF...HEAD" 2>/dev/null
-      else SCOPE_NOTE="branch scope: no base branch found (no origin/HEAD, no local main/master other than $CURRENT_BRANCH) — fell back to --scope all"; git ls-files 2>/dev/null | grep -vE '(^|/)(node_modules|\.expo|\.next|dist|build)/'; fi ;;
-    all) git ls-files 2>/dev/null | grep -vE '(^|/)(node_modules|\.expo|\.next|dist|build)/' ;;
-  esac
-}
-CHANGED="$(changed_files)"
-if [ "$SCOPE" = branch ] && [ -n "$BASE_REF" ] && [ -z "$CHANGED" ] && [ "$(git rev-list --count "$BASE_REF..HEAD" 2>/dev/null)" != 0 ]; then
+EFFECTIVE_SCOPE="$SCOPE"
+if [ "$SCOPE" = branch ] && [ -z "$BASE_REF" ]; then
+  # decided HERE, not inside a $(...) — a variable set in a command substitution
+  # dies with the subshell (cold review of 5.15.0: the note never surfaced)
+  SCOPE_NOTE="branch scope: no base branch found (no origin/HEAD, no local main/master/develop other than $CURRENT_BRANCH) — fell back to --scope all"
+  EFFECTIVE_SCOPE=all
+fi
+# NUL-separated so a path with a space stays one file (cold review 1f)
+CHANGED_FILES=()
+case "$EFFECTIVE_SCOPE" in
+  staged) while IFS= read -r -d '' f; do CHANGED_FILES+=("$f"); done < <(git diff --cached --name-only -z --diff-filter=ACMR 2>/dev/null) ;;
+  branch) while IFS= read -r -d '' f; do CHANGED_FILES+=("$f"); done < <(git diff --name-only -z --diff-filter=ACMR "$BASE_REF...HEAD" 2>/dev/null) ;;
+  all)    while IFS= read -r -d '' f; do case "$f" in */node_modules/*|node_modules/*|.expo/*|.next/*|dist/*|build/*) ;; *) CHANGED_FILES+=("$f") ;; esac; done < <(git ls-files -z 2>/dev/null) ;;
+esac
+CHANGED="$(printf '%s\n' "${CHANGED_FILES[@]}")"; [ "${#CHANGED_FILES[@]}" = 0 ] && CHANGED=""
+if [ "$SCOPE" = branch ] && [ -n "$BASE_REF" ] && [ "${#CHANGED_FILES[@]}" = 0 ] && [ "$(git rev-list --count "$BASE_REF..HEAD" 2>/dev/null)" != 0 ]; then
   SCOPE_NOTE="branch scope: $BASE_REF...HEAD has commits but no changed file matched — check the base"
 fi
+# filter the array by extension regex → prints NUL-separated
+files_matching() { local re="$1" f; for f in "${CHANGED_FILES[@]}"; do [[ "$f" =~ $re ]] && printf '%s\0' "$f"; done; }
 AR_LOCALE=0
 # (no `grep -q` on a git pipeline: under pipefail the early exit turns a hit into a failure — pilot bug)
 if [ -n "$(ls messages/ar* locales/ar* 2>/dev/null)" ] || [ "$(git ls-files 2>/dev/null | grep -cE '(^|/)(ar\.json|ar-[a-z]+\.json|app_ar.*\.arb|intl_ar.*\.arb)$')" != 0 ]; then AR_LOCALE=1; fi
@@ -107,7 +114,7 @@ want() { # is check $1 part of level $LEVEL ?
 }
 if [ "$LIST" = 1 ]; then for c in secrets typecheck lint rtl boundaries tests-related fonts tests-full lighthouse audit; do want "$c" && echo "$c"; done; exit 0; fi
 
-[ "$JSON_ONLY" = 0 ] && echo "maestro-check · level $LEVEL · stack $STACK · runner $RUN · scope $SCOPE ($(printf '%s\n' "$CHANGED" | grep -c .) file(s))$([ $AR_LOCALE = 1 ] && echo ' · ar locale')${BASE_REF:+ · base $BASE_REF}" >&2
+[ "$JSON_ONLY" = 0 ] && echo "maestro-check · level $LEVEL · stack $STACK · runner $RUN · scope $EFFECTIVE_SCOPE ($(printf '%s\n' "$CHANGED" | grep -c .) file(s))$([ $AR_LOCALE = 1 ] && echo ' · ar locale')${BASE_REF:+ · base $BASE_REF}" >&2
 [ -n "$SCOPE_NOTE" ] && [ "$JSON_ONLY" = 0 ] && echo "  ⚠ $SCOPE_NOTE" >&2
 
 # ── secrets (never skippable) ───────────────────────────────────────────────
@@ -115,10 +122,15 @@ SCAN=""
 for cand in "${CLAUDE_PLUGIN_ROOT:-}/../maestro-vcs/skills/00-commit/scripts/secret-scan.sh" "$HERE/../../maestro-vcs/skills/00-commit/scripts/secret-scan.sh"; do [ -f "$cand" ] && SCAN="$cand" && break; done
 [ -z "$SCAN" ] && SCAN="$(ls -d "$HOME"/.claude/plugins/cache/*/maestro-vcs/*/skills/00-commit/scripts/secret-scan.sh 2>/dev/null | sort -V | tail -1)"
 if [ -n "$SCAN" ] && [ -f "$SCAN" ]; then
-  mode=cached; [ "$SCOPE" = branch ] && mode=branch; [ "$SCOPE" = all ] && mode=cached
-  if [ "$mode" = branch ] && [ -n "$BASE_REF" ]; then out="$(bash "$SCAN" branch "$BASE_REF" 2>&1)"; else out="$(bash "$SCAN" $mode 2>&1)"; fi
+  if [ "$EFFECTIVE_SCOPE" = branch ]; then mode="branch $BASE_REF"; out="$(bash "$SCAN" branch "$BASE_REF" 2>&1)"
+  elif [ "$EFFECTIVE_SCOPE" = all ]; then
+    # every tracked text file as one synthetic diff of added lines (the scan only reads added lines)
+    mode="stdin (all tracked files)"
+    out="$( { for f in "${CHANGED_FILES[@]}"; do [ -f "$f" ] || continue; grep -Iq . "$f" 2>/dev/null || continue; printf 'diff --git a/%s b/%s\n--- /dev/null\n+++ b/%s\n@@ -0,0 +1 @@\n' "$f" "$f" "$f"; sed 's/^/+/' "$f"; done; } | bash "$SCAN" stdin 2>&1)"
+  else mode=cached; out="$(bash "$SCAN" cached 2>&1)"; fi
   if printf '%s' "$out" | grep -q '^SECRET SCAN: RED'; then record secrets red 0 "secret-scan.sh $mode" "$out"
   elif printf '%s' "$out" | grep -q '^SECRET SCAN: skipped'; then record secrets red 0 "secret-scan.sh $mode" "$out (a scan that did not run is not clean)"
+  elif [ "$EFFECTIVE_SCOPE" != staged ] && printf '%s' "$out" | grep -q 'clean — 0 added'; then record secrets red 0 "secret-scan.sh $mode" "$out — zero lines scanned on a $EFFECTIVE_SCOPE scope is not clean, it is nothing"
   else record secrets green 0 "secret-scan.sh $mode" "$(printf '%s' "$out" | head -1)"; fi
 else
   record secrets red 0 "" "maestro-vcs not installed — the secrets scan did not run, and a scan that did not run is not clean"
@@ -147,8 +159,8 @@ fi
 # ── rtl (Arabic correctness, structural rules — only when an ar locale exists) ─
 if want rtl; then
   if [ $AR_LOCALE = 1 ]; then
-    FILES="$(printf '%s\n' "$CHANGED" | grep -E '\.(tsx?|jsx?|css|scss|dart)$' || true)"
-    if [ -n "$FILES" ]; then run_check rtl node "$HERE/rtl-lint.js" $FILES
+    UI_FILES=(); while IFS= read -r -d '' f; do UI_FILES+=("$f"); done < <(files_matching '\.(tsx?|jsx?|css|scss|dart)$')
+    if [ "${#UI_FILES[@]}" -gt 0 ]; then run_check rtl node "$HERE/rtl-lint.js" "${UI_FILES[@]}"
     else skip rtl "no UI file in scope"; fi
   else skip rtl "no ar locale (messages/ar*, ar.json, app_ar.arb)"; fi
 fi
@@ -168,7 +180,10 @@ if want boundaries; then
         unset 'RESULTS[${#RESULTS[@]}-1]'; record boundaries red 0 "depcruise --config $DC_CFG $DIRS" "0 modules cruised — the config matched nothing (wrong folders, or a transpiler missing: depcruise --info); a boundary that checks nothing is not green"
       fi
     fi
-  elif [ "$STACK" = flutter ] && grep -q 'dart_code_metrics\|import_lint' pubspec.yaml 2>/dev/null; then run_check boundaries dart run import_lint
+  elif [ "$STACK" = flutter ]; then
+    if ! grep -q 'import_lint' pubspec.yaml 2>/dev/null; then skip boundaries "no import_lint in pubspec.yaml — run maestro-core:00-onboard scaffold (architecture) to get one"
+    elif ! command -v dart >/dev/null; then skip boundaries "dart not on PATH"
+    else run_check boundaries dart run import_lint; fi
   else skip boundaries "no .dependency-cruiser.cjs — run maestro-core:00-onboard scaffold (architecture) to get one"; fi
 fi
 
@@ -176,15 +191,16 @@ fi
 if want tests-related || want tests-full; then
   case "$STACK" in
     flutter)
-      if [ -d test ]; then run_check "tests-$( want tests-full && echo full || echo related)" flutter test; else skip tests-related "no test/ directory"; fi ;;
+      if ! command -v flutter >/dev/null; then skip "tests-$( want tests-full && echo full || echo related)" "flutter not on PATH"
+      elif [ -d test ]; then run_check "tests-$( want tests-full && echo full || echo related)" flutter test; else skip tests-related "no test/ directory"; fi ;;
     *)
       if has_script test; then
         if want tests-full; then run_check tests-full run_script test
         else
-          REL="$(printf '%s\n' "$CHANGED" | grep -E '\.(tsx?|jsx?)$' | grep -vE '\.(test|spec)\.' || true)"
-          if [ -z "$REL" ]; then skip tests-related "no source file in scope"
-          elif [ -x node_modules/.bin/jest ]; then run_check tests-related node_modules/.bin/jest --findRelatedTests --passWithNoTests $REL
-          elif [ -x node_modules/.bin/vitest ]; then run_check tests-related node_modules/.bin/vitest related --run --passWithNoTests $REL
+          REL_FILES=(); while IFS= read -r -d '' f; do [[ "$f" =~ \.(test|spec)\. ]] || REL_FILES+=("$f"); done < <(files_matching '\.(tsx?|jsx?)$')
+          if [ "${#REL_FILES[@]}" = 0 ]; then skip tests-related "no source file in scope"
+          elif [ -x node_modules/.bin/jest ]; then run_check tests-related node_modules/.bin/jest --findRelatedTests --passWithNoTests "${REL_FILES[@]}"
+          elif [ -x node_modules/.bin/vitest ]; then run_check tests-related node_modules/.bin/vitest related --run --passWithNoTests "${REL_FILES[@]}"
           else run_check tests-related run_script test; fi   # no related-tests runner: the whole script, named as such in the output
         fi
       else skip tests-related "no test script in package.json — a project with none has no gate against regressions"; fi ;;
@@ -217,7 +233,7 @@ fi
 # ── audit (paranoid) ────────────────────────────────────────────────────────
 if want audit; then
   case "$STACK" in
-    flutter) run_check audit dart pub outdated --no-dev-dependencies ;;
+    flutter) command -v dart >/dev/null && run_check audit dart pub outdated --no-dev-dependencies || skip audit "dart not on PATH" ;;
     *) case "$RUN" in pnpm) run_check audit pnpm audit --audit-level high ;; yarn) run_check audit yarn npm audit --severity high ;; bun) run_check audit bun audit ;; *) run_check audit npm audit --audit-level high ;; esac ;;
   esac
 fi
@@ -227,6 +243,6 @@ VERDICT=$([ $RED -eq 0 ] && echo green || echo red)
 node -e '
 const [level,stack,scope,verdict,ar,base,note]=process.argv.slice(1,8); const checks=process.argv.slice(8).map(JSON.parse);
 console.log(JSON.stringify({tool:"maestro-check",level,stack,scope,base:base||null,scope_note:note||null,ar_locale:ar==="1",verdict,red:checks.filter(c=>c.status==="red").length,green:checks.filter(c=>c.status==="green").length,skipped:checks.filter(c=>c.status==="skipped").length,checks},null,2));
-' "$LEVEL" "$STACK" "$SCOPE" "$VERDICT" "$AR_LOCALE" "$BASE_REF" "$SCOPE_NOTE" "${RESULTS[@]}"
+' "$LEVEL" "$STACK" "$EFFECTIVE_SCOPE" "$VERDICT" "$AR_LOCALE" "$BASE_REF" "$SCOPE_NOTE" "${RESULTS[@]}"
 [ "$JSON_ONLY" = 0 ] && echo "maestro-check: $VERDICT ($RED red)" >&2
 [ $RED -eq 0 ]
