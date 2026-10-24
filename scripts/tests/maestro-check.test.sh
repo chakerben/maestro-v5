@@ -75,6 +75,14 @@ printf 'export const z = 3;\n' >> app/ok.tsx && git add -A
 mkdir -p "$T/lone/bin" && cp "$CHECK" "$LINT" "$T/lone/bin/"   # a copy with no maestro-vcs sibling
 J=$(CLAUDE_PLUGIN_ROOT="$T/lone" HOME="$T/emptyhome" bash "$T/lone/bin/maestro-check" --level off --json-only 2>/dev/null); RC=$?
 chk "no secret-scan reachable: red (a scan that did not run is not clean)" "$RC:$(echo "$J" | node -e 'console.log(JSON.parse(require("fs").readFileSync(0,"utf8")).checks[0].status)')" "1:red"
+# 4b. branch scope on a repo with no remote whose default branch is master (first pilot):
+#     the base must resolve locally and the files must be seen — not "skipped: no UI file in scope"
+git -c user.name=t -c user.email=t@t commit -qm base2 >/dev/null 2>&1 || true
+git branch -M master 2>/dev/null; git checkout -q -b feat/x
+printf 'export const bad = <View style={{ marginLeft: 8 }} />;\n' > app/bad2.tsx && git add -A && git -c user.name=t -c user.email=t@t commit -qm feat
+J=$(bash "$CHECK" --level standard --scope branch --json-only 2>/dev/null)
+chk "branch scope resolves base=master locally and rtl runs red on the branch file" "$(echo "$J" | node -e 'const j=JSON.parse(require("fs").readFileSync(0,"utf8"));console.log(j.base, j.checks.find(c=>c.name==="rtl").status)')" "master red"
+git checkout -q master 2>/dev/null; git branch -D feat/x -q 2>/dev/null
 # 5. gates.json is read when --level is absent
 mkdir -p maestro_docs && echo '{ "level": "off" }' > maestro_docs/gates.json
 chk "level read from maestro_docs/gates.json" "$(bash "$CHECK" --list | tr '\n' ' ')" "secrets "

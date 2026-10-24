@@ -51,17 +51,28 @@ RUN=npm
 if [ -f bun.lockb ] || [ -f bun.lock ]; then RUN=bun; elif [ -f pnpm-lock.yaml ]; then RUN=pnpm; elif [ -f yarn.lock ]; then RUN=yarn; fi
 has_script() { [ -f package.json ] && node -e 'process.exit(((JSON.parse(require("fs").readFileSync("package.json","utf8")).scripts||{})[process.argv[1]])?0:1)' "$1" 2>/dev/null; }
 run_script() { case "$RUN" in bun) bun run "$1" ;; pnpm) pnpm run "$1" ;; yarn) yarn "$1" ;; *) npm run "$1" ;; esac; }
-DEFAULT_BRANCH="$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||')"; [ -n "$DEFAULT_BRANCH" ] || DEFAULT_BRANCH=main
-
-# changed files for the scope (path-based checks)
+# The base of a branch: origin/HEAD when a remote exists, else a local main or
+# master that is not the current branch, else nothing. The first pilot had no
+# remote and git's default 'master': the old 'main' guess made the branch
+# scope EMPTY and every path check skipped with a plausible-looking reason.
+CURRENT_BRANCH="$(git branch --show-current 2>/dev/null)"
+BASE_REF=""
+r="$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null)"; [ -n "$r" ] && git rev-parse --verify -q "$r" >/dev/null && BASE_REF="$r"
+if [ -z "$BASE_REF" ]; then for b in main master develop; do [ "$b" != "$CURRENT_BRANCH" ] && git rev-parse --verify -q "refs/heads/$b" >/dev/null && { BASE_REF="$b"; break; }; done; fi
+SCOPE_NOTE=""
 changed_files() {
   case "$SCOPE" in
     staged) git diff --cached --name-only --diff-filter=ACMR 2>/dev/null ;;
-    branch) git diff --name-only --diff-filter=ACMR "origin/$DEFAULT_BRANCH...HEAD" 2>/dev/null || git diff --name-only --diff-filter=ACMR "$DEFAULT_BRANCH...HEAD" 2>/dev/null ;;
+    branch)
+      if [ -n "$BASE_REF" ]; then git diff --name-only --diff-filter=ACMR "$BASE_REF...HEAD" 2>/dev/null
+      else SCOPE_NOTE="branch scope: no base branch found (no origin/HEAD, no local main/master other than $CURRENT_BRANCH) — fell back to --scope all"; git ls-files 2>/dev/null | grep -vE '(^|/)(node_modules|\.expo|\.next|dist|build)/'; fi ;;
     all) git ls-files 2>/dev/null | grep -vE '(^|/)(node_modules|\.expo|\.next|dist|build)/' ;;
   esac
 }
 CHANGED="$(changed_files)"
+if [ "$SCOPE" = branch ] && [ -n "$BASE_REF" ] && [ -z "$CHANGED" ] && [ "$(git rev-list --count "$BASE_REF..HEAD" 2>/dev/null)" != 0 ]; then
+  SCOPE_NOTE="branch scope: $BASE_REF...HEAD has commits but no changed file matched — check the base"
+fi
 AR_LOCALE=0
 # (no `grep -q` on a git pipeline: under pipefail the early exit turns a hit into a failure — pilot bug)
 if [ -n "$(ls messages/ar* locales/ar* 2>/dev/null)" ] || [ "$(git ls-files 2>/dev/null | grep -cE '(^|/)(ar\.json|ar-[a-z]+\.json|app_ar.*\.arb|intl_ar.*\.arb)$')" != 0 ]; then AR_LOCALE=1; fi
@@ -96,7 +107,8 @@ want() { # is check $1 part of level $LEVEL ?
 }
 if [ "$LIST" = 1 ]; then for c in secrets typecheck lint rtl boundaries tests-related fonts tests-full lighthouse audit; do want "$c" && echo "$c"; done; exit 0; fi
 
-[ "$JSON_ONLY" = 0 ] && echo "maestro-check · level $LEVEL · stack $STACK · runner $RUN · scope $SCOPE ($(printf '%s\n' "$CHANGED" | grep -c .) file(s))$([ $AR_LOCALE = 1 ] && echo ' · ar locale')" >&2
+[ "$JSON_ONLY" = 0 ] && echo "maestro-check · level $LEVEL · stack $STACK · runner $RUN · scope $SCOPE ($(printf '%s\n' "$CHANGED" | grep -c .) file(s))$([ $AR_LOCALE = 1 ] && echo ' · ar locale')${BASE_REF:+ · base $BASE_REF}" >&2
+[ -n "$SCOPE_NOTE" ] && [ "$JSON_ONLY" = 0 ] && echo "  ⚠ $SCOPE_NOTE" >&2
 
 # ── secrets (never skippable) ───────────────────────────────────────────────
 SCAN=""
@@ -104,7 +116,7 @@ for cand in "${CLAUDE_PLUGIN_ROOT:-}/../maestro-vcs/skills/00-commit/scripts/sec
 [ -z "$SCAN" ] && SCAN="$(ls -d "$HOME"/.claude/plugins/cache/*/maestro-vcs/*/skills/00-commit/scripts/secret-scan.sh 2>/dev/null | sort -V | tail -1)"
 if [ -n "$SCAN" ] && [ -f "$SCAN" ]; then
   mode=cached; [ "$SCOPE" = branch ] && mode=branch; [ "$SCOPE" = all ] && mode=cached
-  out="$(bash "$SCAN" $mode 2>&1)"
+  if [ "$mode" = branch ] && [ -n "$BASE_REF" ]; then out="$(bash "$SCAN" branch "$BASE_REF" 2>&1)"; else out="$(bash "$SCAN" $mode 2>&1)"; fi
   if printf '%s' "$out" | grep -q '^SECRET SCAN: RED'; then record secrets red 0 "secret-scan.sh $mode" "$out"
   elif printf '%s' "$out" | grep -q '^SECRET SCAN: skipped'; then record secrets red 0 "secret-scan.sh $mode" "$out (a scan that did not run is not clean)"
   else record secrets green 0 "secret-scan.sh $mode" "$(printf '%s' "$out" | head -1)"; fi
@@ -213,8 +225,8 @@ fi
 # ── verdict ─────────────────────────────────────────────────────────────────
 VERDICT=$([ $RED -eq 0 ] && echo green || echo red)
 node -e '
-const [level,stack,scope,verdict,ar]=process.argv.slice(1,6); const checks=process.argv.slice(6).map(JSON.parse);
-console.log(JSON.stringify({tool:"maestro-check",level,stack,scope,ar_locale:ar==="1",verdict,red:checks.filter(c=>c.status==="red").length,green:checks.filter(c=>c.status==="green").length,skipped:checks.filter(c=>c.status==="skipped").length,checks},null,2));
-' "$LEVEL" "$STACK" "$SCOPE" "$VERDICT" "$AR_LOCALE" "${RESULTS[@]}"
+const [level,stack,scope,verdict,ar,base,note]=process.argv.slice(1,8); const checks=process.argv.slice(8).map(JSON.parse);
+console.log(JSON.stringify({tool:"maestro-check",level,stack,scope,base:base||null,scope_note:note||null,ar_locale:ar==="1",verdict,red:checks.filter(c=>c.status==="red").length,green:checks.filter(c=>c.status==="green").length,skipped:checks.filter(c=>c.status==="skipped").length,checks},null,2));
+' "$LEVEL" "$STACK" "$SCOPE" "$VERDICT" "$AR_LOCALE" "$BASE_REF" "$SCOPE_NOTE" "${RESULTS[@]}"
 [ "$JSON_ONLY" = 0 ] && echo "maestro-check: $VERDICT ($RED red)" >&2
 [ $RED -eq 0 ]
