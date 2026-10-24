@@ -39,7 +39,7 @@ the table below is markdown escaping for `|` — use a plain `|` in the command.
 The generic pattern is the only case-insensitive one (`-i`); the provider
 prefixes above are literals and are matched case-sensitively. It accepts unquoted values
 (`DB_PASSWORD=…` in a `.env`). Placeholder values are not hits: the script drops a match whose text contains
-`example`, `changeme`, `placeholder`, `xxx…`, `your_`/`your-`, `<…>` or `${`
+`example`, `changeme`, `placeholder`, `xxx…`, `your_`/`your-`, `<…>`, `${`, `todo`, `fixme`, `stub`, `dummy` or `fake`
 (so `API_KEY=changeme_placeholder_value` is clean, `DB_PASSWORD=hunter2hunter2hunter2` is RED).
 A **reference** is not a secret either: a generic match whose value is
 `process.env.X`, `env.X`, `import.meta.env.X`, `os.environ…`, `getenv(…)`, or

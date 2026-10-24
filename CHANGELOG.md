@@ -40,9 +40,10 @@ release gives each one an exit code:
 - `context: fork` on the three audits; `model-policy.md` is one page;
   `platform-watch.md` lists what Claude Code now does that Maestro used to,
   and `04-doctor` files each open row as "retire ours".
-- **The first real `/sdlc` run happened** (ROADMAP prerequisite since 5.3):
-  `00-onboard` and `00-sdlc auto` on a throwaway Expo + Arabic project. What
-  it broke is fixed below under *Pilot*.
+- **The first real `/sdlc auto` ran end to end** (ROADMAP prerequisite
+  since 5.3): `docs/PILOT-5.15.0.md` — spec, plan, 4 phases through the
+  gate, opus review `iterate` 7/10 with two real money bugs, iteration,
+  `ship` 9/10, 37 tests. The eleven places it broke are fixed below.
 
 ### Pilot — what the first real run broke
 
@@ -55,7 +56,17 @@ release gives each one an exit code:
   blanked command.
 - `maestro-check`: `git ls-files | grep -q` under `pipefail` hid the `ar`
   locale (SIGPIPE on 28 000 files); `--scope all` walked `node_modules`;
-  scaffold now adds the stack's build output to a `.gitignore` it creates.
+  `--scope branch` guessed `main` and skipped every path check on a
+  `master` repo with no remote — the base now resolves locally and the
+  verdict says which; scaffold adds the stack's build output to a
+  `.gitignore` it creates.
+- `00-sdlc auto` wrote the plan, announced the next step and ended the
+  turn: a failed run presented as a pause. The turn now ends only at the
+  final report or a hard stop.
+- The boundary config did not cover Expo Router's `app/`; the composition
+  edge is the one UI-side place allowed to import `infrastructure/`.
+- `todo`/`stub`/`dummy`/`fake` are secret placeholders; phase validation
+  greps on Arabic text say `LC_ALL=C.UTF-8`.
 
 ### Fixed
 

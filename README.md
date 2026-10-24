@@ -78,6 +78,8 @@ runtime**, and **never rebuild what Anthropic maintains**.
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Model policy](docs/MODEL-POLICY.md) — Sonnet orchestrates, Fable builds and judges, Opus decides on critical; the pins, what enforces them, and what it costs
+- [Pilot 5.15.0](docs/PILOT-5.15.0.md) — the first real `/sdlc auto`, end to end: what came out, what broke, what it could not test
+- [Audit 5.14.0](docs/AUDIT-5.14.0.md) — independent deep pass, 70 findings, closed in 5.15.0
 - [Audit 5.10.0](docs/AUDIT-5.10.0.md) — independent deep pass, 30 findings, closed in 5.11.0
 - [Audit 5.9.1](docs/AUDIT-5.9.1.md) — independent adversarial pass on the day's six releases; 17 findings, all closed in 5.9.2
 - [Performance & token audit 5.9.0](docs/PERF-AUDIT-5.9.0.md) — what a session and a dispatch cost, and the budget guard

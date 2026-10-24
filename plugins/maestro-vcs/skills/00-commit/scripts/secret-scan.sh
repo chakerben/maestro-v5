@@ -77,7 +77,7 @@ done < "$PATTERNS_MD"
 
 # Placeholder values are not secrets (applied to the MATCHED text, never to
 # the whole line, so a comment cannot hide a real key).
-PLACEHOLDER='example|changeme|placeholder|xxx+|your[_-]?|<.*>|\$\{'
+PLACEHOLDER='example|changeme|placeholder|xxx+|your[_-]?|<.*>|\$\{|todo|fixme|stub|dummy|fake'
 # The generic row ("apiKey = <value>") is the only case-insensitive one — a
 # provider prefix like AKIA or SK is a literal, and `-i` on it made
 # "task1234…" a Twilio key (5.14.0 audit 3.3). It is also the only row whose

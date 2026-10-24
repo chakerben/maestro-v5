@@ -2,12 +2,14 @@
 
 Candidate improvements, prioritized.
 
-## Prerequisite before anything below
+## Prerequisite — done (2026-10-24)
 
-**The first real feature through `/sdlc` has still never been executed.**
-Every rule in this repo is theory until one feature has gone spec → plan →
-implement → review → ship with its task folder as evidence. Do that first,
-journal included, and file what broke as the next release's changelog.
+The first real feature went through `/sdlc auto` end to end on a throwaway
+Expo + Arabic project: `docs/PILOT-5.15.0.md` (8 commits, opus review found
+two money bugs, 11 pipeline breaks fixed in 5.15.0). **Next measurement:**
+the same client feature done twice — through the pipeline and by hand with
+only the mobile standards — on Injaz Owner or Dhiyafa, with a device
+screenshot. That comparison decides how much of maestro-dev stays.
 
 ## v5.3 candidates (after pilot feedback)
 
