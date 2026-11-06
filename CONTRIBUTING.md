@@ -15,18 +15,20 @@ When a change conflicts with a rule, the change loses.
 npm test
 ```
 
-One command, nine checks, 219 cases — and it is the whole contract:
+One command, eleven checks, 325 cases — and it is the whole contract:
 
 | Check | What it refuses |
 |---|---|
-| `check-versions.js` | version drift across the 9 manifests |
+| `check-versions.js` | version drift across the marketplace and every plugin manifest (10) |
 | `validate.js` | a hook declared anywhere but `hooks/hooks.json`; a hook without `timeout` or `${CLAUDE_PLUGIN_ROOT}`; a hook script that spawns processes or names test/format tooling; an agent without `role:`; a reviewer that can write; a skill with no `## Test`; a `!`cmd`` injection without `allowed-tools`; a `dependencies` field; a dependency cycle |
 | `context-budget.js` | a description over 700 chars; the skill index over 11k; the router over 2k; a preloaded skill over 4k; an agent dispatch over 6k; a hook over 100 ms |
-| `tests/bash-guard.test.sh` | 126 cases — blocked spellings, false positives, and the documented bypasses asserted as passing |
+| `tests/bash-guard.test.sh` | 128 cases — blocked spellings, false positives, and the documented bypasses asserted as passing |
 | `tests/memory-sync.test.sh` | 33 cases, each a reproduced corruption of a real CLAUDE.md |
-| `tests/secret-scan.test.sh` | 24 cases on the commit-gate scanner |
-| `tests/validate.test.sh` | 18 cases — the validator's own smuggling attempts |
-| `tests/fleet-apply.test.sh` | 13 cases on the fleet script |
+| `tests/secret-scan.test.sh` | 36 cases on the commit-gate scanner |
+| `tests/validate.test.sh` | 47 cases — the validator's own smuggling attempts |
+| `tests/fleet-apply.test.sh` | 23 cases on the fleet script (`--qa-bootstrap` included) |
+| `tests/qa-plugins.test.sh` | 24 cases — `qa-resolve-repo` refusals, key never printed, env file never executed; `qa-coverage` counts; `qa-set-workstation-key` never takes the key as an argument |
+| `tests/maestro-check.test.sh` | 29 cases |
 | `tests/install-shortcuts.test.sh` | 5 cases |
 
 A red `npm test` is not a starting point for discussion. Also run

@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+"""qa-resolve-repo [--json] [DIR] — which Injaz technical project this repository belongs to.
+
+maestro-test-e2e (plan qa-agents-v1, phase 20). Asks Injaz `GET /api/qa-worker/resolve-repo` with the developer's
+READ-ONLY workstation key, so that `/qa-bootstrap-project` writes nothing in a repository Injaz does not tie to exactly
+one project. Standard library only.
+
+Key and URL come from `~/.config/injaz-qa/.env` (override: QA_ENV_FILE), read as KEY=value lines — never executed:
+  QA_WORKSTATION_KEY=qa_…   the workstation key (Injaz › الإعدادات › وكلاء الجودة › الأجهزة, kind «محطة مطوّر»),
+                            put there with qa-set-workstation-key (hidden input), never typed in a chat or on a command line
+  INJAZ_QA_URL=https://…    optional, default https://www.injaz365.com
+The key travels only in the request header: never printed, never in argv, never written anywhere.
+
+Exit codes (stdout = one line `CODE<TAB>name<TAB>owner/repo<TAB>projectId`, or the JSON answer with --json):
+  0 exactly one project   3 no project   4 several projects   5 not a GitHub repository
+  6 no workstation key    7 Injaz refused or unreachable
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import re
+import subprocess
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+DEFAULT_URL = "https://www.injaz365.com"
+GITHUB = re.compile(r"github\.com[/:]([A-Za-z0-9-]{1,39})/([A-Za-z0-9._-]{1,100}?)(?:\.git)?/?$", re.IGNORECASE)
+
+
+def fail(code: int, message: str, as_json: bool) -> int:
+    if as_json:
+        print(json.dumps({"ok": False, "exit": code, "error": message}, ensure_ascii=False))
+    else:
+        print(message, file=sys.stderr)
+    return code
+
+
+def read_env(path: Path) -> dict[str, str]:
+    values: dict[str, str] = {}
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return values
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        name, _, value = line.partition("=")
+        name = name.strip().removeprefix("export ").strip()
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in "'\"":
+            value = value[1:-1]
+        values[name] = value
+    return values
+
+
+def origin_url(directory: Path) -> str | None:
+    try:
+        out = subprocess.run(["git", "-C", str(directory), "remote", "get-url", "origin"], capture_output=True, text=True, timeout=10, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    return out.stdout.strip() if out.returncode == 0 else None
+
+
+def https_repo(remote: str) -> tuple[str, str] | None:
+    """`(owner, repo)` from https / ssh / scp-like remotes; any credential in the URL is dropped."""
+    match = GITHUB.search(remote.strip())
+    return (match.group(1), match.group(2)) if match else None
+
+
+def main(argv: list[str]) -> int:
+    as_json = "--json" in argv
+    args = [a for a in argv if a != "--json"]
+    directory = Path(args[0] if args else ".").resolve()
+    remote = origin_url(directory)
+    repo = https_repo(remote) if remote else None
+    if not repo:
+        return fail(5, f"{directory}: no GitHub `origin` remote — nothing to resolve", as_json)
+    owner, name = repo
+    env = read_env(Path(os.environ.get("QA_ENV_FILE") or Path.home() / ".config" / "injaz-qa" / ".env"))
+    key = env.get("QA_WORKSTATION_KEY", "")
+    if not key.startswith("qa_"):
+        return fail(6, "no workstation key: create one in Injaz (الإعدادات › وكلاء الجودة › الأجهزة, «محطة مطوّر (قراءة فقط)») and store it with qa-set-workstation-key (it asks, hidden)", as_json)
+    base = (os.environ.get("INJAZ_QA_URL") or env.get("INJAZ_QA_URL") or DEFAULT_URL).rstrip("/")
+    if not base.startswith(("https://", "http://127.0.0.1", "http://localhost")):
+        return fail(7, f"refusing a non-https Injaz URL: {base}", as_json)
+    query = urllib.parse.urlencode({"url": f"https://github.com/{owner}/{name}"})
+    request = urllib.request.Request(f"{base}/api/qa-worker/resolve-repo?{query}", headers={"Authorization": f"Bearer {key}", "Accept": "application/json", "User-Agent": "maestro-test-e2e/qa-resolve-repo"})
+    try:
+        with urllib.request.urlopen(request, timeout=20) as response:  # noqa: S310 — https (or loopback) only, checked above
+            answer = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        try:
+            code = json.loads(exc.read().decode("utf-8")).get("error", {}).get("code", "")
+        except (ValueError, AttributeError):
+            code = ""
+        return fail(7, f"Injaz answered {exc.code} {code}".strip(), as_json)
+    except (urllib.error.URLError, OSError, ValueError) as exc:
+        return fail(7, f"Injaz unreachable: {type(exc).__name__}", as_json)
+    projects = answer.get("projects") or []
+    if as_json:
+        print(json.dumps({"ok": len(projects) == 1, "exit": 0 if len(projects) == 1 else (3 if not projects else 4), **answer}, ensure_ascii=False))
+    if not projects:
+        if not as_json:
+            print(f"no Injaz technical project is tied to github.com/{owner}/{name}: set its «المستودع» in Injaz (or declare a QA target), then run again", file=sys.stderr)
+        return 3
+    if len(projects) > 1:
+        if not as_json:
+            print("several projects claim this repository: " + ", ".join(p.get("code", "?") for p in projects) + " — fix the repository links in Injaz first", file=sys.stderr)
+        return 4
+    project = projects[0]
+    if not as_json:
+        print(f"{project.get('code')}\t{project.get('name')}\t{owner}/{name}\t{project.get('id')}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

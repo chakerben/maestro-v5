@@ -79,6 +79,30 @@ check "an empty directory is not mistaken for a project" '[ "$RC8" = 2 ] && echo
 O9=$(PROJECTS_ROOT="$T" bash scripts/fleet-apply.sh --settings "$T/.maestro-v4-backup-x" 2>&1); RC9=$?
 check "a backup folder given by hand is refused too" '[ "$RC9" = 2 ] && echo "$O9" | grep -q "pas un projet"'
 
+# ── --qa-bootstrap : résolution déterministe d'abord, claude seulement si un seul projet ──
+mkdir -p "$T/qa1/.claude" "$T/qa2/.claude"
+printf '{"enabledPlugins":{"maestro-test-e2e@maestro":true,"maestro-core@maestro":true}}\n' > "$T/qa1/.claude/settings.json"
+printf '{"enabledPlugins":{"maestro-core@maestro":true}}\n' > "$T/qa2/.claude/settings.json"
+FAKE_RESOLVE="$T/fake-resolve"
+cat > "$FAKE_RESOLVE" <<'EOF2'
+#!/bin/bash
+case "$1" in
+  */qa1|*/qa2) printf 'TECH\tمنصة التقنية\tcontent-it/tech1\tp-1\n'; exit 0 ;;
+  *) echo "no Injaz technical project is tied to github.com/x/y" >&2; exit 3 ;;
+esac
+EOF2
+chmod +x "$FAKE_RESOLVE"
+Q1=$(PROJECTS_ROOT="$T" PATH="$BIN" QA_RESOLVE_BIN="$FAKE_RESOLVE" bash scripts/fleet-apply.sh --qa-bootstrap --dry-run "$T/qa1" 2>&1)
+check "qa: a resolved project with the plugin plans the bootstrap with acceptEdits, without the CLI" 'echo "$Q1" | grep -q "qa: TECH" && echo "$Q1" | grep -q "/maestro-test-e2e:qa-bootstrap-project" && echo "$Q1" | grep -q acceptEdits'
+Q2=$(PROJECTS_ROOT="$T" PATH="$BIN" QA_RESOLVE_BIN="$FAKE_RESOLVE" bash scripts/fleet-apply.sh --qa-bootstrap --dry-run "$T/p1" 2>&1)
+check "qa: a repository no project claims is refused and nothing is planned" 'echo "$Q2" | grep -q "qa: refusé (exit 3)" && ! echo "$Q2" | grep -q "qa-bootstrap-project"'
+Q3=$(PROJECTS_ROOT="$T" PATH="$BIN" QA_RESOLVE_BIN="$FAKE_RESOLVE" bash scripts/fleet-apply.sh --qa-bootstrap --dry-run "$T/qa2" 2>&1)
+check "qa: resolved but plugin not enabled → install hint, no claude" 'echo "$Q3" | grep -q "maestro-test-e2e n.est pas activé" && ! echo "$Q3" | grep -q "claude -p"'
+Q4=$(PROJECTS_ROOT="$T" PATH="$BIN" QA_RESOLVE_BIN="$FAKE_RESOLVE" bash scripts/fleet-apply.sh --qa-bootstrap --dry-run --all 2>&1)
+check "qa --dry-run --all lists every project with its verdict, and only qa runs" 'echo "$Q4" | grep -q "actions: qa-bootstrap," && [ "$(echo "$Q4" | grep -c "■ ")" -ge 4 ] && ! echo "$Q4" | grep -q "04-doctor"'
+L3=$(PROJECTS_ROOT="$T" bash scripts/fleet-apply.sh --list)
+check "--list shows maestro-test-e2e (a plugin name with digits)" 'echo "$L3" | grep "/qa1" | grep -q "maestro-test-e2e"'
+
 rm -rf "$T"
 echo "fleet-apply: $pass passed, $fail failed"
 [ "$fail" -eq 0 ]

@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+"""qa-coverage [--json] [DIR] — scenario coverage of a repository, computed from its map (maestro-test-e2e, phase 20).
+
+Reads `qa/map/<CODE>.scenarios.json` (exactly one), the scenario library `injaz-test-scenarios.json` at the root when
+present, the Playwright specs (titles carrying `[REF]`) and the Maestro mobile.dev flows (`.maestro/`, `qa/safari/`).
+Counts automated / manual / blocked and lists what is inconsistent. Read-only, deterministic, no network.
+
+Exit: 0 consistent · 1 inconsistencies found · 2 no map (or more than one) · 3 unreadable map.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import sys
+from pathlib import Path
+
+REF_IN_TITLE = re.compile(r"\[([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*-\d+)\]")
+SPEC_GLOBS = ("**/*.spec.ts", "**/*.spec.tsx", "**/*.spec.js", "**/*.e2e.ts", "**/*.test.ts")
+SKIP_DIRS = {"node_modules", ".git", ".next", "dist", "build", ".qa", ".expo", "ios", "android", "coverage"}
+TEST_DIRS = ("qa/e2e", "e2e", "tests/e2e", "tests")
+
+
+def specs(root: Path) -> dict[str, set[str]]:
+    """`{ref: {spec paths}}` from the first test folder that exists (same order as the worker)."""
+    found: dict[str, set[str]] = {}
+    folder = next((root / d for d in TEST_DIRS if (root / d).is_dir()), None)
+    if folder is None:
+        return found
+    for pattern in SPEC_GLOBS:
+        for path in folder.glob(pattern):
+            if any(part in SKIP_DIRS for part in path.relative_to(root).parts):
+                continue
+            try:
+                text = path.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            for ref in REF_IN_TITLE.findall(text):
+                found.setdefault(ref, set()).add(path.relative_to(root).as_posix())
+    return found
+
+
+def flows(root: Path) -> set[str]:
+    out: set[str] = set()
+    for folder in (".maestro", "qa/safari"):
+        base = root / folder
+        if base.is_dir():
+            out.update(p.relative_to(root).as_posix() for p in base.glob("*.yaml"))
+            out.update(p.relative_to(root).as_posix() for p in base.glob("*.yml"))
+    return out
+
+
+def library(root: Path) -> set[str] | None:
+    path = root / "injaz-test-scenarios.json"
+    if not path.is_file():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except ValueError:
+        return None
+    return {str(s.get("ref")) for s in data.get("scenarios") or [] if s.get("ref") and s.get("state") != "deprecated"}
+
+
+def main(argv: list[str]) -> int:
+    as_json = "--json" in argv
+    args = [a for a in argv if a != "--json"]
+    root = Path(args[0] if args else ".").resolve()
+    maps = sorted((root / "qa" / "map").glob("*.scenarios.json")) if (root / "qa" / "map").is_dir() else []
+    if len(maps) != 1:
+        print(f"expected exactly one qa/map/<CODE>.scenarios.json, found {len(maps)} — run /maestro-test-e2e:qa-bootstrap-project", file=sys.stderr)
+        return 2
+    try:
+        data = json.loads(maps[0].read_text(encoding="utf-8"))
+        entries = list(data.get("entries") or [])
+    except (ValueError, AttributeError, OSError):
+        print(f"{maps[0].relative_to(root)}: not a valid map", file=sys.stderr)
+        return 3
+    by_spec, all_flows, lib = specs(root), flows(root), library(root)
+    counts = {"automated": 0, "manual": 0, "blocked": 0}
+    problems: list[str] = []
+    seen: set[str] = set()
+    for entry in entries:
+        ref, status = str(entry.get("ref") or ""), entry.get("status")
+        if not ref:
+            problems.append("an entry has no ref")
+            continue
+        if ref in seen:
+            problems.append(f"{ref}: listed twice")
+        seen.add(ref)
+        if status not in counts:
+            problems.append(f"{ref}: status {status!r} is not automated / manual / blocked")
+            continue
+        counts[status] += 1
+        if status in ("manual", "blocked") and not entry.get("reason"):
+            problems.append(f"{ref}: {status} without a reason")
+        if status == "automated":
+            target = entry.get("spec") or entry.get("flow")
+            if not target:
+                problems.append(f"{ref}: automated without a spec or a flow")
+            elif not (root / target).is_file():
+                problems.append(f"{ref}: {target} does not exist")
+            elif entry.get("spec") and target not in by_spec.get(ref, set()):
+                problems.append(f"{ref}: {target} has no test titled with [{ref}]")
+        if lib is not None and ref not in lib and not ref.startswith(("AGT-", "REG-")):
+            problems.append(f"{ref}: not in the scenario library")
+    untracked_specs = sorted(ref for ref in by_spec if ref not in seen)
+    mapped_flows = {str(e.get("flow")) for e in entries if e.get("flow")}
+    untracked_flows = sorted(all_flows - mapped_flows)
+    missing = sorted(lib - seen) if lib is not None else None
+    total = sum(counts.values())
+    report = {
+        "project": data.get("project"),
+        "map": maps[0].relative_to(root).as_posix(),
+        "counts": counts,
+        "automatedPercent": round(100 * counts["automated"] / total) if total else None,
+        "libraryRefsWithoutEntry": missing,
+        "testsWithoutEntry": untracked_specs,
+        "flowsWithoutEntry": untracked_flows,
+        "problems": problems,
+    }
+    if as_json:
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    else:
+        pct = "—" if report["automatedPercent"] is None else f"{report['automatedPercent']}%"
+        print(f"{report['project']}: {counts['automated']} automated · {counts['manual']} manual · {counts['blocked']} blocked ({pct} automated)")
+        if missing:
+            print(f"library refs without a map entry ({len(missing)}): {', '.join(missing[:20])}{' …' if len(missing) > 20 else ''}")
+        if lib is None:
+            print("no injaz-test-scenarios.json at the root: library refs not checked")
+        for label, items in (("tests titled with a ref but not in the map", untracked_specs), ("flows not in the map", untracked_flows)):
+            if items:
+                print(f"{label} ({len(items)}): {', '.join(items[:20])}")
+        for problem in problems:
+            print(f"  ✗ {problem}")
+    inconsistent = bool(problems or untracked_specs or untracked_flows or missing)
+    return 1 if inconsistent else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

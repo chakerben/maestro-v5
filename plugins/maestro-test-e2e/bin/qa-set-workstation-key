@@ -1,0 +1,38 @@
+#!/bin/sh
+# qa-set-workstation-key [--url https://…] — store the READ-ONLY workstation key of the Injaz QA agents for this user
+# (maestro-test-e2e). The key is read hidden from the keyboard (or from a pipe, e.g. a password manager), never from an
+# argument, never echoed. File: ~/.config/injaz-qa/.env (override QA_ENV_FILE), mode 600, one QA_WORKSTATION_KEY line
+# (and INJAZ_QA_URL with --url — not a secret; default Injaz is production).
+set -eu
+F="${QA_ENV_FILE:-$HOME/.config/injaz-qa/.env}"
+URL=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --url) shift; URL="${1:-}" ;;
+    *) echo "the key is never an argument (it would stay in the shell history): run qa-set-workstation-key alone, it asks." >&2; exit 2 ;;
+  esac
+  shift
+done
+case "$URL" in ""|https://*|http://127.0.0.1*|http://localhost*) ;; *) echo "--url must be https://…" >&2; exit 2 ;; esac
+V=""
+if [ -t 0 ] && [ -r /dev/tty ]; then
+  printf "Paste the workstation key (qa_…) then Enter — nothing is shown: " > /dev/tty
+  stty -echo < /dev/tty; IFS= read -r V < /dev/tty || true; stty echo < /dev/tty; echo > /dev/tty
+else
+  IFS= read -r V || true
+fi
+V=$(printf '%s' "$V" | LC_ALL=C sed -e 's/\x1b\[[0-9;]*[~A-Za-z]//g' | LC_ALL=C tr -cd '[:graph:]')
+case "$V" in qa_?*) ;; *) echo "not a workstation key (it starts with qa_): nothing stored" >&2; exit 1 ;; esac
+umask 077
+mkdir -p "$(dirname "$F")"
+touch "$F"
+if [ -n "$URL" ]; then
+  { grep -v -e '^QA_WORKSTATION_KEY=' -e '^INJAZ_QA_URL=' "$F" || true; } > "$F.tmp"
+else
+  { grep -v -e '^QA_WORKSTATION_KEY=' "$F" || true; } > "$F.tmp"
+fi
+printf 'QA_WORKSTATION_KEY=%s\n' "$V" >> "$F.tmp"
+[ -z "$URL" ] || printf 'INJAZ_QA_URL=%s\n' "$URL" >> "$F.tmp"
+mv "$F.tmp" "$F"
+chmod 600 "$F"
+echo "OK: QA_WORKSTATION_KEY stored in $F (${#V} characters)${URL:+, Injaz = $URL}."

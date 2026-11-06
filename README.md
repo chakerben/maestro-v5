@@ -50,6 +50,8 @@ project memory bank.
 | `maestro-web` | Next.js/Prisma/Clerk stack, UX, design review, motion (GSAP+Lenis, RTL-safe) | 0 |
 | `maestro-pm` | PRD, user stories, specs (FR/EN/AR), tickets → Trello, writing rules (anti-slop, AR register) | 0 |
 | `maestro-vcs` | Commits with gates (executable secrets scan), PRs, releases, one-worktree-per-branch | 0 |
+| `maestro-test-e2e` | Injaz QA agents, E2E side: Playwright web, Maestro mobile.dev flows, scenario map, heal review, flaky policy; `qa-bootstrap-project` resolves the repo to its Injaz project first | 0 |
+| `maestro-security` | Injaz QA agents, defensive security: pinned scanners, Expo bundle / MobSF, passive checks, scope & licences, finding triage | 0 |
 
 ## What this is, honestly
 

@@ -194,7 +194,7 @@ else ok(`${hookCount} hook(s) total across ${hookSources.length} candidate file(
 console.log('▶ Philosophy rule #2 — no typecheck/test/format, no subprocess in hooks');
 const hookScripts = new Set();
 for (const { h } of hookCommands) {
-  const m = (h.command || '').match(/\$\{CLAUDE_PLUGIN_ROOT\}\/(\S+)/);
+  const m = (h.command || '').match(/\$\{CLAUDE_PLUGIN_ROOT\}\/([^\s"']+)/);
   if (!m) continue;
   for (const { dir } of pluginDirs) {
     const p = path.join(dir, m[1]);
@@ -460,7 +460,7 @@ console.log('▶ Plugin-cache paths & cross-plugin guards');
       const body = txt.replace(/^---\n[\s\S]*?\n---/, '').replace(/```[\s\S]*?```/g, '');
       const VERB = /\b(invoke|hand(s|ed)? off|delegat\w*|run|route|dispatch\w*|go(es)? to|use|call|start|→)(?![a-z])/i;
       for (const para of body.split(/\n\s*\n/)) {
-        for (const m of para.matchAll(/\b(maestro-[a-z]+):\d{2}-[a-z0-9-]+/g)) {
+        for (const m of para.matchAll(/\b(maestro-[a-z][a-z0-9-]*?):\d{2}-[a-z0-9-]+/g)) {
           if (m[1] === name || !PLUGIN_NAMES.includes(m[1])) continue;
           if (/\binstalled\b/i.test(para)) continue;
           // the sentence around the reference: bounded by sentence punctuation
@@ -498,7 +498,7 @@ console.log('▶ Router references');
     if (!fs.existsSync(p)) { fail(`${r}: missing`); continue; }
     const txt = read(p);
     const missing = new Set();
-    for (const [, ref] of txt.matchAll(/\b(maestro-[a-z]+:\d{2}-[a-z0-9-]+)/g)) if (!knownSkills.has(ref)) missing.add(ref);
+    for (const [, ref] of txt.matchAll(/\b(maestro-[a-z][a-z0-9-]*?:\d{2}-[a-z0-9-]+)/g)) if (!knownSkills.has(ref)) missing.add(ref);
     if (r.endsWith('routing.md'))
       for (const m of txt.matchAll(/\bagent\s+([a-z0-9-]+)|\b(m-[a-z0-9-]+)\b/g)) {
         const a = m[1] || m[2];
