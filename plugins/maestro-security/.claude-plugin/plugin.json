@@ -1,0 +1,8 @@
+{
+  "name": "maestro-security",
+  "version": "5.15.0",
+  "description": "Defensive security of the projects the Injaz QA agents cover: the pinned scanners (gitleaks, OSV-Scanner, Trivy, Semgrep / Opengrep), the Expo bundle and MobSF, passive header / TLS / ZAP checks, scope and licences, finding triage. Command: qa-security-triage.",
+  "author": {
+    "name": "Ben Moussa Chaker"
+  }
+}

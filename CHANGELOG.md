@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased — the Injaz QA agent plugins
+
+- **`maestro-test-e2e`** (new): router `00-qa-e2e` — Playwright web, Maestro mobile.dev flows, the
+  `qa/map/<CODE>.scenarios.json` file, heal-diff review, flaky policy, the agents' runbook; commands
+  `qa-bootstrap-project`, `qa-map-scenarios`, `qa-heal-review`, `qa-coverage`; `bin/qa-resolve-repo` (asks Injaz
+  `GET /api/qa-worker/resolve-repo` with a read-only workstation key — refuses when no project or several claim the
+  repository), `bin/qa-coverage` (coverage computed from the map, no network) and `bin/qa-set-workstation-key`
+  (stores the key read hidden, never from an argument).
+- **`maestro-security`** (new): router `00-qa-security` — the pinned defensive scanners, the Expo bundle and MobSF,
+  passive header / TLS / ZAP checks, scope and licences (A40: no rule vendored, Opengrep for code ContentCo does not
+  own), finding triage; command `qa-security-triage`.
+- Routers rather than eleven skills: the skill index is at 10 611 / 11 000 characters with them.
+- `fleet-apply.sh --qa-bootstrap`: deterministic resolution first, `claude -p` only for a project Injaz ties to
+  exactly one technical project.
+- `validate.js` and `lib/fleet.sh` read plugin names with digits and inner dashes (`maestro-test-e2e`): the
+  cross-plugin guard, the router check and project discovery used to miss them.
+
 ## 5.15.0 — unreleased (audit 5.14.0 fixes)
 
 An independent deep pass (`docs/AUDIT-5.14.0.md`, 70 findings, every H

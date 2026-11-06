@@ -44,7 +44,7 @@ except Exception:
 out = []
 def name_from(chain):
     for k in reversed(chain):
-        m = re.match(r"^(maestro-[a-z]+)(@maestro)?$", str(k))
+        m = re.match(r"^(maestro-[a-z][a-z0-9-]*?)(@maestro)?$", str(k))
         if m:
             return m.group(1)
     return None

@@ -41,6 +41,16 @@
       "name": "maestro-vcs",
       "source": "./plugins/maestro-vcs",
       "description": "Delivery: conventional commits with secret detection and quality gates at commit time (the right moment), pull requests, releases. Layered on top of the official commit-commands plugin."
+    },
+    {
+      "name": "maestro-test-e2e",
+      "source": "./plugins/maestro-test-e2e",
+      "description": "E2E QA with the Injaz QA agents: Playwright web tests, Maestro mobile.dev flows, the qa/map scenario ↔ test file, heal-diff review, flaky policy, the agents' runbook. qa-bootstrap-project resolves the repository to its Injaz project (read-only workstation key) before writing anything."
+    },
+    {
+      "name": "maestro-security",
+      "source": "./plugins/maestro-security",
+      "description": "Defensive security with the Injaz QA security agent: the pinned scanners (gitleaks, OSV-Scanner, Trivy, Semgrep / Opengrep), the Expo bundle and MobSF, passive header / TLS / ZAP checks, scope and licences, finding triage. Defensive only."
     }
   ]
 }

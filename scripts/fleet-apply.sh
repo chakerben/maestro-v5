@@ -16,6 +16,11 @@
 #   --scaffold   `claude -p "/maestro-core:00-onboard scaffold"` (crée
 #                maestro_docs/, le bloc CLAUDE.md, settings) — écrit des
 #                fichiers, donc --permission-mode acceptEdits.
+#   --qa-bootstrap  agents QA d'Injaz : d'abord `qa-resolve-repo` (déterministe,
+#                lecture seule, clé de poste) — un projet que Injaz ne relie à
+#                aucun TechProject (ou à plusieurs) est REFUSÉ, rien n'est lancé ;
+#                sinon `claude -p "/maestro-test-e2e:qa-bootstrap-project"`
+#                (acceptEdits : n'ajoute que le squelette qa/ manquant).
 # Défaut sans action : --settings --doctor.
 #
 # USAGE :
@@ -24,6 +29,7 @@
 #   ./scripts/fleet-apply.sh --settings --all          # gratuit, sans LLM
 #   ./scripts/fleet-apply.sh --doctor ~/Documents/Projects/myproject
 #   ./scripts/fleet-apply.sh --scaffold --doctor --all --jobs 2
+#   ./scripts/fleet-apply.sh --qa-bootstrap --dry-run --all  # projet Injaz de chacun, sans rien écrire
 #
 # Options : --jobs N (défaut 1 : un projet à la fois — la politique de
 # flotte dit "sonnet en parallèle OK, pas de raisonnement lourd en
@@ -42,7 +48,7 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 . "$REPO_ROOT/scripts/lib/fleet.sh"
 
 DRY_RUN=0; ALL=0; LIST_ONLY=0; JOBS=1; MODEL="sonnet"; TIMEOUT=600
-DO_SETTINGS=0; DO_DOCTOR=0; DO_SCAFFOLD=0
+DO_SETTINGS=0; DO_DOCTOR=0; DO_SCAFFOLD=0; DO_QA=0
 PROJECTS=()
 
 while [ $# -gt 0 ]; do
@@ -53,6 +59,7 @@ while [ $# -gt 0 ]; do
     --settings) DO_SETTINGS=1 ;;
     --doctor)   DO_DOCTOR=1 ;;
     --scaffold) DO_SCAFFOLD=1 ;;
+    --qa-bootstrap) DO_QA=1 ;;
     --jobs)     shift; JOBS="${1:-1}" ;;
     --model)    shift; MODEL="${1:-sonnet}" ;;
     --timeout)  shift; TIMEOUT="${1:-600}" ;;
@@ -62,7 +69,7 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
-if [ "$DO_SETTINGS$DO_DOCTOR$DO_SCAFFOLD" = "000" ]; then DO_SETTINGS=1; DO_DOCTOR=1; fi
+if [ "$DO_SETTINGS$DO_DOCTOR$DO_SCAFFOLD$DO_QA" = "0000" ]; then DO_SETTINGS=1; DO_DOCTOR=1; fi
 case "$MODEL" in sonnet|fable|opus) ;; *) echo "--model : sonnet|fable|opus" >&2; exit 2 ;; esac
 
 B='\033[0;34m'; G='\033[0;32m'; Y='\033[1;33m'; R='\033[0;31m'; N='\033[0m'
@@ -72,9 +79,11 @@ err()  { echo -e "  ${R}❌ $1${N}"; }
 act()  { if [ "$DRY_RUN" = "1" ]; then echo -e "  ${B}[dry-run] $1${N}"; else echo -e "  ${B}→ $1${N}"; fi; }
 
 command -v python3 >/dev/null || { err "python3 requis"; exit 1; }
-if [ "$DO_DOCTOR$DO_SCAFFOLD" != "00" ] && [ "$DRY_RUN" = "0" ]; then
-  command -v claude >/dev/null || { err "claude CLI introuvable (requis pour --doctor/--scaffold)"; exit 1; }
+if [ "$DO_DOCTOR$DO_SCAFFOLD$DO_QA" != "000" ] && [ "$DRY_RUN" = "0" ]; then
+  command -v claude >/dev/null || { err "claude CLI introuvable (requis pour --doctor/--scaffold/--qa-bootstrap)"; exit 1; }
 fi
+# Le résolveur du plugin maestro-test-e2e (surchargeable pour les tests).
+QA_RESOLVE="${QA_RESOLVE_BIN:-$REPO_ROOT/plugins/maestro-test-e2e/bin/qa-resolve-repo}"
 
 # ── Timeout portable ──────────────────────────────────────────────────────
 # macOS stock n'a pas `timeout` (GNU coreutils only). On utilise `timeout` si
@@ -164,6 +173,8 @@ run_claude() {  # $1 project, $2 action (doctor|scaffold)
               perm=(--allowedTools "Read,Glob,Grep,Bash") ;;
     scaffold) prompt='/maestro-core:00-onboard scaffold — non-interactive: answer yes to writing permissions.deny and "model": "sonnet"; never overwrite an existing value; report created vs skipped.'
               perm=(--permission-mode acceptEdits --allowedTools "Read,Glob,Grep,Bash,Write,Edit") ;;
+    qa)       prompt='/maestro-test-e2e:qa-bootstrap-project — non-interactive: create only what is missing, never overwrite, never write a secret; report created vs kept and the next step.'
+              perm=(--permission-mode acceptEdits --allowedTools "Read,Glob,Grep,Bash,Write") ;;
   esac
   # Deux projets peuvent partager un basename (chaque worktree `main`) : le log
   # porte le dossier parent aussi, sinon le second écrase le premier.
@@ -195,10 +206,30 @@ one_project() {
   fi
   [ "$DO_SCAFFOLD" = "1" ] && run_claude "$proj" scaffold
   [ "$DO_DOCTOR" = "1" ]   && run_claude "$proj" doctor
+  [ "$DO_QA" = "1" ]       && qa_bootstrap "$proj"
   return 0
 }
 
-echo "Maestro fleet — ${#PROJECTS[@]} projet(s), actions:$( [ $DO_SETTINGS = 1 ] && echo -n ' settings')$( [ $DO_SCAFFOLD = 1 ] && echo -n ' scaffold')$( [ $DO_DOCTOR = 1 ] && echo -n ' doctor'), model $MODEL, jobs $JOBS"
+# ── --qa-bootstrap : résolution déterministe d'abord, LLM seulement si un seul projet ──
+qa_bootstrap() {
+  local proj="$1" out rc
+  out="$("$QA_RESOLVE" "$proj" 2>&1)"; rc=$?
+  if [ $rc -ne 0 ]; then
+    warn "qa: refusé (exit $rc) — $(echo "$out" | head -1)"
+    [ "$DRY_RUN" = "1" ] || printf '%s\tqa\t%s\t0\t-\n' "$proj" "refused-$rc" >> "$SUMMARY"
+    return 0
+  fi
+  local code name repo
+  IFS=$'\t' read -r code name repo _ <<< "$out"
+  ok "qa: $code — $name ($repo)"
+  if ! plugins_of "$proj" | grep -qx 'maestro-test-e2e'; then
+    warn "qa: maestro-test-e2e n'est pas activé dans ce projet — claude plugin install maestro-test-e2e@$MARKETPLACE --scope project"
+    return 0
+  fi
+  run_claude "$proj" qa
+}
+
+echo "Maestro fleet — ${#PROJECTS[@]} projet(s), actions:$( [ $DO_SETTINGS = 1 ] && echo -n ' settings')$( [ $DO_SCAFFOLD = 1 ] && echo -n ' scaffold')$( [ $DO_DOCTOR = 1 ] && echo -n ' doctor')$( [ $DO_QA = 1 ] && echo -n ' qa-bootstrap'), model $MODEL, jobs $JOBS"
 [ "$DRY_RUN" = "1" ] || echo "Logs : $RUN_DIR"
 
 if [ "$JOBS" -le 1 ]; then

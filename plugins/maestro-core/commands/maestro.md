@@ -1,6 +1,6 @@
 ---
 description: Discover Maestro capabilities — the menu of skills, agents, and commands, organized by what you want to do. Optional filter argument (e.g. /maestro mobile).
-argument-hint: "[category: setup | dev | quality | mobile | web | pm | vcs | context]"
+argument-hint: "[category: setup | dev | quality | mobile | web | pm | vcs | qa | context]"
 ---
 
 Show the Maestro 5 capability menu, filtered by `$ARGUMENTS` if given.
@@ -46,6 +46,11 @@ Present it grouped by INTENT (what the user wants to do), not by plugin:
 - PRD → `maestro-pm:00-prd` · Stories → `01-user-stories` · Specs → `02-specs`
 - A finding must go to the team, not be fixed now → `maestro-pm:03-ticket`
 - Submit a mobile build to the stores → `maestro-mobile:03-store-release`
+
+**QA agents (Injaz — when installed)**
+- Prepare a repository for the QA agents → `/maestro-test-e2e:qa-bootstrap-project` · map scenarios → `/maestro-test-e2e:qa-map-scenarios` · coverage → `/maestro-test-e2e:qa-coverage`
+- Write / fix a Playwright test or a Maestro mobile.dev flow, review a heal diff → `maestro-test-e2e:00-qa-e2e`
+- Decide a security finding of the QA agent → `maestro-security:00-qa-security` · `/maestro-security:qa-security-triage`
 
 **Delivery**
 - Open a PR → `maestro-vcs:01-pull-request` · Cut a release → `maestro-vcs:02-release`

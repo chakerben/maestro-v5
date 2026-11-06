@@ -1,0 +1,8 @@
+{
+  "name": "maestro-test-e2e",
+  "version": "5.15.0",
+  "description": "E2E QA with the Injaz QA agents: Playwright web, Maestro mobile.dev flows, the scenario ↔ test map, heal-diff review, flaky policy and the agents' runbook. Commands: qa-bootstrap-project, qa-map-scenarios, qa-heal-review, qa-coverage.",
+  "author": {
+    "name": "Ben Moussa Chaker"
+  }
+}
