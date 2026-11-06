@@ -2,6 +2,9 @@
 
 ## Unreleased — the Injaz QA agent plugins
 
+- **Hooks quoted**: `maestro-core` (SessionStart) and `maestro-quality` (PreToolUse) run `node "${CLAUDE_PLUGIN_ROOT}/hooks/…"`
+  — `claude plugin validate --strict` failed on the unquoted placeholder (a plugin root with a space would split the
+  command); `scripts/validate.js` reads the quoted path. `npm run test:platform` passes for every plugin again.
 - **`maestro-test-e2e`** (new): router `00-qa-e2e` — Playwright web, Maestro mobile.dev flows, the
   `qa/map/<CODE>.scenarios.json` file, heal-diff review, flaky policy, the agents' runbook; commands
   `qa-bootstrap-project`, `qa-map-scenarios`, `qa-heal-review`, `qa-coverage`; `bin/qa-resolve-repo` (asks Injaz

@@ -194,7 +194,7 @@ else ok(`${hookCount} hook(s) total across ${hookSources.length} candidate file(
 console.log('▶ Philosophy rule #2 — no typecheck/test/format, no subprocess in hooks');
 const hookScripts = new Set();
 for (const { h } of hookCommands) {
-  const m = (h.command || '').match(/\$\{CLAUDE_PLUGIN_ROOT\}\/(\S+)/);
+  const m = (h.command || '').match(/\$\{CLAUDE_PLUGIN_ROOT\}\/([^\s"']+)/);
   if (!m) continue;
   for (const { dir } of pluginDirs) {
     const p = path.join(dir, m[1]);
