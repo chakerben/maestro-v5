@@ -197,6 +197,38 @@ to ship as a test, none is built here.
   naming the missing right, 503 on provider outage, no cascade across
   authorities, one token type per audience.
 
+### Added — factory skills (mobile, vcs)
+
+- **`maestro-mobile:06-eas-build-and-ota`** — update URL and runtime policy
+  before the first store build, builds from a clean clone of a committed
+  sha, no native change over the air, explicit public env at export, real
+  install in the publishing directory, delivery claims proven by the update
+  list; tester builds target the acceptance environment by default.
+- **`maestro-vcs:04-deploy-verify`** — "merged" is not "live": deployment
+  identified by commit sha, smoke call, invariant, deploy log; migrations
+  guarded to the production build only; cherry-pick releases with a
+  mandatory schema-versus-migrations diff before and after.
+
+### Changed — `01-rtl-i18n`, `03-worktree`
+
+- **`01-rtl-i18n` default is Western digits 0-9 everywhere (input
+  included) and Gregorian only**, through one formatting helper
+  (`references/formatting.md`). Arabic-Indic digits and Hijri are no longer
+  suggested: they exist only as a recorded project exception. `02-pdf-rtl`
+  and the store checklist follow.
+- React Native direction: two models chosen at project start — forced RTL
+  for an Arabic-only app, `allowRTL` following the language (never
+  `forcesRTL`) for a bilingual one; mirrored root forbidden for new
+  projects; `writingDirection` at block level only
+  (`references/react-native-rtl.md`).
+- Currency is always the SVG icon component; `references/sar.md` shows one
+  rendered example and drops the Unicode-character route.
+- **`03-worktree`**: a mobile or bundler project replaces the
+  `node_modules` link by a real install (skill text and action 02; `gwt` is
+  unchanged); guarded `cd` on `gwt path`, no `git stash` in a shared
+  repository, base cut from the deployed branch, one database and one
+  generated client per worktree.
+
 ## 5.14.0 — the ي keeps its dots (2026-10-15)
 
 Nemah's client reported «الياء ناقصة» on `حسابي` / `نعمي` / `الشخصي`: the
