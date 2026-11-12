@@ -26,3 +26,8 @@ Mobile + Arabic — the Maestro differentiator.
   dispose/async discipline (where Flutter apps actually break), 4 states,
   perf; Firebase named instances and platform channels in
   `references/firebase-and-channels.md`
+- `06-eas-build-and-ota` — store/tester binaries and over-the-air updates:
+  update URL and runtime policy before the first build, clean-clone builds,
+  no native change over the air, explicit env at export, tester builds on
+  the acceptance environment by default, delivery claims proven by the
+  update list
