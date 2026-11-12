@@ -25,6 +25,8 @@
 - [ ] An equivalent privacy-preserving login (Sign in with Apple qualifies) when third-party social login is offered (Apple 4.8)
 - [ ] iOS: ATT prompt (`NSUserTrackingUsageDescription`, Apple 5.1.2) when any SDK reads the IDFA; none requested otherwise
 - [ ] Age rating questionnaire answered from the actual features (UGC, chat, gambling-like mechanics, ads)
+- [ ] Android manifest matches the privacy claim: no permission the listing or the data-safety form denies (read the merged manifest of the release build)
+- [ ] Privacy policy and account-deletion URLs answer 200 right now; seed and test accounts are purged from production data the reviewer can see
 - [ ] Export compliance answered; `ITSAppUsesNonExemptEncryption` set explicitly in Info.plist / `app.json` (`ios.config.usesNonExemptEncryption`)
 
 ## 3. Store listing
@@ -33,7 +35,8 @@
 - [ ] Screenshots per device class, per language — Arabic ones taken in RTL with real Arabic content
 - [ ] Preview video (optional) has no third-party trademarks
 - [ ] Support URL and contact answer within the review window
-- [ ] Demo account for the reviewer, with data, documented in review notes (if login required)
+- [ ] Demo account for the reviewer, with data, documented in review notes (if login required); it signs in **without receiving an SMS or e-mail code**
+- [ ] The app has its own icon, splash and listing name — none shared with another app of the same developer account (spam rejection, account-wide); unrelated client brands live under separate developer accounts
 - [ ] What's-new text written for users, not from the changelog
 
 ## 4. KSA specifics
@@ -47,6 +50,8 @@
 
 ## 5. Final
 
+- [ ] One full pass on a tablet layout (review runs on it even for a phone-only app)
+- [ ] Upcoming platform requirements read for this release (minimum SDK, scene lifecycle, deprecations with a date) and written here with their deadline
 - [ ] Fresh install → onboarding → main flow → logout, on iOS and Android physical devices, in `ar` and the second locale
 - [ ] Offline start does not crash; airplane-mode screens show the error state with retry
 - [ ] Rollback plan written: which OTA/rollback lever, who can trigger it

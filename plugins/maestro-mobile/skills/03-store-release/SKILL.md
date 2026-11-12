@@ -51,6 +51,14 @@ Arguments: `$ARGUMENTS` (platform, then optional rejection text)
 - Age rating and data-safety answers are read from the code (analytics SDKs,
   auth, payments, UGC), not from memory.
 - A build submitted from an uncommitted tree is a `NO-GO`.
+- Never resubmit unchanged after a spam or duplicate rejection: answer in
+  the review thread with what makes the app distinct — because an identical
+  resubmission repeats the rejection and the flag is account-wide.
+- Answer a "minimum functionality" rejection with content and features,
+  not with platform mirrors (widget, watch app) — because review rounds
+  were lost on mirrors.
+- The reviewer account never depends on a code sent to a phone — because
+  reviewers cannot receive it.
 
 ## Test
 
