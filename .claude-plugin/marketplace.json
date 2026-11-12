@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "maestro",
   "version": "5.15.0",
-  "description": "Maestro 5 — Business-layer framework for web & mobile development on top of official Claude Code plugins. RTL/Arabic-native, opinionated stack (Next.js, Prisma, Clerk, Expo), workflow-enforced quality.",
+  "description": "Maestro 5 — Business-layer framework for web & mobile development on top of official Claude Code plugins. RTL/Arabic-native, opinionated stack (Next.js, Prisma, Zod, Expo), workflow-enforced quality.",
   "owner": {
     "name": "Ben Moussa Chaker"
   },
@@ -30,7 +30,7 @@
     {
       "name": "maestro-web",
       "source": "./plugins/maestro-web",
-      "description": "Web standards: Next.js + Prisma + Clerk + PostgreSQL + Zod stack enforcement, UX standards, design review with RTL awareness — layered on top of the official frontend-design plugin."
+      "description": "Web standards: Next.js + Prisma/PostgreSQL + Zod stack with one server identity module (auth provider behind it), database safety, API boundaries, UX standards, design review with RTL awareness — layered on top of the official frontend-design plugin."
     },
     {
       "name": "maestro-payments",

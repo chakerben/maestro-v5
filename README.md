@@ -47,7 +47,7 @@ project memory bank.
 | `maestro-dev` | brainstorm, sdlc, plan, implement, debug, lean-code, protocols + executor/checker/m-architect/m-devil-advocate/m-analyst/m-i18n-checker agents | 0 |
 | `maestro-quality` | Quality gates at commit/review time | 1 (PreToolUse bash-guard) |
 | `maestro-mobile` | RN/Expo + Flutter standards, RTL Arabic (web/RN/Flutter), RTL PDF (+ ZATCA), store release | 0 |
-| `maestro-web` | Next.js/Prisma/Clerk stack, UX, design review, motion (GSAP+Lenis, RTL-safe) | 0 |
+| `maestro-web` | Next.js/Prisma stack (auth provider behind one identity module), DB safety, API boundaries, UX, design review, motion (GSAP+Lenis, RTL-safe) | 0 |
 | `maestro-payments` | Payment integrity: server-decided success, idempotent webhooks + reconciliation, integer minor units, crash-safe refunds | 0 |
 | `maestro-pm` | PRD, user stories, specs (FR/EN/AR), tickets → Trello, writing rules (anti-slop, AR register) | 0 |
 | `maestro-vcs` | Commits with gates (executable secrets scan), PRs, releases, one-worktree-per-branch | 0 |
@@ -58,8 +58,8 @@ A **business layer**, not a platform competitor: rule #8 says never rebuild what
 Anthropic maintains, and `00-onboard` recommends the official plugin whenever one
 exists.
 
-**Opinionated**: Next.js App Router, Prisma/PostgreSQL, Clerk, Zod and Tailwind on
-the web; Expo or Flutter on mobile. Deviating is allowed and gets recorded in
+**Opinionated**: Next.js App Router, Prisma/PostgreSQL, one server identity module
+(the auth provider behind it), Zod and Tailwind on the web; Expo or Flutter on mobile. Deviating is allowed and gets recorded in
 `tech-decisions.md`.
 
 **Built for the Arabic market**, Saudi first. RTL correctness, the six Arabic
