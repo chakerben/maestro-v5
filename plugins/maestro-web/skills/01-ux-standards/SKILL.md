@@ -53,9 +53,32 @@ Every action acknowledges within 100ms (optimistic or pending state). Toasts
 for background outcomes; inline for field-level; never toast a form error the
 user must fix.
 
+## Honest surfaces
+
+- A refusal (403) is its own screen naming the missing permission, never an
+  error banner with "retry" — because users retried forever and reported a
+  breakdown. One shared refusal component.
+- No fabricated number on a live surface: a stub throws or says "not
+  measured"; show the honest zero or the last real value — because demo
+  numbers reached testers and clients.
+- Never render a control that leads to nothing; zero is a value; an unknown
+  is not a dash-filled row — because empty production data looked broken.
+- Test every screen with the longest real values and the emptiest real
+  account — because prototype data is shorter and always filled.
+- Test at laptop height (768 px): one scroll region per column, sticky
+  primary action — because the submit button was unreachable.
+- A field required at sign-up is editable somewhere afterwards — because
+  users were trapped with a wrong value.
+- No visible "revalidating" indicator over data already shown — because
+  users read it as "stuck".
+- One page-header action slot and shared formatters for money and dates —
+  because per-screen variants drifted. Ship the sweep (every page uses the
+  shared refusal component and formatters) as a test, not as prose.
+
 ## Test
 
 Every data surface built under this skill renders the four states (loading,
 empty, error with retry, data); every input has a real `<label>`; the
 keyboard path reaches every interactive element; and destructive actions name
-their consequence in the confirmation.
+their consequence in the confirmation; a 403 renders the refusal screen
+with the missing permission named; no number on screen is fabricated.
