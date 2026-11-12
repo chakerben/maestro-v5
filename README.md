@@ -63,7 +63,7 @@ exists.
 `tech-decisions.md`.
 
 **Built for the Arabic market**, Saudi first. RTL correctness, the six Arabic
-plural categories, Hijri dates, SAR rendering, Arabic PDF and ZATCA are not an
+plural categories, 0-9 digits and Gregorian dates, SAR rendering, Arabic PDF and ZATCA are not an
 afterthought here — they are why the framework exists.
 
 **Not** a general-purpose agent harness, not an orchestrator, and it does not want

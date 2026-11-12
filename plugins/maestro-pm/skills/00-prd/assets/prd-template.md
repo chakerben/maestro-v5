@@ -19,7 +19,7 @@
 ## User flows (happy + top failure)
 
 ## i18n / market notes
-<languages, RTL, Hijri/VAT/regulatory if KSA>
+<languages, RTL, VAT/regulatory if KSA>
 
 ## Risks & open questions
 | Risk/Question | Impact | Owner |

@@ -59,8 +59,8 @@ rule 2 (`${CLAUDE_PLUGIN_ROOT}/skills/06-protocols/SKILL.md`) — state
 confidence, name the specific unknown rather than smoothing over it.
 
 **When the project has an `ar` locale**, the market questions are asked
-unprompted: numerals arab or latn, Hijri or Gregorian, who reads this in Arabic
-and on what device. These are shape-changing questions, not polish.
+unprompted: Arabic-only or bilingual, any recorded exception to the 0-9 /
+Gregorian default, who reads this in Arabic and on what device. These are shape-changing questions, not polish.
 
 ## Where the work lands
 

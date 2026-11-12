@@ -19,7 +19,7 @@
 ## Parcours utilisateur (nominal + principal échec)
 
 ## Notes i18n / marché
-<langues, RTL, Hijri/TVA/réglementaire si KSA>
+<langues, RTL, TVA/réglementaire si KSA>
 
 ## Risques et questions ouvertes
 | Risque / Question | Impact | Responsable |
