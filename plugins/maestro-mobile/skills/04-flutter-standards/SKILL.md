@@ -1,6 +1,6 @@
 ---
 name: 04-flutter-standards
-description: Flutter/Dart conventions — structure, state out of widgets, async and dispose discipline, Firebase access, platform channels, performance, secrets. Auto-applies when working in a Flutter project (pubspec.yaml, lib/**.dart). Not for React Native/Expo (00-mobile-standards), not for Arabic/RTL depth (01-rtl-i18n covers Flutter's directional APIs and fonts).
+description: Flutter/Dart conventions — structure, state, async and dispose discipline, Firebase, platform channels, performance. Auto-applies in a Flutter project (pubspec.yaml, lib/**.dart). Not for React Native/Expo (00-mobile-standards) or Arabic/RTL depth (01-rtl-i18n).
 user-invocable: false
 paths:
   - "pubspec.yaml"
