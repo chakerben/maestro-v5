@@ -1,6 +1,6 @@
 ---
 name: 01-rtl-i18n
-description: Arabic and RTL correctness for web and mobile — layout mirroring, Arabic typography and plurals, Hijri dates, numerals, currency, font metrics. Auto-applies when the project has an ar locale or the task mentions Arabic/RTL; say audit to audit RTL readiness.
+description: Arabic and RTL correctness for web and mobile — direction model, mirroring, plurals, digits, dates, currency icon, font metrics. Auto-applies with an ar locale or an Arabic/RTL task; say audit to audit RTL readiness.
 argument-hint: "[audit]"
 paths:
   - "**/ar.json"
@@ -14,100 +14,95 @@ paths:
 
 # Skill: rtl-i18n
 
-Arabic-grade i18n. "Flipping the layout" is 20% of the job — this skill
-covers the other 80%.
+Arabic-grade i18n. Flipping the layout is 20% of the job. Every rule names
+the incident class it prevents.
 
-## Layout rules (web)
+## Defaults: digits, calendar, currency
 
-- **Logical properties ONLY**: `margin-inline-start`, `padding-inline-end`,
-  `inset-inline-start`, `border-start-start-radius`, `text-align: start`.
-  Physical `left/right` in styles is a review finding.
-- Tailwind: use `ms-*`/`me-*`/`ps-*`/`pe-*`/`start-*`/`end-*` utilities —
-  never `ml-*`/`mr-*` in a multilingual codebase.
-- `dir` set on `<html>` from the locale; `dir="auto"` on user-generated
-  content containers (a bidi comment field renders correctly regardless of
-  the surrounding page direction).
-- Flexbox/Grid mirror automatically under `dir=rtl` — do NOT add
-  `flex-row-reverse` "for RTL"; that double-flips.
+A project may deviate only by a decision recorded in tech-decisions.md.
 
-## Layout rules (React Native)
+- **Western digits 0-9 everywhere, input included** — because mixed digit
+  sets broke validation, search and comparisons.
+- **Gregorian only** — because the default calendar varies by runtime.
+- **One formatting helper** owns every number, date and amount, pinned to
+  `nu-latn`, `ca-gregory` and an explicit time zone; no `Intl` or
+  `toLocaleString` call outside it — because per-call defaults drift
+  (`references/formatting.md`).
+- Normalise Arabic-Indic and Persian digits to 0-9 on every input, before
+  validation — because pasted and keyboard digits fail numeric checks.
+- **Currency is always the SVG icon component**, never a Unicode character
+  or font glyph — because fallback fonts lack it. Never ﷼ (U+FDFC is another
+  currency). Placement: the rendered example in `references/sar.md`.
 
-- `I18nManager.allowRTL(true)` + `forceRTL` per locale — **requires an app
-  restart** to apply; design the language switcher accordingly (Expo:
-  `expo-updates` reload).
-- Native flags: `android:supportsRtl="true"`; Expo: the `expo-localization`
-  plugin (`supportsRTL` / `forcesRTL`). Trap: below 58.0.5 the plugin resets
-  `forceRTL` from the device locale at every cold start — upgrade, or do not
-  pass those options when the app has a language switcher. Not in Expo Go.
-- Use `start`/`end` style props (`marginStart`, `paddingEnd`) — RN maps them
-  per direction. `writingDirection` for text alignment edge cases.
-- `flexDirection: 'row'` auto-mirrors under RTL. Never hand-reverse.
+## Layout (web)
+
+- Logical properties only (`margin-inline-start`, `inset-inline-end`,
+  `text-align: start`; Tailwind `ms-*`/`pe-*`/`start-*`) — because a physical
+  `left/right` stays invisible until the other direction is tested.
+- `dir` on `<html>` from the locale, passed again to every portal/overlay
+  root — because portalled content loses the document direction.
+- `dir="auto"` on user-generated text, on the text element (not the table
+  cell), never on an empty input — because caret and placeholder jump sides.
+- Never `flex-row-reverse` "for RTL" — because flex and grid already mirror.
+
+## Layout (React Native)
+
+Read `references/react-native-rtl.md` before the first RN screen.
+
+- Choose the direction model at project start and record it: **Arabic-only
+  = forced RTL**; **bilingual = `allowRTL` following the language + reload,
+  never `forcesRTL`** — because mixed models double-flipped for months.
+- Never mirror the root view with a transform (forbidden for new projects)
+  — because every modal, icon, list and input then needs its own exception.
+- `start`/`end` style props only; ship the ban on physical props as a lint
+  rule, not as prose.
+- `writingDirection` at block level only, never on a text run; isolate
+  mixed fragments with bidi isolates — because iOS reorders the paragraph.
+- Explicit `textAlign` on every `TextInput` — because inputs ignore
+  inherited direction.
 
 ## What flips and what doesn't
 
-- **Flip**: directional arrows, chevrons, back icons, progress direction,
-  carousel order, stepper flow.
-- **Never flip**: logos, clocks, media playback controls (play stays ▶),
-  phone numbers, code blocks, maps, checkmarks.
-- **Phone input is an LTR object** even on an RTL screen: country-code box on
-  the LEFT, digits left-aligned, label RTL — recipe (web `dir="ltr"`, RN
-  `direction: 'ltr'`) in `references/rtl-checklist.md`.
+- **Flip**: back/forward icons (chosen by intention, not by arrow name),
+  chevrons, progress, carousel order, stepper flow.
+- **Never flip**: logos, clocks, media controls, code blocks, maps,
+  checkmarks, phone numbers.
+- **Phone input is an LTR object** on an RTL screen: recipe in
+  `references/rtl-checklist.md`.
 
-## Text, plurals, numbers, dates
+## Text and fonts
 
-- Arabic has **6 CLDR plural categories** (zero, one, two, few, many, other).
-  Every count string uses ICU plural syntax — a hardcoded "s" suffix is a bug.
-- Numerals: decide per market — `ar-SA` commonly uses Arabic-Indic digits
-  (٠١٢٣) in consumer contexts. Control via
-  `Intl.NumberFormat('ar-SA', { numberingSystem: 'arab' | 'latn' })` and
-  record the choice in tech-decisions.md.
-- Dates: Saudi context often requires **Hijri** —
-  `new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura')`. Dual display
-  (Hijri + Gregorian) for legal/official documents.
-- Currency: format with `Intl.NumberFormat(…, { currencyDisplay: 'code' })`
-  and replace the `SAR` token by `assets/sar-icon.svg` (see
-  `references/sar.md`) placed **before** the number with a space (SAMA rule,
-  all languages). U+20C1 SAUDI RIYAL SIGN (Unicode 17, Sept 2025) as text only
-  when every font in the render path has the glyph; never ﷼ (U+FDFC is the
-  Iranian rial sign).
-
-## Fonts
-
-- UI: Cairo, Tajawal, or IBM Plex Sans Arabic (include Latin subset for
-  mixed text). Print/PDF: Amiri or Noto Naskh Arabic.
-- Line-height: Arabic needs ~1.6–1.8 (taller than Latin defaults) — check
-  clipping of diacritics and descenders.
-- letter-spacing MUST be 0 for Arabic — tracking breaks cursive joining.
-- **Mobile metrics check (mandatory, RN/Expo and Flutter)**: `pip install
-  fonttools`, then `python3 ${CLAUDE_PLUGIN_ROOT}/skills/01-rtl-i18n/assets/font-metrics.py check <fonts>`
-  before the first device build and after every font bump. `CLIP` = the
-  declared descent is smaller than the ي dots and the device cuts them; fix
-  with `… fix <fonts> --out assets/fonts` (same family names). Procedure:
-  `references/arabic-font-metrics.md`.
+- Arabic has **6 CLDR plural categories**: every count string uses ICU
+  plural syntax and names the set, not the statistic.
+- letter-spacing 0 on Arabic (tracking breaks joining); line-height
+  ~1.6–1.8; UI fonts with a Latin subset.
+- **Mobile metrics check (mandatory)**: `python3
+  ${CLAUDE_PLUGIN_ROOT}/skills/01-rtl-i18n/assets/font-metrics.py check <fonts>`
+  before the first device build and after every font bump; `CLIP` = the
+  device cuts the ي dots (`references/arabic-font-metrics.md`).
+- CSV for Arabic: BOM, always quoted — because spreadsheets show mojibake.
 
 ## Flutter
 
-Read `references/flutter-rtl.md` **before** any Flutter UI in a project with
-an `ar` locale. In one line: `EdgeInsetsDirectional`, never
-`EdgeInsets.only(left:)`; ARB + `gen_l10n`, never an `isArabic` ternary; a
-Latin font has no Arabic glyphs.
+Read `references/flutter-rtl.md` before any Flutter UI with an `ar` locale:
+`EdgeInsetsDirectional`, ARB + `gen_l10n`, an Arabic font family.
 
 ## Audit mode (`audit` argument)
 
-Scan the scope and report: physical CSS properties, hardcoded strings
-outside the i18n layer, count strings without plural syntax, icons flipped
-wrong, `letter-spacing` on Arabic text, date/number formatting without
-locale. Each finding: file, evidence, fix. See `references/rtl-checklist.md`.
+Report, per finding, file + evidence + fix: physical properties, strings
+outside the i18n layer, counts without plural syntax, wrongly flipped icons,
+letter-spacing on Arabic, formatting outside the helper, non-Latin digits or
+a non-Gregorian calendar without a recorded exception, a currency character,
+`writingDirection` on a text run. Checklist: `references/rtl-checklist.md`.
 
 ## Test
 
-- Code written under this skill contains no physical `left|right|ml-|mr-|pl-|pr-`
-  property on a directional element, no `letter-spacing` other than 0 on
-  Arabic text, and every count string uses ICU plural with the six Arabic
-  categories.
-- `audit` output lists each finding as file:line + quoted evidence + fix, and
-  the arab-vs-latn digits choice is either read from tech-decisions.md or
-  flagged as "decision needed" — never assumed.
-- A mobile project with an `ar` locale ships no Arabic font file for which
-  `font-metrics.py check` reports `CLIP` or `NO-ARABIC`; the check (or the
-  fixed copy in `assets/fonts`) is recorded in the release log.
+- Code written under this skill has no physical `left|right|ml-|mr-|pl-|pr-`
+  on a directional element, no letter-spacing on Arabic text, and ICU
+  plurals with the six Arabic categories.
+- `grep -rnE "numberingSystem: *'arab'|nu-arab|ca-islamic|forcesRTL|﷼"`
+  finds nothing outside a recorded exception; every `Intl.` call sits in the
+  formatting helper; the amount renders as in `references/sar.md`.
+- An RN project names its direction model in tech-decisions.md.
+- No shipped Arabic font reports `CLIP` or `NO-ARABIC`; the check is
+  recorded in the release log.

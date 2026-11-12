@@ -32,9 +32,10 @@ disconnected and left-to-right. This skill encodes the reliable route.
 - **Embed fonts** — never rely on system fonts in headless: Amiri or
   Noto Naskh Arabic for body, Cairo for headings, `@font-face` with local
   files, `font-display: block`.
-- Numbers in tables: decide arab vs latn digits per document type (invoices
-  for government: follow the authority's requirement; record it).
-- Dual dates on official docs: Hijri (islamic-umalqura) + Gregorian.
+- Digits 0-9 and Gregorian dates, through the project's formatting helper
+  (01-rtl-i18n `references/formatting.md`). Arabic-Indic digits or a Hijri
+  date next to the Gregorian one only where an authority requires it for
+  that document type — a recorded project exception.
 - Currency: inline SVG from `01-rtl-i18n/assets/sar-icon.svg` (see its
   `references/sar.md`); icon fonts often don't load headless.
 - Mixed content cells (Arabic + product codes): wrap LTR runs in

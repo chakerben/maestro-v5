@@ -38,10 +38,10 @@
 
 ## 4. KSA specifics
 
-- [ ] Hijri date display verified where the product shows dates to Saudi users
-- [ ] SAR rendering per `01-rtl-i18n/references/sar.md` (icon or U+20C1 with verified font), never the ﷼ glyph; amounts formatted per locale decision
+- [ ] Dates are Gregorian and digits 0-9 on every screen and input (a Hijri display or Arabic-Indic digits only as an exception recorded in tech-decisions.md)
+- [ ] SAR rendered by the SVG icon component as in `01-rtl-i18n/references/sar.md`; no currency character anywhere
 - [ ] Arabic typography: no letter-spacing, line-height ≥ 1.6, diacritics not clipped
-- [ ] Numerals decision (arab vs latn) applied consistently and recorded in tech-decisions.md
+- [ ] RN: the direction model is the recorded one (forced RTL for an Arabic-only app; `allowRTL` following the language, no `forcesRTL`, for a bilingual one)
 - [ ] Regulatory content present when the domain requires it (CST/PDPL notices, charity licence number for donation apps, VAT number on receipts)
 - [ ] Phone/OTP flows tested with a +966 number; SMS sender ID registered
 
