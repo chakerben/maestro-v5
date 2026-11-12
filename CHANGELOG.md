@@ -197,6 +197,16 @@ to ship as a test, none is built here.
   naming the missing right, 503 on provider outage, no cascade across
   authorities, one token type per audience.
 
+### Changed — other web and quality skills
+
+- `01-ux-standards` gains "Honest surfaces" (403 as its own screen naming
+  the missing right, no fabricated numbers, longest-value and laptop-height
+  tests); `03-motion` requires reveal content in the server HTML and bans
+  tracking on Arabic.
+- `01-security-audit` gains a recurring-findings pass (15 lines, each
+  reported found / not found / not applicable); `02-perf-audit` starts by
+  locating the time (server vs total, cold path, round trips, regions).
+
 ### Added — factory skills (mobile, vcs)
 
 - **`maestro-mobile:06-eas-build-and-ota`** — update URL and runtime policy
