@@ -238,6 +238,15 @@ to ship as a test, none is built here.
   unchanged); guarded `cd` on `gwt path`, no `git stash` in a shared
   repository, base cut from the deployed branch, one database and one
   generated client per worktree.
+- **`00-mobile-standards`**: session, async and navigation rules (only a
+  401/403 ends a session, one `endIdentity()`, alive/busy/sequence guards,
+  absolute `router.push`, no test file under the routes folder) and data
+  rules (no client-only server entity, stale-while-revalidate, no mock in a
+  production bundle).
+- **`03-store-release`**: checklist gains own icon/splash/name per app,
+  reviewer account without SMS, tablet pass, live privacy and deletion URLs,
+  manifest matching the privacy claim, upcoming platform requirements; never
+  resubmit unchanged after a spam rejection.
 
 ## 5.14.0 — the ي keeps its dots (2026-10-15)
 
