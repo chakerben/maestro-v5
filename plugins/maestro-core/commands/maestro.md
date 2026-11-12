@@ -37,13 +37,14 @@ Present it grouped by INTENT (what the user wants to do), not by plugin:
 - Deep security audit → `maestro-quality:01-security-audit`
 - Performance audit → `maestro-quality:02-perf-audit`
 - Gate level config → `maestro-quality:00-quality-gate`
+- A check that may lie (pipes, skips, fake green) → `maestro-quality:03-trustworthy-gates` · Env vars & secrets → `04-secrets-and-env`
 - Charging, webhooks, refunds → `maestro-payments:00-payment-integrity`
 
 **Mobile / Web / PM**
 - RN/Expo standards → `maestro-mobile:00-mobile-standards` · Flutter → `04-flutter-standards`
 - Arabic RTL i18n (or `audit`) → `maestro-mobile:01-rtl-i18n`
 - Arabic PDF generation → `maestro-mobile:02-pdf-rtl`
-- Stack enforcement → `maestro-web:00-web-standards` · UX → `01-ux-standards` · Review a screen → `02-design-review` · Landing motion → `03-motion`
+- Stack enforcement → `maestro-web:00-web-standards` · UX → `01-ux-standards` · Review a screen → `02-design-review` · Landing motion → `03-motion` · Schema, migrations → `04-db-safety` · Routes, schemas, errors → `05-api-boundaries`
 - PRD → `maestro-pm:00-prd` · Stories → `01-user-stories` · Specs → `02-specs`
 - A finding must go to the team, not be fixed now → `maestro-pm:03-ticket`
 - Submit a mobile build to the stores → `maestro-mobile:03-store-release`

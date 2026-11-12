@@ -157,6 +157,46 @@ release gives each one an exit code:
   evidence a session can read; `00-commit` no longer claims to delegate to
   commit-commands; `install-shortcuts.sh` no longer writes `/auto` twice.
 
+### Added — factory skills (web, quality, payments)
+
+Rules promoted from the recurring incident classes of the analysed
+projects; each rule carries its "because", each guard is named as a guard
+to ship as a test, none is built here.
+
+- **`maestro-web:04-db-safety`** — no production URL on previews, migrate
+  guarded to the production build only, no destructive verb in any build
+  config, idempotent ordered migrations, additive first, schema-vs-migrations
+  diff before and after a selective release, validated strings instead of
+  database enums for vocabularies that grow.
+- **`maestro-web:05-api-boundaries`** — opaque ids, PATCH without defaults,
+  stable error codes, idempotent public writes, side effects after the
+  response, files behind signed short-lived URLs.
+- **`maestro-quality:03-trustworthy-gates`** — a gate is seen red once
+  before its green counts; exit codes read apart from any pipe; a skipped
+  test is red; the commit is verified, not the working tree.
+- **`maestro-quality:04-secrets-and-env`** — never display a secret, one
+  real call after setting one, explicit target environment (skill text
+  only: `bash-guard` is unchanged).
+- **New plugin `maestro-payments`**, skill `00-payment-integrity` — the
+  server asks the gateway, amounts recomputed in integer minor units,
+  raw-body signed idempotent webhooks backed by reconciliation, crash-safe
+  refunds, explicit live-mode flag. Ten manifests now carry the version.
+
+### Changed — `00-web-standards`
+
+- **Clerk is no longer imposed**: the standard is one server identity
+  module with the provider behind it (marketplace, plugin and README
+  descriptions follow).
+- Order in every route handler and server action is now session →
+  permission → validation (was validate → authorize).
+- Public writes and writes called by a mobile app are API route handlers;
+  server actions only for authenticated back-office writes.
+- Errors: stable code plus a safe, already-localized message.
+- New "Authorization and identity" block: authorize in every server
+  function, permissions as data, 404 for an out-of-scope object and 403
+  naming the missing right, 503 on provider outage, no cascade across
+  authorities, one token type per audience.
+
 ## 5.14.0 — the ي keeps its dots (2026-10-15)
 
 Nemah's client reported «الياء ناقصة» on `حسابي` / `نعمي` / `الشخصي`: the
