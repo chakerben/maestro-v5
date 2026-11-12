@@ -18,6 +18,7 @@ The relevant Maestro plugins installed at project scope, status reported.
 | Always | `maestro-dev`, `maestro-quality`, `maestro-vcs` |
 | Next.js / web frontend | `maestro-web` |
 | React Native / Expo / Flutter | `maestro-mobile` |
+| A payment gateway SDK, a checkout or a payment webhook | `maestro-payments` |
 | Product docs wanted (ask) | `maestro-pm` |
 
 ## Process

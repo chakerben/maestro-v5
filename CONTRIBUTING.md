@@ -19,7 +19,7 @@ One command, nine checks, 219 cases — and it is the whole contract:
 
 | Check | What it refuses |
 |---|---|
-| `check-versions.js` | version drift across the 9 manifests |
+| `check-versions.js` | version drift across the 10 manifests |
 | `validate.js` | a hook declared anywhere but `hooks/hooks.json`; a hook without `timeout` or `${CLAUDE_PLUGIN_ROOT}`; a hook script that spawns processes or names test/format tooling; an agent without `role:`; a reviewer that can write; a skill with no `## Test`; a `!`cmd`` injection without `allowed-tools`; a `dependencies` field; a dependency cycle |
 | `context-budget.js` | a description over 700 chars; the skill index over 11k; the router over 2k; a preloaded skill over 4k; an agent dispatch over 6k; a hook over 100 ms |
 | `tests/bash-guard.test.sh` | 126 cases — blocked spellings, false positives, and the documented bypasses asserted as passing |
@@ -84,7 +84,7 @@ Five questions; the first "no" ends the evaluation.
 ## Commits, branches, releases
 
 Conventional Commits, in English. Scopes follow the plugin or the area:
-`core, dev, mobile, web, pm, quality, vcs, scripts, validate, docs`.
+`core, dev, mobile, web, payments, pm, quality, vcs, scripts, validate, docs`.
 
 The main checkout stays on the default branch; every branch gets its own
 worktree (`gwt new <branch>`, skill `maestro-vcs:03-worktree`). In a shared

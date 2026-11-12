@@ -48,6 +48,7 @@ project memory bank.
 | `maestro-quality` | Quality gates at commit/review time | 1 (PreToolUse bash-guard) |
 | `maestro-mobile` | RN/Expo + Flutter standards, RTL Arabic (web/RN/Flutter), RTL PDF (+ ZATCA), store release | 0 |
 | `maestro-web` | Next.js/Prisma/Clerk stack, UX, design review, motion (GSAP+Lenis, RTL-safe) | 0 |
+| `maestro-payments` | Payment integrity: server-decided success, idempotent webhooks + reconciliation, integer minor units, crash-safe refunds | 0 |
 | `maestro-pm` | PRD, user stories, specs (FR/EN/AR), tickets → Trello, writing rules (anti-slop, AR register) | 0 |
 | `maestro-vcs` | Commits with gates (executable secrets scan), PRs, releases, one-worktree-per-branch | 0 |
 

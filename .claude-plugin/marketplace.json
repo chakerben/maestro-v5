@@ -33,6 +33,11 @@
       "description": "Web standards: Next.js + Prisma + Clerk + PostgreSQL + Zod stack enforcement, UX standards, design review with RTL awareness — layered on top of the official frontend-design plugin."
     },
     {
+      "name": "maestro-payments",
+      "source": "./plugins/maestro-payments",
+      "description": "Payment integrity: gateway-independent rules for charging, confirming, refunding and reconciling money — server-decided success, idempotent webhooks backed by reconciliation, integer minor units."
+    },
+    {
       "name": "maestro-pm",
       "source": "./plugins/maestro-pm",
       "description": "Product management: PRD, user stories, technical specs — FR/EN/AR templates — and tickets (a finding becomes a Trello card, never a silent fix)."

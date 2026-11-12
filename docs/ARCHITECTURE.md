@@ -18,6 +18,7 @@ flowchart TB
     QUAL["maestro-quality<br/>gates at commit/review"]
     MOB["maestro-mobile<br/>RN/Expo · RTL AR · PDF RTL"]
     WEB["maestro-web<br/>stack enforcement · UX · design review"]
+    PAY["maestro-payments<br/>payment integrity"]
     PM["maestro-pm<br/>PRD · stories · specs (FR/EN/AR)"]
     VCS["maestro-vcs<br/>commit+gates · PR · release"]
   end

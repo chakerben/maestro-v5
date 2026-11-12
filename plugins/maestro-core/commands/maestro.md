@@ -37,6 +37,7 @@ Present it grouped by INTENT (what the user wants to do), not by plugin:
 - Deep security audit → `maestro-quality:01-security-audit`
 - Performance audit → `maestro-quality:02-perf-audit`
 - Gate level config → `maestro-quality:00-quality-gate`
+- Charging, webhooks, refunds → `maestro-payments:00-payment-integrity`
 
 **Mobile / Web / PM**
 - RN/Expo standards → `maestro-mobile:00-mobile-standards` · Flutter → `04-flutter-standards`
