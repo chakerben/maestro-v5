@@ -1,6 +1,6 @@
 ---
 name: 03-store-release
-description: Use when a mobile build is about to be submitted to the App Store or Google Play — "on soumet", "TestFlight", "review Apple", "publier sur le store", a release checklist request, or a store rejection to work through. Produces a go/no-go checklist with evidence, KSA-specific items included (Arabic screenshots, age rating, data disclosure, payment rules). Not for cutting the git release (maestro-vcs:02-release) nor for building features.
+description: Use when a mobile build is about to be submitted to the App Store or Google Play — "on soumet", "TestFlight", "review Apple", a release checklist request, or a store rejection to work through. Not for the git release (maestro-vcs:02-release) nor for building or publishing updates (06-eas-build-and-ota).
 argument-hint: "[ios | android | both] [rejection text]"
 allowed-tools: Bash   # turn-scoped: the !`…` injections below use shell builtins, pipes and $(…) that pattern grants do not cover
 ---
@@ -51,6 +51,14 @@ Arguments: `$ARGUMENTS` (platform, then optional rejection text)
 - Age rating and data-safety answers are read from the code (analytics SDKs,
   auth, payments, UGC), not from memory.
 - A build submitted from an uncommitted tree is a `NO-GO`.
+- Never resubmit unchanged after a spam or duplicate rejection: answer in
+  the review thread with what makes the app distinct — because an identical
+  resubmission repeats the rejection and the flag is account-wide.
+- Answer a "minimum functionality" rejection with content and features,
+  not with platform mirrors (widget, watch app) — because review rounds
+  were lost on mirrors.
+- The reviewer account never depends on a code sent to a phone — because
+  reviewers cannot receive it.
 
 ## Test
 

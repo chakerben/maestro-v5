@@ -1,7 +1,7 @@
 {
   "name": "maestro-web",
   "version": "5.15.0",
-  "description": "Web standards: Next.js + Prisma + Clerk + PostgreSQL + Zod stack enforcement, UX standards, RTL-aware design review, and marketing motion (CSS first, GSAP + Lenis) layered on the official frontend-design plugin.",
+  "description": "Web standards: Next.js + Prisma/PostgreSQL + Zod stack with one server identity module (auth provider behind it), database safety, API boundaries, UX standards, RTL-aware design review, and marketing motion (CSS first, GSAP + Lenis) layered on the official frontend-design plugin.",
   "author": {
     "name": "Ben Moussa Chaker"
   }

@@ -157,6 +157,97 @@ release gives each one an exit code:
   evidence a session can read; `00-commit` no longer claims to delegate to
   commit-commands; `install-shortcuts.sh` no longer writes `/auto` twice.
 
+### Added — factory skills (web, quality, payments)
+
+Rules promoted from the recurring incident classes of the analysed
+projects; each rule carries its "because", each guard is named as a guard
+to ship as a test, none is built here.
+
+- **`maestro-web:04-db-safety`** — no production URL on previews, migrate
+  guarded to the production build only, no destructive verb in any build
+  config, idempotent ordered migrations, additive first, schema-vs-migrations
+  diff before and after a selective release, validated strings instead of
+  database enums for vocabularies that grow.
+- **`maestro-web:05-api-boundaries`** — opaque ids, PATCH without defaults,
+  stable error codes, idempotent public writes, side effects after the
+  response, files behind signed short-lived URLs.
+- **`maestro-quality:03-trustworthy-gates`** — a gate is seen red once
+  before its green counts; exit codes read apart from any pipe; a skipped
+  test is red; the commit is verified, not the working tree.
+- **`maestro-quality:04-secrets-and-env`** — never display a secret, one
+  real call after setting one, explicit target environment (skill text
+  only: `bash-guard` is unchanged).
+- **New plugin `maestro-payments`**, skill `00-payment-integrity` — the
+  server asks the gateway, amounts recomputed in integer minor units,
+  raw-body signed idempotent webhooks backed by reconciliation, crash-safe
+  refunds, explicit live-mode flag. Ten manifests now carry the version.
+
+### Changed — `00-web-standards`
+
+- **Clerk is no longer imposed**: the standard is one server identity
+  module with the provider behind it (marketplace, plugin and README
+  descriptions follow).
+- Order in every route handler and server action is now session →
+  permission → validation (was validate → authorize).
+- Public writes and writes called by a mobile app are API route handlers;
+  server actions only for authenticated back-office writes.
+- Errors: stable code plus a safe, already-localized message.
+- New "Authorization and identity" block: authorize in every server
+  function, permissions as data, 404 for an out-of-scope object and 403
+  naming the missing right, 503 on provider outage, no cascade across
+  authorities, one token type per audience.
+
+### Changed — other web and quality skills
+
+- `01-ux-standards` gains "Honest surfaces" (403 as its own screen naming
+  the missing right, no fabricated numbers, longest-value and laptop-height
+  tests); `03-motion` requires reveal content in the server HTML and bans
+  tracking on Arabic.
+- `01-security-audit` gains a recurring-findings pass (15 lines, each
+  reported found / not found / not applicable); `02-perf-audit` starts by
+  locating the time (server vs total, cold path, round trips, regions).
+
+### Added — factory skills (mobile, vcs)
+
+- **`maestro-mobile:06-eas-build-and-ota`** — update URL and runtime policy
+  before the first store build, builds from a clean clone of a committed
+  sha, no native change over the air, explicit public env at export, real
+  install in the publishing directory, delivery claims proven by the update
+  list; tester builds target the acceptance environment by default.
+- **`maestro-vcs:04-deploy-verify`** — "merged" is not "live": deployment
+  identified by commit sha, smoke call, invariant, deploy log; migrations
+  guarded to the production build only; cherry-pick releases with a
+  mandatory schema-versus-migrations diff before and after.
+
+### Changed — `01-rtl-i18n`, `03-worktree`
+
+- **`01-rtl-i18n` default is Western digits 0-9 everywhere (input
+  included) and Gregorian only**, through one formatting helper
+  (`references/formatting.md`). Arabic-Indic digits and Hijri are no longer
+  suggested: they exist only as a recorded project exception. `02-pdf-rtl`
+  and the store checklist follow.
+- React Native direction: two models chosen at project start — forced RTL
+  for an Arabic-only app, `allowRTL` following the language (never
+  `forcesRTL`) for a bilingual one; mirrored root forbidden for new
+  projects; `writingDirection` at block level only
+  (`references/react-native-rtl.md`).
+- Currency is always the SVG icon component; `references/sar.md` shows one
+  rendered example and drops the Unicode-character route.
+- **`03-worktree`**: a mobile or bundler project replaces the
+  `node_modules` link by a real install (skill text and action 02; `gwt` is
+  unchanged); guarded `cd` on `gwt path`, no `git stash` in a shared
+  repository, base cut from the deployed branch, one database and one
+  generated client per worktree.
+- **`00-mobile-standards`**: session, async and navigation rules (only a
+  401/403 ends a session, one `endIdentity()`, alive/busy/sequence guards,
+  absolute `router.push`, no test file under the routes folder) and data
+  rules (no client-only server entity, stale-while-revalidate, no mock in a
+  production bundle).
+- **`03-store-release`**: checklist gains own icon/splash/name per app,
+  reviewer account without SMS, tablet pass, live privacy and deletion URLs,
+  manifest matching the privacy claim, upcoming platform requirements; never
+  resubmit unchanged after a spam rejection.
+
 ## 5.14.0 — the ي keeps its dots (2026-10-15)
 
 Nemah's client reported «الياء ناقصة» on `حسابي` / `نعمي` / `الشخصي`: the

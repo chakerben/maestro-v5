@@ -1,0 +1,8 @@
+{
+  "name": "maestro-payments",
+  "version": "5.15.0",
+  "description": "Payment integrity: gateway-independent rules for charging, confirming, refunding and reconciling money — server-decided success, idempotent webhooks backed by reconciliation, integer minor units.",
+  "author": {
+    "name": "Ben Moussa Chaker"
+  }
+}

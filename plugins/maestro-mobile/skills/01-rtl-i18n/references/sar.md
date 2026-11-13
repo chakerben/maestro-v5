@@ -2,69 +2,80 @@
 
 Reference of `maestro-mobile:01-rtl-i18n`. Ships with `assets/sar-icon.svg`
 (24×24, `fill="currentColor"`, a simplified geometric rendering; swap in the
-official SAMA artwork when brand fidelity matters).
+official artwork when brand fidelity matters).
 
-## Why an icon, not a character
+## Rule: always the icon component, never a character
 
-- `SAR` / `ر.س` are the legacy spellings (`﷼` U+FDFC is the *Iranian* RIAL
-  SIGN, never SAR); the new symbol is **U+20C1 SAUDI RIYAL SIGN**, added in
-  Unicode 17.0 (September 2025).
-- Use U+20C1 as text only when every font in the render path (UI, PDF
-  headless, email) ships the glyph; most Arabic UI fonts and older OS fonts
-  do not yet, and a tofu box on a price is a critical bug. Until then the
-  inline SVG is the reliable route on web, RN, Flutter and PDF.
+- The currency mark is **one SVG component** (`SarIcon`), used on every
+  surface: web, React Native, Flutter, PDF, email.
+- Never a Unicode character — not `﷼` (U+FDFC is the sign of another
+  currency), not the newer U+20C1, not `ر.س` / `SAR` typed next to a number
+  — because one font in the render path without the glyph prints a tofu box
+  on a price, and that is a critical bug.
+- Ship a grep test for those characters in source and translation files,
+  not a sentence in a guide.
 
-## Strategy: `Intl` for the number, the icon placed by rule
+## The one rendering
 
-Let `Intl` do the locale work (digits, grouping) with `style: 'decimal'`;
-then put the icon **before** the number with a space. That is SAMA's rule for
-the new symbol ("to the left of the numeral, with a space, in all languages")
-and it is NOT what `formatToParts` gives you: ICU places the `SAR` code
-*after* the amount in `ar-SA`. Never build the digits by hand; never let the
-currency position come from the formatter.
+This is what the user sees — same object on an English and on an Arabic
+screen (`[icon]` stands for the SVG):
 
-```ts
-const number = new Intl.NumberFormat(locale, {
-  style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2,
-  numberingSystem: digits, // 'arab' | 'latn' — from tech-decisions.md
-}).format(amount);
+```
+English screen (LTR):   Total   [icon] 1,250.50
+Arabic screen  (RTL):   [icon] 1,250.50   الإجمالي
 ```
 
-### React / React Native
+- Child order in the component: **icon first, number second, one space**.
+- The component is an **LTR object** with its direction pinned (like a phone
+  number): it does not mirror with the page. Only its position in the line
+  follows the page direction.
+- Digits are 0-9 with two decimals, from the project's formatting helper
+  (`formatting.md`) — never from a formatter that also places a currency
+  code, because the formatter's currency position changes with the locale.
+
+### React (web)
 
 ```tsx
-import SarIcon from './assets/sar-icon.svg'; // svgr (web) or react-native-svg-transformer (RN)
+import SarIcon from './assets/sar-icon.svg'; // svgr
+import { formatNumber } from './format';     // the one helper, digits 0-9
 
-export function Price({ amount, locale, digits }: Props) {
-  const number = new Intl.NumberFormat(locale, {
-    style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2, numberingSystem: digits,
-  }).format(amount);
-  // Icon first, then the number — same order in ar and en. The wrapper is an
-  // LTR object (like a phone number): it must not mirror with the page.
+export function Price({ amount }: { amount: number }) {
   return (
     <span dir="ltr" aria-label={`${amount} SAR`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25em' }}>
       <SarIcon width="1em" height="1em" aria-hidden />
-      <span>{number}</span>
+      <span>{formatNumber(amount, 2)}</span>
     </span>
   );
 }
 ```
 
-The icon inherits `currentColor` and `1em`, so it follows the text style; in
-RN use `<View style={{ direction: 'ltr', flexDirection: 'row' }}>` as the
-wrapper.
+The icon inherits `currentColor` and `1em`, so it follows the text style.
+
+### React Native
+
+```tsx
+import SarIcon from './assets/sar-icon.svg'; // react-native-svg-transformer
+
+export function Price({ amount, size = 16, color }: Props) {
+  return (
+    <View accessible accessibilityLabel={`${amount} SAR`}
+      style={{ direction: 'ltr', flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+      <SarIcon width={size} height={size} color={color} />
+      <Text style={{ fontSize: size, color }}>{formatNumber(amount, 2)}</Text>
+    </View>
+  );
+}
+```
 
 ### Flutter
 
 ```dart
 // pubspec: flutter_svg, intl; asset: assets/sar-icon.svg
 Widget price(BuildContext context, num amount) {
-  final locale = Localizations.localeOf(context).toString();
-  final number = NumberFormat.decimalPatternDigits(locale: locale, decimalDigits: 2).format(amount);
+  // 'en' pins digits 0-9 while the UI locale stays ar.
+  final number = NumberFormat.decimalPatternDigits(locale: 'en', decimalDigits: 2).format(amount);
   final icon = SvgPicture.asset('assets/sar-icon.svg',
       height: 14, colorFilter: ColorFilter.mode(DefaultTextStyle.of(context).style.color!, BlendMode.srcIn));
-  // Icon first, then the number, in every locale (SAMA). The row is an LTR
-  // object: pin its direction instead of letting it follow the page.
   return Row(mainAxisSize: MainAxisSize.min, textDirection: TextDirection.ltr, children: [
     icon, const SizedBox(width: 4), Text(number),
   ]);
@@ -75,11 +86,13 @@ Wrap in `Semantics(label: '$amount SAR')`.
 
 ### PDF (02-pdf-rtl)
 
-Inline the SVG markup in the HTML template (not `<img src>` — headless
-Chromium may not load it before `page.pdf()`), `height: 1em; vertical-align: -0.1em`.
+Inline the SVG markup in the HTML template (not `<img src>` — a headless
+browser may not load it before printing), `height: 1em; vertical-align: -0.1em`,
+inside a `dir="ltr"` inline wrapper with the number.
 
 ## Checks
 
-- Screenshot on `ar` and `en`: icon sits where `SAR` would, same colour as
-  the digits, no baseline jump.
-- `grep -rn "﷼\|ر\.س" src/` finds nothing in new code.
+- Screenshot on `ar` and `en`: both match the rendering above, icon in the
+  colour of the digits, no baseline jump.
+- `grep -rnE "﷼|ر\.س|⃁" src/ messages/ locales/` finds nothing (U+FDFC, the
+  typed abbreviation, U+20C1).

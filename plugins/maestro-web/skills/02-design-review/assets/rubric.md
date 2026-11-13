@@ -31,8 +31,8 @@ occurrence.
   font rendering Arabic — `font-metrics.py` says `CLIP` / `NO-ARABIC`.
 - R-RTL-4 (−1): mixed bidi text without isolation (`<bdi>`, `dir="auto"`,
   phone/code/IBAN not LTR), or the riyal symbol after the amount.
-- R-RTL-5 (−1): numerals inconsistent with the recorded arab/latn decision,
-  or a date where the market expects Hijri and gets Gregorian only.
+- R-RTL-5 (−1): digits other than 0-9 or a non-Gregorian date without a
+  recorded project exception.
 - R-RTL-6 (−1): Arabic copy in the wrong register (machine-translated
   phrasing, Latin punctuation) — `maestro-pm:04-writing`'s `ar.md`.
 

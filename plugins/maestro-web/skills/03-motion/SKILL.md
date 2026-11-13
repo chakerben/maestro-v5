@@ -38,11 +38,19 @@ effort: medium
 - One `gsap.context()` / `useGSAP` scope per component; killed on unmount.
 - No animation on the first contentful element above the fold slower than
   300 ms — the headline must be readable before the reveal finishes.
+- Scroll-reveal content is visible in the server HTML; hide only
+  below-the-fold elements, after mount — because CSS-only reveals left
+  content invisible to crawlers and no-JS users. Ship as a test: the
+  server HTML of a marketing page holds its headings with no hiding class.
+- Counters and reveals carry a time fallback — because an observer that
+  never fires leaves a zero on screen.
 
 ## RTL / Arabic traps
 
 - **SplitText: `type: 'words'` (or `lines`), never `chars` on Arabic** —
   splitting glyphs breaks cursive joining and shaping. Test with «فاتورة».
+- Never animate `letter-spacing` or apply Latin tracking to Arabic —
+  because tracking breaks cursive joining.
 - Direction-aware offsets: `x: dir === 'rtl' ? 80 : -80`; read `dir` from
   `document.documentElement`, do not hardcode.
 - Everything else (icon mirroring, line-height, fonts, plurals):

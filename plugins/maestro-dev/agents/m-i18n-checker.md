@@ -39,8 +39,9 @@ RTL correctness, with Arabic as the hardest target.
   numbers and codes forced LTR.
 - Count strings: ICU plural with all 6 CLDR categories for `ar`
   (zero/one/two/few/many/other).
-- Numerals: one recorded decision (arab vs latn), `Intl.NumberFormat` /
-  `Intl.DateTimeFormat` per locale; Hijri where the market requires.
+- Numerals and dates: Western digits 0-9 and the Gregorian calendar by
+  default, through the one formatting helper pinned to Latin digits; anything
+  else only as a recorded project exception.
 - Directional icons (arrows, chevrons, back) flip; clocks, logos, media
   controls do not.
 - Arabic font loaded with Latin fallback, real bold weights,

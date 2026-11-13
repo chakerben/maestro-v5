@@ -18,6 +18,14 @@ labeled "hypothesis".
 
 ## Process
 
+0. **Locate the time before reading code** — each line is a past wrong
+   diagnosis. Split server time from total time (the cause was network
+   distance, not code). Measure against production, and the cold path: a
+   cache wrapper does not protect the first request. Count DB round trips
+   per request, auth wrapper included, and parallelise independent ones.
+   Check the function region against the database region (cross-region
+   cost seconds). Find hooks or stores without a cache that many
+   components call (one hook refetched a whole catalogue twelve times).
 1. **Data layer.** Queries in the scope — Prisma, raw SQL, Firestore/Dart,
    Supabase: over-fetch (missing `select` / field mask), loops containing
    queries (N+1 — propose `include`, batched reads, `whereIn`), missing

@@ -37,11 +37,45 @@ and a finding without the line that proves it is a hypothesis.
    (`NEXT_PUBLIC_` misuse), webhook signature verification present?
 5. **Deps pass.** Run the ecosystem audit (`pnpm audit` etc.) and read the
    criticals — versions pinned? lockfile committed?
-6. Report: findings by severity (critical/high/medium/low), each with file,
+6. **Recurring findings pass.** Look for each line below; absence of the
+   fix is a finding.
+7. Report: findings by severity (critical/high/medium/low), each with file,
    evidence, exploit sketch (one line), and the concrete fix. Offer to open
    a task folder for the criticals.
+
+## Recurring findings (step 6)
+
+- Redirect target not validated on the parsed URL's origin, `//` or `/\`
+  accepted — open redirect.
+- CSV builder (server or client) not neutralising a leading `= + - @`, tab
+  or CR — formula injection.
+- User field unescaped in e-mail HTML or an href — HTML injection.
+- Upload not validated at upload AND at serve, by magic bytes — stored
+  content attack.
+- Single-use token stored unhashed, not consumed by a conditional update,
+  or surviving a re-issue — token replay.
+- Account flow answering differently for known and unknown accounts,
+  server failure included — enumeration.
+- Sign-in not constant-time, refresh token without rotation and reuse
+  detection, account linking on an unverified claim — account takeover.
+- Token verification used as authorization; internal endpoint behind a
+  platform key instead of a dedicated secret — privilege confusion.
+- Client able to write an authorization or decision column — self-promotion.
+- Row-security fix not tested as the application role (no superuser, no
+  bypass attribute), definer objects unaudited — silent bypass.
+- Boot accepting a known, published or placeholder secret — default secret
+  in production.
+- Starter-kit leftovers: public sign-up on, routes gated by "authenticated"
+  only, preview cookie treated as authorization — unintended access.
+- Privilege derived from a list in env (phones, e-mails) — backdoor.
+- Agent-tool server on a private network without authentication — key
+  exposure.
+- A regex command guard presented as a security boundary — say in the
+  report that it is not one.
 
 ## Test
 
 - Every finding has a path + quoted evidence + a fix.
+- The report states, for each recurring-findings line, found / not found /
+  not applicable.
 - No code was modified.

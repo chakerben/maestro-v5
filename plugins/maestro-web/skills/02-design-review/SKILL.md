@@ -38,9 +38,9 @@ layer and the proof on a device.**
 4. **RTL / KSA pass** when an `ar` locale exists — the Maestro layer, read
    on the Arabic screenshot: mirrored layout actually mirrored; directional
    icons flipped, logos/clocks/media not; Arabic font loaded with real bold
-   weights, no clipped ي dots or diacritics; numerals consistent with the
-   recorded arab/latn decision; Hijri where the market expects it; riyal
-   symbol before the amount; phone/code/price blocks LTR; mixed Arabic/Latin
+   weights, no clipped ي dots or diacritics; digits 0-9 and Gregorian dates
+   (unless a recorded project exception); riyal shown with the SVG icon
+   component, never the Unicode character; phone/code/price blocks LTR; mixed Arabic/Latin
    lines isolated; line-height ≥ 1.6; register of the Arabic copy
    (`maestro-pm:04-writing` when installed).
 5. **Visual pass** — delegate: when `frontend-design` or `impeccable` is

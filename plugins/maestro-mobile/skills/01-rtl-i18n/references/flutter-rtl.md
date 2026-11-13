@@ -1,7 +1,7 @@
 # RTL and Arabic in Flutter
 
 > Reference of `maestro-mobile:01-rtl-i18n`. The SKILL.md rules (logical
-> layout, plurals, Hijri, SAR, typography) still hold in substance; this file
+> layout, plurals, digits 0-9, Gregorian dates, SAR icon, typography) still hold in substance; this file
 > gives their Flutter form, which looks like neither web nor RN.
 
 ## Flutter — the web rules do not apply as written
@@ -37,11 +37,11 @@
   `matchTextDirection: true` only for custom SVGs/assets (`arrow_back_ios`
   and `arrow_back_ios_new` both flip — they differ by optical offset only).
   `Slider`, `PageView` and navigation swipes mirror too.
-- **Numbers and dates**: `NumberFormat`/`DateFormat` with the locale (`ar`
-  → Arabic-Indic digits per the project decision). Never `toString()` on a
-  displayed number. `DateFormat` from `intl` is **Gregorian only** — it does
-  not do the umalqura calendar; for Hijri use the `hijri` / `hijri_calendar`
-  package (or a native channel to `Calendar.islamicUmmAlQura`) and show Hijri
-  + Gregorian on official documents.
-- **Currency**: SAR via `assets/sar-icon.svg` — Flutter snippet in
+- **Numbers and dates**: digits 0-9 and Gregorian are the default. One
+  `formatters.dart` owns `NumberFormat`/`DateFormat` and passes a Latin-digit
+  locale (`'en'`) while the UI locale stays `ar` — the `ar` locale would
+  print Arabic-Indic digits. Never `toString()` on a displayed number.
+  `DateFormat` from `intl` is Gregorian, which is what is wanted; a Hijri
+  display is a recorded project exception (`references/formatting.md`).
+- **Currency**: always the SVG icon (`assets/sar-icon.svg`), never a character — Flutter snippet in
   `references/sar.md`.
